@@ -1,1 +1,369 @@
-{}
+{
+  "ru": {
+    "error": {
+      "UnknownError": "<b>Неизвестная ошибка</b>",
+      "ZeroCurrencies": "<i>В данном чате отсутствуют валюты</i>",
+      "NoCurrencyStoryToday": "<i>У валюты $title отсутствует история за сегодня</i>",
+      "NoCurrencyDetailToday": "<i>У валюты $title отсутствует детализация за сегодня</i>",
+      "AddAddressCommandNotFound": "<b>Некорректный криптоадрес</b>",
+      "ZeroStory": "<i>В данном чате не было операций</i>",
+      "ErrorDeleteStoryCurrencyCreating": "<i>Невозможно отменить создание валюты</i>",
+      "ZeroAddresses": "<b>У вас отсутствуют криптоадреса</b>",
+      "IncorrectAddress": "<b>Криптоадрес некорректный</b>",
+      "IncorrectValue": "<b>Для нового значения необходимо число</b>",
+      "TitleCantWithSpace": "<b>Указывая новое название пробелы недопустимы</b>",
+      "PostfixCantWithSpace": "<b>Указывая новый постфикс пробелы недопустимы</b>",
+      "IncorrectCalculation": "<b>Для калькуляции необходимо число или корректная формула</b>",
+      "MinValueMustBeFloat": "<b>Минимальное значение для поступлений должно быть числом</b>",
+      "CodeNameCantWithSpace": "<b>Новое кодовое название должно быть без пробелов</b>"
+    },
+    "message_command": {
+      "StartCommand": "<b>Приветствую тебя, $first_name, это бот для калькуляции</b>",
+      "UnlockChatCommand": "<b>Чат $title доступен для работы</b>",
+      "LockChatCommand": "<b>Чат $title заблокирован для работы</b>",
+      "CreateCurrencyCommand": "Создана валюта <b>«$title»</b> со значением <b>$value $postfix</b>",
+      "EditCurrencyCommand": "Меню валюты <b>$title</b>",
+      "EditChatThemeCommand": "<b>Меню настройки чата/темы</b>",
+      "BalanceListCommand": "<b>Балансы всех валют чата:</b>\n\n<blockquote expandable>$curr_info_list</blockquote>",
+      "CurrencyBalance": "Баланс <b>$title</b>: <i>$value $postfix</i>",
+      "CurrencyCommand": "CurrencyBalance",
+      "CurrencyCalculationCommand": "CurrencyBalance",
+      "CalculationCommand": "<b>Выберите валюту, с которой желаете произвести калькуляцию</b>\n<i>$expression</i>",
+      "StoryCommand": "<b>Выберите валюту, у которой желаете посмотреть историю</b>",
+      "CurrencyStoryCommand": "История валюты <b>$title</b>:\n$story",
+      "DetailCommand": "<b>Выберите валюту, у которой желаете посмотреть детализацию</b>",
+      "CurrencyDetailCommand": "Детализация валюты <b>$title</b>:\n$detail",
+      "CancelCommand": "Последняя операция <i><a href='$expr_link'>$expression</a></i> отменена, значение <b>$title</b> = <i>$value $postfix</i>",
+      "CurrencyNullCommand": "CurrencyBalance",
+      "NullCommand": "<b>Выберите валюту, которую желаете обнулить</b>",
+      "AddressListCommand": "<b>Список адресов:</b>\n$address_list",
+      "AddAddressCommandCreate": "<b>Криптоадрес добавлен</b>",
+      "AddAddressCommandEdit": "<b>Выберите что желаете сделать с криптоадресом:</b>",
+      "ChangeAddressCommand": "<b>Выберите что желаете сделать с криптоадресом</b>",
+      "TrackingCommand": "<b>Отслеживание включено</b>",
+      "OffTrackingCommand": "<b>Отслеживание отключено</b>",
+      "AdminMenuCommand": "<b>Данное меню позволяет управлять ботом, чатами, сотрудниками и командами:</b>",
+      "null_1": "",
+      "null_2": "",
+      "null_3": ""
+    },
+    "callback_command": {
+      "edit": {
+        "CurrChangeTitleCommand": "Напишите название, которое заменит текущее: <b>$title</b>",
+        "CurrChangeValueCommand": "Укажите новое значение для <b>$title</b>, текущее: $value",
+        "CurrChangePostfixCommand": "Укажите новый постфикс для <b>$title</b>, текущий: $postfix",
+        "CurrNullStoryCommand": "<b>Вы уверены?</b>",
+        "CurrNullStoryCommandSecond": "Теперь история валюты <b>$title</b> пуста",
+        "CurrDropCurrCommand": "<b>Вы уверены?\n<i>Валюта будет удалена вместе с историей</i></b>",
+        "CurrDropCurrCommandSecond": "<b>На 100%???</b>",
+        "CurrDropCurrCommandThird": "Помянем <b>$title</b> \uD83D\uDE22",
+        "EditChatThemeCommand": "EditChatThemeCommand",
+        "ChatBalancesCommand": "<b>Список валют, выберите ту, которую желаете изменить:</b>",
+        "ChatTopicsCommand": "<b>Список тем чата, выберите ту, которую желаете изменить:\n$topic_list</b>",
+        "ChatPhotoCalcCommand": "Какие подсчёты делать под фото? Сейчас <b>$sign</b>",
+        "ChatLockCommand": "LockChatCommand",
+        "ChatDropStory": "<b>Вы уверены?<i>\nБудет удалена история ВСЕХ валют</i></b>",
+        "ChatDropStorySecond": "<b>На 100%???</b>",
+        "ChatDropStoryThird": "<b>Теперь история чиста как белый лист</b>",
+        "ChatGeneralTopicCommand": "<b>Теперь тема главная</b>",
+        "9": "2",
+        "CurrCalculationCommand": "Напишите число или выражение, которое будет добавлено к валюте <b>$title</b>",
+        "CurrStoryCommand": "CurrencyStoryCommand",
+        "CurrDetailCommand": "CurrencyDetailCommand",
+        "CalculationCommand": "CurrencyBalance",
+        "CurrReadyStoryCommand": "CurrencyStoryCommand",
+        "CurrReadyDetailCommand": "CurrencyDetailCommand",
+        "CurrReadyNullCommand": "CurrencyBalance",
+        "0": "2",
+        "AddressChangeMinValueCommand": "Укажите новое минимальное значение поступлений на криптоадрес:\n<code>$address</code>",
+        "AddressDelete": "Вы уверены?",
+        "AddressDeleteSecond": "Криптоадрес <code>$address</code> удалён из списка отслеживаемых",
+        "EditTopicCommand": "<b>Выберите что желаете сделать с данной темой чата:</b>",
+        "ChatPhotoCalc": "<b>Теперь калькуляция под фото идёт со знаком $sign</b>",
+        "12": "2",
+        "AdminChats": "<b>Список всех чатов и их кодовых имён:</b>\n<blockquote expandable>$chat_list_links</blockquote>",
+        "AdminChat": "Выберите что желаете сделать с чатом <b>$title (<code>$code_name</code>):</b>",
+        "AdminChatDelete": "<b>Вы уверены?\n<i>Данные нельзя будет вернуть</i></b>",
+        "AdminChatDelete2": "<b>На 100%???</b>",
+        "AdminChatDelete3": "<b>Чат $title ($code_name) канул в Лету</b>",
+        "AdminChatLock": "<b>Чат $title (<code>$code_name</code>) заблокирован</b>",
+        "AdminChatChangeCodeName": "Введите новый код для чата:",
+        "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employee_list</blockquote>",
+        "AdminEmployeesAdd": "<b>Укажите username с \"@\" или без, для добавления нескольких, разделите username с помощью одного из символов [,./| ]</b>",
+        "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
+        "AdminDistribution": "<b>Можете выбрать какую массовую рассылку планируете: с закреплением сообщений или без закрепления</b>",
+        "AdminDistributionPin": "<b>Напишите текст, который будет разослан по группам и закреплён</b>",
+        "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по группам без закрепления</b>",
+        "AdminBotSettings": "<b>В ближайшее время здесь будет настройка текстов бота</b>"
+      },
+      "send": {
+        "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
+        "CurrCancelCommand": "CancelCommand",
+        "4": "2",
+        "5": "2",
+        "6": "2",
+        "7": "2",
+        "8": "2",
+        "9": "2",
+        "0": "2",
+        "12": "2",
+        "23": "2",
+        "d": "2",
+        "df": "2",
+        "h": "2",
+        "gh": "2",
+        "ds": "2"
+      }
+    },
+    "next_callback_message_command": {
+      "edit": {
+
+      },
+      "send": {
+        "CurrChangeTitleCommand": "Название валюты <b>$title1</b> успешно изменено на <b>$title2</b>",
+        "CurrChangeValueCommand": "Новое значение для <b>$title</b>: $value",
+        "CurrChangePostfixCommand": "Новый постфикс для <b>$title</b>: $postfix",
+        "CurrCalculationCommand": "CurrencyBalance",
+        "AddressChangeMinValueCommand": "Новое минимальное значение <i>$min_value</i> для криптоадреса:\n<code>$address</code>",
+        "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - <code>$code_name</code></b>",
+        "AdminEmployeeAdd": "<b>Пользователи, раннее написавшие боту теперь сотрудники</b>",
+        "AdminEmployeeRemove": "<b>Пользователи, раннее имеющие уровень доступа \"сотрудник\" теперь обладают уровнем доступа \"нулевой\"</b>",
+        "AdminDistributionPin": "Текст успешно разослан и закреплён",
+        "AdminDistributionUnpin": "Текст успешно разослан"
+      }
+    },
+    "reaction_command": {
+      "1": "1"
+    },
+    "inline_command": {
+      "1": "1"
+    },
+    "buttons": {
+      "EditCurrencyCommand": [
+        [
+          {"text": "Смена названия", "callback_data": "curr/change_title/$curr_id/"},
+          {"text": "Смена значения", "callback_data": "curr/change_value/$curr_id/"},
+          {"text": "Смена постфикса", "callback_data": "curr/change_postfix/$curr_id/"}
+        ],
+        [
+          {"text": "Обнулить историю \uD83D\uDD12", "callback_data": "curr/null_story/$curr_id/"},
+          {"text": "Удалить валюту \uD83D\uDD12", "callback_data": "curr/drop_curr/$curr_id/"}
+        ],
+        [
+          {"text": "Закрыть", "callback_data": "close", "variable": "1"},
+          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/balances/$chat_id/", "variable": "2"}
+        ]
+      ],
+      "EditChatThemeCommand": [
+        [
+          {"text": "Валюты", "callback_data": "chat/balances/$chat_id/"},
+          {"text": "Темы", "callback_data": "chat/topics/$chat_id/"},
+          {"text": "Фото +-", "callback_data": "chat/photo_calc/$chat_id/"}
+        ],
+        [
+          {"text": "Заблокировать чат \uD83D\uDD12", "callback_data": "chat/lock/$chat_id/"},
+          {"text": "Удалить историю чата \uD83D\uDD12", "callback_data": "chat/drop_story/$chat_id/"}
+        ],
+        [
+          {"text": "Сделать главной темой", "callback_data": "chat/general_topic/$chat_id/", "variable": "1"}
+        ],
+        [
+          {"text":  "Закрыть", "callback_data": "close"}
+        ]
+      ],
+      "CurrencyBalanceCommand": [
+        [
+          {"text": "Калькуляция", "callback_data": "curr/calculation/$curr_id/"}
+        ],
+        [
+          {"text": "Обнулить", "callback_data": "curr/set_null/$curr_id/"},
+          {"text": "Отменить", "callback_data": "curr/cancel/$curr_id/"}
+        ],
+        [
+          {"text": "История", "callback_data": "curr/story/$curr_id/"},
+          {"text": "Детализация", "callback_data": "curr/detailing/$curr_id/"}
+        ]
+      ],
+      "CalculationCommand": [
+        [
+          {"text": "$title", "callback_data": "curr/ready/calculation/$curr_id/", "cycle": true, "row_width": 2}
+        ]
+      ],
+      "StoryCommand": [
+        [
+          {"text": "$title", "callback_data": "curr/ready/story/$curr_id/", "cycle": true, "row_width": 2}
+        ]
+      ],
+      "DetailCommand": [
+        [
+          {"text": "$title", "callback_data": "curr/ready/detailing/$curr_id/", "cycle": true, "row_width": 2}
+        ]
+      ],
+      "NullCommand": [
+        [
+          {"text": "$title", "callback_data": "curr/ready/set_null/$curr_id/", "cycle": true, "row_width": 2}
+        ]
+      ],
+      "AddAddressCommandEdit": [
+        [
+          {"text": "Изменить минимальное значение", "callback_data": "address/change_min_value/$address/"}
+        ],
+        [
+          {"text": "Удалить", "callback_data": "address/delete/$address/"}
+        ]
+      ],
+      "AddressDeleteCommand": [
+        [
+          {"text": "Да", "callback_data": "address/delete/$address/yes/"},
+          {"text": "Нет", "callback_data": "address/delete/$address/no/"}
+        ]
+      ],
+      "CurrNullStoryCommand": [
+        [
+          {"text": "Да", "callback_data": "curr/null_story/$curr_id/yes/"},
+          {"text": "Нет", "callback_data": "curr/null_story/$curr_id/no/"}
+        ]
+      ],
+      "CurrDropCurrCommand": [
+        [
+          {"text": "Да", "callback_data": "curr/drop_curr/$curr_id/yes/"},
+          {"text": "Нет", "callback_data": "curr/drop_curr/$curr_id/no/"}
+        ]
+      ],
+      "CurrDropCurrCommandSecond": [
+        [
+          {"text": "Да", "callback_data": "curr/drop_curr/$curr_id/yes/yes/"},
+          {"text": "Нет", "callback_data": "curr/drop_curr/$curr_id/yes/no/"}
+        ]
+      ],
+      "ChatBalancesCommand": [
+        [
+          {"text": "$title: $value $postfix", "callback_data": "chat/edit_currency/$curr_id/", "cycle": true, "row_width": 1}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_chat_theme/"}
+        ]
+      ],
+      "ChatTopicsCommand": [
+        [
+          {"text": "$title", "callback_data": "chat/edit_topic/$chat_id/", "cycle": true, "row_width": 1}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_chat_theme/"}
+        ]
+      ],
+      "ChatEditTopicCommand": [
+        [
+          {"text": "Фото +-", "callback_data": "chat/photo_calc/$chat_id/"}
+        ],
+        [
+          {"text": "Заблокировать чат \uD83D\uDD12", "callback_data": "chat/lock/$chat_id/"}
+        ],
+        [
+          {"text": "Сделать главной темой", "callback_data": "chat/general_topic/$chat_id/", "variable": "1"}
+        ],
+        [
+          {"text":  "Назад \uD83D\uDD19", "callback_data": "chat/topics/$chat_id/"}
+        ]
+      ],
+      "ChatPhotoCalcCommand": [
+        [
+          {"text": "+", "callback_data": "chat/photo_calc/$chat_id/+/"},
+          {"text": "-", "callback_data": "chat/photo_calc/$chat_id/-/"}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_chat_theme/"}
+        ]
+      ],
+      "ChatDropStoryCommand": [
+        [
+          {"text": "Да", "callback_data": "chat/drop_story/$chat_id/yes/"},
+          {"text": "Нет", "callback_data": "chat/drop_story/$chat_id/no/"}
+        ]
+      ],
+      "ChatDropStoryCommandSecond": [
+        [
+          {"text": "Да", "callback_data": "chat/drop_story/$chat_id/yes/yes/"},
+          {"text": "Нет", "callback_data": "chat/drop_story/$chat_id/yes/no/"}
+        ]
+      ],
+      "AdminMenuCommand": [
+        [
+          {"text": "Чаты", "callback_data": "admin/chats/"},
+          {"text": "Сотрудники", "callback_data": "admin/employees/"}
+        ],
+        [
+          {"text":  "Настройка бота", "callback_data": "admin/bot_settings/"}
+        ],
+        [
+          {"text": "Рассылка", "callback_data": "admin/distribution/"}
+        ]
+      ],
+      "AdminChats": [
+        [
+          {"text": "$title ($code_name)", "callback_data": "admin/chat/$chat_pk/", "cycle": true, "row_width": 1}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/menu/"}
+        ]
+      ],
+      "AdminChat": [
+        [
+          {"text": "Удалить чат \uD83D\uDD12", "callback_data": "admin/chat/$chat_pk/delete/"}
+        ],
+        [
+          {"text": "Заблокировать", "callback_data": "admin/chat/$chat_pk/lock/", "variable": "1"},
+          {"text": "Сменить кодовое имя", "callback_data": "admin/chat/$chat_pk/change_code_name/"}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/chats/"}
+        ]
+      ],
+      "AdminChatDelete": [
+        [
+          {"text": "Да", "callback_data": "admin/chat/$chat_pk/delete/yes/"},
+          {"text": "Нет", "callback_data": "admin/chat/$chat_pk/delete/no/"}
+        ]
+      ],
+      "AdminChatDelete2": [
+        [
+          {"text": "Да", "callback_data": "admin/chat/$chat_pk/delete/yes/yes/"},
+          {"text": "Нет", "callback_data": "admin/chat/$chat_pk/delete/yes/no/"}
+        ]
+      ],
+      "AdminEmployees": [
+        [
+          {"text": "Добавить сотрудника", "callback_data": "admin/employees/add/"}
+        ],
+        [
+          {"text": "Исключить сотрудника", "callback_data": "admin/employees/remove/"}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/menu/"}
+        ]
+      ],
+      "AdminDistribution": [
+        [
+          {"text": "С закреплением", "callback_data": "admin/distribution/pin/"}
+        ],
+        [
+          {"text": "Без", "callback_data": "admin/distribution/unpin/"}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/menu/"}
+        ]
+      ],
+      "AdminBotSettings": [
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/menu/"}
+        ]
+      ]
+    },
+    "addition": {
+      "curr_info_list": "<b>$title</b>: <i>$value $postfix</i>\n",
+      "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
+      "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime"
+    }
+  },
+  "en": {}
+}
