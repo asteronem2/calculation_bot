@@ -2,6 +2,8 @@ import datetime
 import re
 from string import Template
 
+import aiogram.types
+
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import CallbackQueryCommand
@@ -1418,6 +1420,133 @@ class AdminMenu(CallbackQueryCommand):
         )
 
 
+# Балансы
+class AdminBalances(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/balances/', self.cdata)
+            if rres:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message()
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM chat_table
+            WHERE type = 'chat';
+        """)
+
+        chat_balance_list = ''
+
+        for i in res:
+            var_res2 = await self.db.fetch("""
+                SELECT * FROM currency_table
+                WHERE chat_pid = $1;
+            """, i['id'])
+
+            curr_info_list = ''
+
+            for ii in var_res2:
+                curr_info_list += Template(self.global_texts['addition']['curr_info_list']).substitute(
+                    title=ii['title'].upper(),
+                    value=float_to_str(ii['value']),
+                    postfix=ii['postfix'] if ii['postfix'] else ''
+                )
+
+            chat_balance_list += Template(self.global_texts['addition']['chat_balance']).substitute(
+                title=i['title'],
+                code_name=i['code_name'],
+                curr_info_list=curr_info_list
+            )
+
+        text = Template(self.edit_texts['AdminBalances']).substitute(
+            chat_balance=chat_balance_list
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminBalances'],
+            cycle=[{'title': i['title'],
+                    'code_name': i['code_name'],
+                    'chat_pk': i['id']
+                    } for i in res]
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminBalance(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/balance/([0-9]+)/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        # res = await self.db.fetchrow("""
+        #     SELECT * FROM chat_table
+        #     WHERE id = $1;
+        # """, kwargs['chat_pk'])
+        #
+        # text = Template(self.edit_texts['AdminBalance']).substitute(
+        #     title=res['title'],
+        #     code_name=res['code_name']
+        # )
+        #
+        # variable_list = []
+        #
+        # markup_kwargs = {
+        #     'chat_pk': kwargs['chat_pk']
+        # }
+        #
+        # if res['locked'] is False:
+        #     variable_list.append('lock')
+        #
+        # if res['super'] is True:
+        #     variable_list.append('unset_super')
+        # else:
+        #     variable_list.append('set_super')
+        #
+        # if res['tag']:
+        #     variable_list.append('change_tag')
+        #     markup_kwargs['tag'] = res['tag']
+        # else:
+        #     variable_list.append('set_tag')
+        #
+        # markup = markup_generate(
+        #     buttons=self.buttons['AdminChat'],
+        #     variable=variable_list,
+        #     **markup_kwargs
+        # )
+        #
+        return EditMessage(
+            chat_id=self.chat.id,
+            text="В разработке",
+            message_id=self.sent_message_id,
+            markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[[aiogram.types.InlineKeyboardButton(text='Назад', callback_data='admin/balances/')]])
+        )
+
+
+# Чаты
 class AdminChats(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
@@ -1450,7 +1579,10 @@ class AdminChats(CallbackQueryCommand):
 
         markup = markup_generate(
             buttons=self.buttons['AdminChats'],
-            cycle=[{'title': i['title'], 'code_name': i['code_name'], 'chat_pk': i['id']} for i in res]
+            cycle=[{'title': i['title'],
+                    'code_name': i['code_name'],
+                    'chat_pk': i['id']
+                    } for i in res]
         )
 
         return EditMessage(
@@ -1799,6 +1931,62 @@ class AdminChatChangeTag(CallbackQueryCommand):
         )
 
 
+class AdminChatBalance(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/balance/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM currency_table
+            WHERE chat_pid = $1;
+        """, kwargs['chat_pk'])
+
+        curr_info_list = ''
+
+        for i in res2:
+            curr_info_list = curr_info_list + '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
+                title=i['title'].upper(),
+                value=float_to_str(i['value']),
+                postfix=i['postfix'] if i['postfix'] else ''
+            )
+
+        text = Template(self.global_texts['addition']['chat_balance']).substitute(
+            title=res1['title'],
+            code_name=res1['code_name'],
+            curr_info_list=curr_info_list
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminChatBalance'],
+            chat_pk=kwargs['chat_pk']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+
+# Cотрудники
 class AdminEmployees(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
@@ -1817,7 +2005,7 @@ class AdminEmployees(CallbackQueryCommand):
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
             SELECT * FROM user_table
-            WHERE access_level == 'employee';
+            WHERE access_level = 'employee';
         """)
 
         employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'
@@ -1903,6 +2091,7 @@ class AdminEmployeesRemove(CallbackQueryCommand):
         )
 
 
+# Рассылки
 class AdminDistribution(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
@@ -2006,6 +2195,8 @@ class AdminDistributionUnpin(CallbackQueryCommand):
             message_id=self.sent_message_id
         )
 
+
+# Настройки бота
 class AdminBotSettings(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':

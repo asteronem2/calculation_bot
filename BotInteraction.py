@@ -1,4 +1,6 @@
 import asyncio
+import re
+import time
 import traceback
 from dataclasses import dataclass
 
@@ -69,6 +71,8 @@ class BotInter:
                         disable_notification=self.disable_notifications,
                         disable_web_page_preview=self.disable_web_page_preview
                     )
+                    rres = re.sub(r'<.+?>|/n', '', sent_message.text)
+                    print(f'\033[1;36mSEND BOT: \033[1;32m{rres}\033[0;0m')
 
                     if message_obj.pin is True:
                         await self.bot.pin_chat_message(
@@ -99,6 +103,8 @@ class BotInter:
                 raise Exception('При отправке сообщения необходимо передать TextMessage объект')
 
     async def edit_text(self, message_obj: EditMessage):
+        rres = re.sub(r'<.+?>|/n', '', message_obj.text)
+        print(f'\033[1;36mEDIT BOT: \033[1;32m{rres}\033[0;0m')
         await self.bot.edit_message_text(
             chat_id=message_obj.chat_id,
             text=message_obj.text,

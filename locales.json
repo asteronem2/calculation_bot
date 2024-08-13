@@ -82,6 +82,7 @@
         "EditTopicCommand": "<b>Выберите что желаете сделать с данной темой чата:</b>",
         "ChatPhotoCalc": "<b>Теперь калькуляция под фото идёт со знаком $sign</b>",
         "12": "2",
+        "AdminBalances": "<b>Список всех чатов и их балансы:\n$chat_balance</b>",
         "AdminChats": "<b>Список всех чатов и их кодовых имён:</b>\n<blockquote expandable>$chat_list_links</blockquote>",
         "AdminChat": "Выберите что желаете сделать с чатом <b>$title (<code>$code_name</code>):</b>",
         "AdminChatDelete": "<b>Вы уверены?\n<i>Данные нельзя будет вернуть</i></b>",
@@ -91,6 +92,7 @@
         "AdminChatChangeCodeName": "Введите новый код для чата:",
         "AdminChatSetTag": "Напишите тег для чата <b>$title</b> (<code>$code_name</code>):",
         "AdminChatChangeTag": "Напишите новый тег для чата <b>$title</b> (<code>$code_name</code>), текущий <i>$tag</i>:\n<i>если желаете удалить тег, напишите \"*\"</i>",
+        "AdminChatBalance": "chat_balance",
         "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminEmployeesAdd": "<b>Укажите username с \"@\" или без, для добавления нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
@@ -131,8 +133,8 @@
         "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - <code>$code_name</code></b>",
         "AdminChatSetTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
         "AdminChatChangeTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
-        "AdminEmployeeAdd": "<b>Пользователи, раннее написавшие боту теперь сотрудники</b>",
-        "AdminEmployeeRemove": "<b>Пользователи, раннее имеющие уровень доступа \"сотрудник\" теперь обладают уровнем доступа \"нулевой\"</b>",
+        "AdminEmployeesAdd": "<b>Пользователи, раннее написавшие боту теперь сотрудники</b>",
+        "AdminEmployeesRemove": "<b>Пользователи, раннее имеющие уровень доступа \"сотрудник\" теперь обладают уровнем доступа \"нулевой\"</b>",
         "AdminDistributionPin": "Текст успешно разослан и закреплён",
         "AdminDistributionUnpin": "Текст успешно разослан"
       }
@@ -295,13 +297,23 @@
       "AdminMenuCommand": [
         [
           {"text": "Чаты", "callback_data": "admin/chats/"},
-          {"text": "Сотрудники", "callback_data": "admin/employees/"}
+          {"text": "Балансы", "callback_data": "admin/balances/"}
         ],
         [
-          {"text":  "Настройка бота", "callback_data": "admin/bot_settings/"}
-        ],
-        [
+          {"text": "Сотрудники", "callback_data": "admin/employees/"},
           {"text": "Рассылка", "callback_data": "admin/distribution/"}
+        ],
+        [
+          {"text":  "Настройка бота", "callback_data": "admin/bot_settings/"},
+          {"text":  "Команды", "callback_data": "admin/commands/"}
+        ]
+      ],
+      "AdminBalances": [
+        [
+          {"text": "$title ($code_name)", "callback_data": "admin/balance/$chat_pk/", "cycle": true, "row_width": 1}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/menu/"}
         ]
       ],
       "AdminChats": [
@@ -345,6 +357,11 @@
           {"text": "Нет", "callback_data": "admin/chat/$chat_pk/delete/yes/no/"}
         ]
       ],
+      "AdminChatBalance": [
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "admin/chat/$chat_pk/"}
+        ]
+      ],
       "AdminEmployees": [
         [
           {"text": "Добавить сотрудника", "callback_data": "admin/employees/add/"}
@@ -378,7 +395,8 @@
     "addition": {
       "curr_info_list": "<b>$title</b>: <i>$value $postfix</i>\n",
       "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
-      "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime"
+      "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime",
+      "chat_balance": "<blockquote expandable>Баланс чата <b>$title</b> (<code>$code_name</code>):\n$curr_info_list</blockquote>"
     }
   },
   "en": {}

@@ -54,7 +54,9 @@ async def check_define(cls_list: list, interface_class, obj):
 @dispatcher.message()
 async def telegram_message_update(message: Message):
     if message.content_type == 'text':
-        print(f'\033[1;36mMESSAGE {message.from_user.username}: \033[1;32m{message.text}\033[0;0m')
+        t1 = time.time()
+        print(f'\n\n\033[1;36mMESSAGE {message.from_user.username}: \033[1;32m{message.text}\033[0;0m')
+
         if message.text == '/fix':
             await db.execute("""
                 DELETE FROM pressure_button_table
@@ -92,11 +94,14 @@ async def telegram_message_update(message: Message):
 
             if define is None:
                 return None
+        t2 = time.time()
+        print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
 
 
 @dispatcher.callback_query()
 async def telegram_callback_query_update(callback: CallbackQuery):
-    print(f'\033[1;36mCALLBACK {callback.from_user.username}: \033[1;32m{callback.data}\033[0;0m')
+    t1 = time.time()
+    print(f'\n\n\033[1;36mCALLBACK {callback.from_user.username}: \033[1;32m{callback.data}\033[0;0m')
     result: Type[CallbackQueryCommand] = await check_define(callback_command_cls, CallbackQueryCommand, callback)
     if result is None:
         return None
@@ -107,6 +112,9 @@ async def telegram_callback_query_update(callback: CallbackQuery):
 
     if define is None:
         return None
+
+    t2 = time.time()
+    print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
 
 
 @dispatcher.message_reaction()
