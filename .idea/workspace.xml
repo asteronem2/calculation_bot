@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.91 version&#10;Added:&#10;1. В настройки чата в админ панели добавлена возможность делать чат супер и не супер&#10;2. В настройках чата в админ панели добавлена возможность добавлять и изменять теги&#10;3. В рассылки добавлена возможность рассылать выборочно по тегам">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.92 version&#10;Added:&#10;1. В настройках чата в меню админа есть возможность посмотреть балансы чата">
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +123,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723544347163</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="0.91 version&#10;Added:&#10;1. В настройки чата в админ панели добавлена возможность делать чат супер и не супер&#10;2. В настройках чата в админ панели добавлена возможность добавлять и изменять теги&#10;3. В рассылки добавлена возможность рассылать выборочно по тегам">
+      <option name="closed" value="true" />
+      <created>1723556041487</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1723556041487</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -156,7 +160,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Базовая структура бота" />
     <MESSAGE value="Stable 0.9 version" />
-    <MESSAGE value="0.91 version&#10;Added:&#10;1. В настройки чата в админ панели добавлена возможность делать чат супер и не супер&#10;2. В настройках чата в админ панели добавлена возможность добавлять и изменять теги&#10;3. В рассылки добавлена возможность рассылать выборочно по тегам" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.91 version&#10;Added:&#10;1. В настройки чата в админ панели добавлена возможность делать чат супер и не супер&#10;2. В настройках чата в админ панели добавлена возможность добавлять и изменять теги&#10;3. В рассылки добавлена возможность рассылать выборочно по тегам" />
+    <MESSAGE value="0.92 version&#10;Added:&#10;1. В настройках чата в меню админа есть возможность посмотреть балансы чата" />
+    <MESSAGE value="0.92 version&#10;Added:&#10;1. В настройках чата в меню админа есть возможность посмотреть балансы чата" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.92 version&#10;Added:&#10;1. В настройках чата в меню админа есть возможность посмотреть балансы чата" />
   </component>
 </project>

@@ -19,6 +19,11 @@ import BotInteraction
 class DotEnvData:
     BOT_TOKEN: str
     ADMIN_LIST: list
+    HOST: str
+    PORT: str
+    USER: str
+    PASSWORD: str
+    DATABASE: str
 
     def __init__(self):
         environ = os.environ
@@ -26,6 +31,11 @@ class DotEnvData:
             load_dotenv('.env')
         self.BOT_TOKEN = environ.get('BOT_TOKEN')
         self.ADMIN_LIST = environ.get('ADMIN_LIST').split(' ')
+        self.HOST = environ.get('HOST')
+        self.PORT = environ.get('PORT')
+        self.USER = environ.get('USER')
+        self.PASSWORD = environ.get('PASSWORD')
+        self.DATABASE = environ.get('DATABASE')
 
 
 class GetLocales:
@@ -100,12 +110,13 @@ class DataDB:
         """
 
     async def connect(self):
+        data = DotEnvData()
         self.conn = await asyncpg.connect(
-            host='127.0.0.1',
-            port='5432',
-            user='ded',
-            password='ded',
-            database='c_bot',
+            host=data.HOST,
+            port=data.PORT,
+            user=data.USER,
+            password=data.PASSWORD,
+            database=data.DATABASE,
         )
 
     async def fetch(self, query, *args) -> List[Record]:
