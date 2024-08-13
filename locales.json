@@ -15,7 +15,8 @@
       "PostfixCantWithSpace": "<b>Указывая новый постфикс пробелы недопустимы</b>",
       "IncorrectCalculation": "<b>Для калькуляции необходимо число или корректная формула</b>",
       "MinValueMustBeFloat": "<b>Минимальное значение для поступлений должно быть числом</b>",
-      "CodeNameCantWithSpace": "<b>Новое кодовое название должно быть без пробелов</b>"
+      "CodeNameCantWithSpace": "<b>Новое кодовое название должно быть без пробелов</b>",
+      "TagCantWithSpace": "<b>Тег должен быть без пробелов</b>"
     },
     "message_command": {
       "StartCommand": "<b>Приветствую тебя, $first_name, это бот для калькуляции</b>",
@@ -88,12 +89,14 @@
         "AdminChatDelete3": "<b>Чат $title ($code_name) канул в Лету</b>",
         "AdminChatLock": "<b>Чат $title (<code>$code_name</code>) заблокирован</b>",
         "AdminChatChangeCodeName": "Введите новый код для чата:",
+        "AdminChatSetTag": "Напишите тег для чата <b>$title</b> (<code>$code_name</code>):",
+        "AdminChatChangeTag": "Напишите новый тег для чата <b>$title</b> (<code>$code_name</code>), текущий <i>$tag</i>:\n<i>если желаете удалить тег, напишите \"*\"</i>",
         "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminEmployeesAdd": "<b>Укажите username с \"@\" или без, для добавления нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminDistribution": "<b>Можете выбрать какую массовую рассылку планируете: с закреплением сообщений или без закрепления</b>",
-        "AdminDistributionPin": "<b>Напишите текст, который будет разослан по группам и закреплён</b>",
-        "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по группам без закрепления</b>",
+        "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
+        "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "AdminBotSettings": "<b>В ближайшее время здесь будет настройка текстов бота</b>"
       },
       "send": {
@@ -126,6 +129,8 @@
         "CurrCalculationCommand": "CurrencyBalance",
         "AddressChangeMinValueCommand": "Новое минимальное значение <i>$min_value</i> для криптоадреса:\n<code>$address</code>",
         "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - <code>$code_name</code></b>",
+        "AdminChatSetTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
+        "AdminChatChangeTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
         "AdminEmployeeAdd": "<b>Пользователи, раннее написавшие боту теперь сотрудники</b>",
         "AdminEmployeeRemove": "<b>Пользователи, раннее имеющие уровень доступа \"сотрудник\" теперь обладают уровнем доступа \"нулевой\"</b>",
         "AdminDistributionPin": "Текст успешно разослан и закреплён",
@@ -309,11 +314,20 @@
       ],
       "AdminChat": [
         [
+          {"text": "Баланс чата", "callback_data": "admin/chat/$chat_pk/balance/"}
+        ],
+        [
           {"text": "Удалить чат \uD83D\uDD12", "callback_data": "admin/chat/$chat_pk/delete/"}
         ],
         [
-          {"text": "Заблокировать", "callback_data": "admin/chat/$chat_pk/lock/", "variable": "1"},
+          {"text": "Заблокировать", "callback_data": "admin/chat/$chat_pk/lock/", "variable": "lock"},
           {"text": "Сменить кодовое имя", "callback_data": "admin/chat/$chat_pk/change_code_name/"}
+        ],
+        [
+          {"text": "Поставить супер статус", "callback_data": "admin/chat/$chat_pk/set_super/", "variable": "set_super"},
+          {"text": "Убрать супер статус", "callback_data": "admin/chat/$chat_pk/unset_super/", "variable": "unset_super"},
+          {"text": "Поставить тег", "callback_data": "admin/chat/$chat_pk/set_tag/", "variable": "set_tag"},
+          {"text": "Изменить тег ($tag)", "callback_data": "admin/chat/$chat_pk/change_tag/", "variable": "change_tag"}
         ],
         [
           {"text": "Назад \uD83D\uDD19", "callback_data": "admin/chats/"}
@@ -344,10 +358,12 @@
       ],
       "AdminDistribution": [
         [
-          {"text": "С закреплением", "callback_data": "admin/distribution/pin/"}
+          {"text": "$tag с закреплением", "callback_data": "admin/distribution/pin/$tag/", "cycle": true, "row_width": 2},
+          {"text": "$tag без закрепления", "callback_data": "admin/distribution/unpin/$tag/", "cycle": true, "row_width": 2}
         ],
         [
-          {"text": "Без", "callback_data": "admin/distribution/unpin/"}
+          {"text": "ВСЕМ с закреплением", "callback_data": "admin/distribution/pin/to_all/"},
+          {"text": "ВСЕМ без закрепления", "callback_data": "admin/distribution/unpin/to_all/"}
         ],
         [
           {"text": "Назад \uD83D\uDD19", "callback_data": "admin/menu/"}

@@ -322,7 +322,6 @@ class CurrCalculationCommand(NextCallbackMessageCommand):
 class AddressChangeMinValueCommand(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'address/change_min_value/([^/]+)/', self.cdata)
-        print(rres1)
         if rres1:
             rres2 = re.fullmatch(r'[0-9,. ]+', self.text_low)
             if rres2:
@@ -457,6 +456,144 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
         )
 
 
+class AdminChatSetTag(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/chat/([^/]+)/set_tag/', self.cdata)
+        if rres1:
+            if self.text_low.count(' '):
+                await self.process(error='error')
+                return True
+            else:
+                chat_pk = int(rres1.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        if kwargs.get('error'):
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+        else:
+            tag = self.text_low
+            await self.db.execute("""
+                UPDATE chat_table
+                SET tag = $1
+                WHERE id = $2;
+            """, tag, kwargs['chat_pk'])
+
+            message_obj = await self.generate_send_message(**kwargs)
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+
+        text = Template(self.send_texts['AdminChatSetTag']).substitute(
+            title=res['title'],
+            code_name=res['code_name'],
+            tag=res['tag'] if res['tag'] else 'отсутствует'
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['TagCantWithSpace']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+
+class AdminChatChangeTag(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/chat/([^/]+)/change_tag/', self.cdata)
+        if rres1:
+            if self.text_low.count(' '):
+                await self.process(error='error')
+                return True
+            else:
+                chat_pk = int(rres1.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        if kwargs.get('error'):
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+        else:
+            tag = self.text_low if self.text_low != '*' else None
+            await self.db.execute("""
+                UPDATE chat_table
+                SET tag = $1
+                WHERE id = $2;
+            """, tag, kwargs['chat_pk'])
+
+            message_obj = await self.generate_send_message(tag=tag, **kwargs)
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+
+        text = Template(self.send_texts['AdminChatChangeTag']).substitute(
+            title=res['title'],
+            code_name=res['code_name'],
+            tag=res['tag'] if res['tag'] else 'отсутствует'
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['TagCantWithSpace']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+
 class AdminEmployeesAdd(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/employees/add/', self.cdata)
@@ -579,9 +716,10 @@ class AdminEmployeesRemove(NextCallbackMessageCommand):
 
 class AdminDistributionPin(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/distribution/pin/', self.cdata)
+        rres1 = re.fullmatch(r'admin/distribution/pin/([^/]+)/', self.cdata)
         if rres1:
-            await self.process()
+            tag = rres1.group(1)
+            await self.process(tag=tag)
             return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -592,8 +730,10 @@ class AdminDistributionPin(NextCallbackMessageCommand):
 
         res = await self.db.fetch("""
             SELECT * FROM chat_table
-            WHERE type = 'chat' and super = FALSE;
-        """)
+            WHERE type = 'chat' 
+                AND super = FALSE
+                AND COALESCE(tag, '1') = COALESCE($1, '1');
+        """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
 
         for i in res:
             message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=True)
@@ -627,9 +767,10 @@ class AdminDistributionPin(NextCallbackMessageCommand):
 
 class AdminDistributionUnpin(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/distribution/unpin/', self.cdata)
+        rres1 = re.fullmatch(r'admin/distribution/unpin/([^/]+)/', self.cdata)
         if rres1:
-            await self.process()
+            tag = rres1.group(1)
+            await self.process(tag=tag)
             return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -640,8 +781,10 @@ class AdminDistributionUnpin(NextCallbackMessageCommand):
 
         res = await self.db.fetch("""
             SELECT * FROM chat_table
-            WHERE type = 'chat' and super = FALSE;
-        """)
+            WHERE type = 'chat' 
+                AND super = FALSE
+                AND COALESCE(tag, '1') = COALESCE($1, '1');
+        """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
 
         for i in res:
             message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=False)

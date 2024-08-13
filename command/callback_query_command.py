@@ -1482,15 +1482,36 @@ class AdminChat(CallbackQueryCommand):
             SELECT * FROM chat_table
             WHERE id = $1;
         """, kwargs['chat_pk'])
+
         text = Template(self.edit_texts['AdminChat']).substitute(
             title=res['title'],
             code_name=res['code_name']
         )
 
+        variable_list = []
+
+        markup_kwargs = {
+            'chat_pk': kwargs['chat_pk']
+        }
+
+        if res['locked'] is False:
+            variable_list.append('lock')
+
+        if res['super'] is True:
+            variable_list.append('unset_super')
+        else:
+            variable_list.append('set_super')
+
+        if res['tag']:
+            variable_list.append('change_tag')
+            markup_kwargs['tag'] = res['tag']
+        else:
+            variable_list.append('set_tag')
+
         markup = markup_generate(
             buttons=self.buttons['AdminChat'],
-            chat_pk=kwargs['chat_pk'],
-            variable=['1'] if res['locked'] is False else []
+            variable=variable_list,
+            **markup_kwargs
         )
 
         return EditMessage(
@@ -1601,7 +1622,7 @@ class AdminChatDelete(CallbackQueryCommand):
             )
 
 
-class AdminChatLock(CallbackQueryCommand):
+class AdminChatLock(AdminChat):
     async def define(self):
         if self.access_level == 'admin':
             rres = re.fullmatch(r'admin/chat/([0-9]+)/lock/', self.cdata)
@@ -1617,28 +1638,9 @@ class AdminChatLock(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['chat_pk'])
 
-        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.answer_query(self.callback.id, 'Чат заблокирован')
+        message_obj = await AdminChat.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM chat_table
-            WHERE id = $1;
-        """, kwargs['chat_pk'])
-
-        text = Template(self.edit_texts['AdminChatLock']).substitute(
-            title=res['title'],
-            code_name=res['code_name']
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-        )
 
 
 class AdminChatChangeCodeName(CallbackQueryCommand):
@@ -1666,6 +1668,129 @@ class AdminChatChangeCodeName(CallbackQueryCommand):
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.edit_texts['AdminChatChangeCodeName']).substitute()
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+        )
+
+
+class AdminChatSetSuper(AdminChat):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/set_super/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE chat_table
+            SET super = TRUE
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+
+        await self.bot.answer_query(self.callback.id, 'Чат теперь супер')
+        message_obj = await AdminChat.generate_edit_message(self, **kwargs)
+        await self.bot.edit_text(message_obj)
+
+
+class AdminChatUnsetSuper(AdminChat):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/unset_super/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE chat_table
+            SET super = FALSE
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+
+        await self.bot.answer_query(self.callback.id, 'Чат теперь не супер')
+        message_obj = await AdminChat.generate_edit_message(self, **kwargs)
+        await self.bot.edit_text(message_obj)
+
+
+class AdminChatSetTag(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/set_tag/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+        text = Template(self.edit_texts['AdminChatSetTag']).substitute(
+            title=res['title'],
+            code_name=res['code_name']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+        )
+
+
+class AdminChatChangeTag(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/change_tag/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+        text = Template(self.edit_texts['AdminChatChangeTag']).substitute(
+            title=res['title'],
+            code_name=res['code_name'],
+            tag=res['tag']
+        )
 
         return EditMessage(
             chat_id=self.chat.id,
@@ -1794,10 +1919,14 @@ class AdminDistribution(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT DISTINCT tag FROM chat_table;
+        """)
         text = Template(self.edit_texts['AdminDistribution']).substitute()
 
         markup = markup_generate(
-            buttons=self.buttons['AdminDistribution']
+            buttons=self.buttons['AdminDistribution'],
+            cycle=[{'tag': i['tag']} for i in res if i['tag']]
         )
 
         return EditMessage(
@@ -1811,9 +1940,10 @@ class AdminDistribution(CallbackQueryCommand):
 class AdminDistributionPin(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/distribution/pin/', self.cdata)
+            rres = re.fullmatch(r'admin/distribution/pin/([^/]+)/', self.cdata)
             if rres:
-                await self.process()
+                tag = rres.group(1)
+                await self.process(tag=tag)
                 return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -1824,14 +1954,16 @@ class AdminDistributionPin(CallbackQueryCommand):
             ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
         """, None, self.db_user['id'], self.sent_message_id, self.cdata)
 
-        message_obj = await self.generate_edit_message()
+        message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminDistributionPin']).substitute()
+        text = Template(self.edit_texts['AdminDistributionPin']).substitute(
+            tag=kwargs['tag'] if kwargs['tag'] != 'to_all' else 'всем'
+        )
 
         return EditMessage(
             chat_id=self.chat.id,
@@ -1843,9 +1975,10 @@ class AdminDistributionPin(CallbackQueryCommand):
 class AdminDistributionUnpin(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/distribution/unpin/', self.cdata)
+            rres = re.fullmatch(r'admin/distribution/unpin/([^/]+)/', self.cdata)
             if rres:
-                await self.process()
+                tag = rres.group(1)
+                await self.process(tag=tag)
                 return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -1856,21 +1989,22 @@ class AdminDistributionUnpin(CallbackQueryCommand):
             ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
         """, None, self.db_user['id'], self.sent_message_id, self.cdata)
 
-        message_obj = await self.generate_edit_message()
+        message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminDistributionUnpin']).substitute()
+        text = Template(self.edit_texts['AdminDistributionUnpin']).substitute(
+            tag=kwargs['tag'] if kwargs['tag'] != 'to_all' else 'всем'
+        )
 
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id,
+            message_id=self.sent_message_id
         )
-
 
 class AdminBotSettings(CallbackQueryCommand):
     async def define(self):

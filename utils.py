@@ -228,29 +228,25 @@ def markup_generate(buttons: list, variable: list = None, *args, **kwargs) -> ai
 
     for i in buttons:
         button_list_list.append([])
-        for ii in i:
 
-            if ii.get('variable') is not None:
-                if ii['variable'] not in variable:
-                    continue
+        if i[0].get('cycle') is True:
+            var1 = 0
+            for ii in kwargs['cycle']:
+                for iii in range(len(i)):
 
-            if ii.get('cycle') is True:
-                var1 = 0
-
-                for iii in kwargs['cycle']:
-
-                    if var1 == ii['row_width']:
+                    if var1 == i[0]['row_width']:
                         var1 = 0
                         button_list_list.append([])
+                    var1 += 1
 
-                    text = Template(ii['text']).substitute(iii)
+                    text = Template(i[iii]['text']).substitute(ii)
                     callback_data = None
                     url = None
 
-                    if ii.get('callback_data') is not None:
-                        callback_data = Template(ii['callback_data']).substitute(iii)
-                    elif ii.get('get') is not None:
-                        url = Template(ii['url']).substitute(iii)
+                    if i[iii].get('callback_data') is not None:
+                        callback_data = Template(i[iii]['callback_data']).substitute(ii)
+                    elif i[iii].get('url') is not None:
+                        url = Template(i[iii]['url']).substitute(ii)
                     else:
                         raise Exception('Ошибка, нельзя в InlineButton передавать url и callback_data одновременно')
 
@@ -261,8 +257,14 @@ def markup_generate(buttons: list, variable: list = None, *args, **kwargs) -> ai
                             callback_data=callback_data
                         )
                     )
-                    var1 += 1
-                continue
+
+            continue
+
+        for ii in i:
+
+            if ii.get('variable') is not None:
+                if ii['variable'] not in variable:
+                    continue
 
             text = Template(ii['text']).substitute(**kwargs)
             callback_data = None

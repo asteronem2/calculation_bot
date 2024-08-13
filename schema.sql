@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS chat_table (
     code_name TEXT NOT NULL,
     title TEXT,
     link TEXT,
+    tag TEXT,
     locked BOOLEAN NOT NULL DEFAULT TRUE,
     super BOOLEAN NOT NULL DEFAULT TRUE,
     sign BOOLEAN DEFAULT FALSE,
