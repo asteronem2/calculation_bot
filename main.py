@@ -10,7 +10,7 @@ from aiogram.types.callback_query import CallbackQuery
 from aiogram.types.message_reaction_updated import MessageReactionUpdated
 from aiogram.types.inline_query import InlineQuery
 
-from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand
+from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand
 from utils import DotEnvData, db, Tracking
 
 EnvData = DotEnvData()
@@ -127,10 +127,13 @@ async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
 
 @dispatcher.inline_query()
 async def telegram_inline_query_update(inline: InlineQuery):
-    return
-    # define = await check_define(inline_command_cls, inline)
-    # if define is None:
-    #     return None
+    result: Type[InlineQueryCommand] = await check_define(inline_command_cls, InlineQueryCommand, inline)
+    if result is None:
+        return None
+
+    command_obj = result(inline)
+    await command_obj.async_init()
+    define = await command_obj.define()
 
 
 allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_query']

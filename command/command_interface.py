@@ -277,11 +277,20 @@ class MessageReactionCommand:
 class InlineQueryCommand:
     def __init__(self, inline: InlineQuery):
         self.inline = inline
+        self.query = inline.query
+        self.bot = BotInteraction.BotInter()
+
+    async def async_init(self):
+        pass
 
     @abstractmethod
     async def define(self):
         pass
 
     @abstractmethod
-    async def send_error(self):
+    async def process(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    async def generate_results(self, *args, **kwargs):
         pass

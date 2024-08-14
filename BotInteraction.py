@@ -123,10 +123,16 @@ class BotInter:
         except Exception as err:
             print(err)
 
-    async def answer_query(self, callback_id, text: str):
+    async def answer_clb_query(self, callback_id, text: str):
         await self.bot.answer_callback_query(
             callback_query_id=callback_id,
             text=text
+        )
+
+    async def answer_inline_query(self, results: [aiogram.types.InlineQueryResult], query_id):
+        await self.bot.answer_inline_query(
+            inline_query_id=query_id,
+            results=results
         )
 
     async def _destroy_message(self, message: aiogram.types.Message, destroy_timeout: int):

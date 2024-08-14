@@ -48,7 +48,7 @@ class CurrChangeTitleCommand(CallbackQueryCommand):
                         await self.process(curr_id=curr_id)
                         return True
                     else:
-                        await self.bot.answer_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
+                        await self.bot.answer_clb_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_edit_message(**kwargs)
@@ -96,7 +96,7 @@ class CurrChangeValueCommand(CallbackQueryCommand):
                         await self.process(curr_id=curr_id)
                         return True
                     else:
-                        await self.bot.answer_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
+                        await self.bot.answer_clb_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_edit_message(**kwargs)
@@ -145,7 +145,7 @@ class CurrChangePostfixCommand(CallbackQueryCommand):
                         await self.process(curr_id=curr_id)
                         return True
                     else:
-                        await self.bot.answer_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
+                        await self.bot.answer_clb_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_edit_message(**kwargs)
@@ -890,7 +890,7 @@ class CurrCalculationCommand(CallbackQueryCommand):
                     await self.process(curr_id=curr_id)
                     return True
                 else:
-                    await self.bot.answer_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
+                    await self.bot.answer_clb_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_edit_message(**kwargs)
@@ -1281,7 +1281,7 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
                     await self.process(address_id=address_id, res=res)
                     return True
                 else:
-                    await self.bot.answer_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
+                    await self.bot.answer_clb_query(self.callback.id, 'А прошлая команда? Про неё совсем забыл?')
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
@@ -1770,7 +1770,7 @@ class AdminChatLock(AdminChat):
             WHERE id = $1;
         """, kwargs['chat_pk'])
 
-        await self.bot.answer_query(self.callback.id, 'Чат заблокирован')
+        await self.bot.answer_clb_query(self.callback.id, 'Чат заблокирован')
         message_obj = await AdminChat.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -1824,7 +1824,7 @@ class AdminChatSetSuper(AdminChat):
             WHERE id = $1;
         """, kwargs['chat_pk'])
 
-        await self.bot.answer_query(self.callback.id, 'Чат теперь супер')
+        await self.bot.answer_clb_query(self.callback.id, 'Чат теперь супер')
         message_obj = await AdminChat.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -1845,7 +1845,7 @@ class AdminChatUnsetSuper(AdminChat):
             WHERE id = $1;
         """, kwargs['chat_pk'])
 
-        await self.bot.answer_query(self.callback.id, 'Чат теперь не супер')
+        await self.bot.answer_clb_query(self.callback.id, 'Чат теперь не супер')
         message_obj = await AdminChat.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
 
