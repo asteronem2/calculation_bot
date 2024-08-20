@@ -126,7 +126,6 @@ class CallbackQueryCommand:
     async def process(self, *args, **kwargs) -> None:
         pass
 
-    @abstractmethod
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
 

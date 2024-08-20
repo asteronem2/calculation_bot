@@ -82,4 +82,25 @@ CREATE TABLE IF NOT EXISTS pressure_button_table (
     UNIQUE (user_pid, message_id, callback_data)
 );
 
+CREATE TABLE IF NOT EXISTS note_table (
+    id SERIAL PRIMARY KEY,
+    user_pid INTEGER REFERENCES user_table(id) NOT NULL,
+    title TEXT NOT NULL,
+    text TEXT DEFAULT NULL,
+    type TEXT NOT NULL,
+    parent_id INTEGER REFERENCES note_table(id)
+);
+
+INSERT INTO user_table
+(id, user_id, access_level)
+VALUES
+(0, 0, 'infinity')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO note_table
+(id, user_pid, title, type, parent_id)
+VALUES
+(0, 0, 'Заметки', 'folder', 0)
+ON CONFLICT (id) DO NOTHING;
+
 SET timezone = 'Europe/Moscow';

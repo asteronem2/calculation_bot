@@ -194,9 +194,7 @@ class InlineCalculation(InlineQueryCommand):
         return True
 
     async def process(self, *args, **kwargs):
-        print(1)
         results = await self.generate_results()
-        print(2)
         await self.bot.answer_inline_query(results=results, query_id=self.inline.id)
 
     async def generate_results(self, *args, **kwargs) -> [InlineQueryResultArticle]:

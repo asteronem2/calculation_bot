@@ -240,9 +240,9 @@ def markup_generate(buttons: list, variable: list = None, *args, **kwargs) -> ai
     for i in buttons:
         button_list_list.append([])
 
-        if i[0].get('cycle') is True:
+        if i[0].get('cycle'):
             var1 = 0
-            for ii in kwargs['cycle']:
+            for ii in kwargs[i[0].get('cycle')]:
                 for iii in range(len(i)):
 
                     if var1 == i[0]['row_width']:
@@ -329,94 +329,151 @@ def calculate(expression: str):
         return False
 
 
-def story_generate(story_items: List[Record], days: int = 1) -> str:
+def story_generate(story_items: List[Record], chat_id: int, days: int = 1) -> str:
     today = datetime.datetime.today().strftime('%Y.%m.%d')
 
-    expr_type_first = story_items[0]['expr_type']
+    link_pattern = Template(f'$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a>')
 
-    if expr_type_first == 'create':
-        string = f'0 --> {story_items[0]["after_value"]}'
-    elif expr_type_first in ['add', 'update']:
-        string = f'{story_items[0]["before_value"]} --> {story_items[0]["after_value"]} '
-    else:
-        string = 'Ошибка'
+    current_story_items = []
 
-    for i in story_items[:-1]:
-        operation_td = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
+    for i in story_items:
+        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
+        if story_datetime == today:
+            if i['status'] is True:
+                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group[1] else '.', i['expression']) if i['expression'] else None
+                current_story_items.append({
+                    'type': i['expr_type'],
+                    'expr': expr,
+                    'after_value': i['after_value'],
+                    'before_value': i['before_value'],
+                    'message_id': i['message_id']
+                })
 
-        if operation_td != today:
-            continue
+    if not current_story_items:
+        return False
 
-        expr_type = i['expr_type']
-        expr = i['expression'].replace(' ', '').replace(',', '.')
+    string: str = ''
 
-        if expr[0] == '(' and expr[-1]:
-            expr = expr[1:-1]
+    temp_expr_list = []
 
-        if expr[0] == '+':
-            expr = expr[1:]
+    for story_item in current_story_items:
+        si_type = story_item['type']
 
-        if expr_type == 'add':
-            if expr[0] == '-':
-                string += f' - {expr[1:]}'
-            else:
-                string += f' + {expr}'
+        if si_type == 'add':
 
-        elif expr_type == 'update':
-            expr += f' = {expr}'
+            expr = story_item['expr']
 
-        elif expr_type == 'null':
-            expr += f' = 0'
+            rres1 = re.search(r'^\(*([+-])', expr)
+            sign = ' + ' if not rres1 else (' ' + rres1.group(1) + ' ')
 
-    string += f' = {story_items[-1]["after_value"]}'
+            expr = re.sub(r'^[+-]', '', expr)
 
-    string = re.sub(r'[0-9.]+', lambda x: float_to_str(float(x.group())), string)
+            temp_expr_list.append([
+                expr,
+                story_item['message_id'],
+                sign
+            ])
+
+        elif si_type == 'update':
+            temp_expr_list.append([
+                story_item['after_value'],
+                story_item['message_id'],
+                ' --> '
+            ])
+
+        elif si_type == 'null':
+            temp_expr_list.insert(0, '(')
+            temp_expr_list.append(')')
+            temp_expr_list.append([
+                '*0',
+                story_item['message_id'],
+                ''
+            ])
+
+    for it in temp_expr_list:
+        if str == type(it):
+            string += it
+        elif list == type(it):
+            string += link_pattern.substitute(
+                expression=it[0],
+                message_id=it[1],
+                sign=it[2]
+            )
+
+    string = str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + ' --> ' + string
+
+    string += link_pattern.substitute(
+        expression=current_story_items[-1]['after_value'],
+        message_id=current_story_items[-1]['message_id'],
+        sign=' = '
+    )
+
+    string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
+                    lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
 
     return string
 
 
-def detail_generate(story_items: List[Record], days: int = 1) -> str:
+def detail_generate(story_items: List[Record], chat_id: int, days: int = 1) -> str:
     today = datetime.datetime.today().strftime('%Y.%m.%d')
 
-    expr_type_first = story_items[0]['expr_type']
+    link_pattern = Template(f'\n$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a> = $value')
 
-    string = ''
-
-    var1 = 0
+    current_story_items = []
 
     for i in story_items:
-        operation_td = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
+        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
+        if story_datetime == today:
+            if i['status'] is True:
+                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group[1] else '.', i['expression']) if i['expression'] else None
+                current_story_items.append({
+                    'type': i['expr_type'],
+                    'expr': expr,
+                    'after_value': i['after_value'],
+                    'before_value': i['before_value'],
+                    'message_id': i['message_id']
+                })
 
-        if operation_td != today:
-            continue
+    if not current_story_items:
+        return False
 
-        var1 += 1
+    string: str = '\n' + str(current_story_items[0]['before_value'])
 
-        expr_type = i['expr_type']
-        expr = i['expression'].replace(' ', '').replace(',', '.')
+    for story_item in current_story_items:
+        si_type = story_item['type']
 
-        if expr[0] == '(' and expr[-1]:
-            expr = expr[1:-1]
+        if si_type == 'add':
+            expr = story_item['expr']
 
-        if expr[0] == '+':
-            expr = expr[1:]
+            rres1 = re.search(r'^\(*([+-])', expr)
+            sign = '+ ' if not rres1 else (rres1.group(1) + ' ')
 
-        if expr_type == 'add':
-            var2 = ''
-            if var1 == 1:
-                var2 = f'{i["before_value"]} '
-            if expr[0] == '-':
-                string += f'\n{var2}- {expr[1:]} = {i["after_value"]}'
-            else:
-                string += f'\n{var2}+ {expr} = {i["after_value"]}'
+            expr = re.sub(r'^[+-]', '', expr)
 
-        elif expr_type == 'update':
-            string += f'\n= {i["after_value"]}'
+            string += link_pattern.substitute(
+                sign=sign,
+                message_id=story_item['message_id'],
+                expression=expr,
+                value=story_item['after_value']
+            )
+        elif si_type == 'update':
+            string += link_pattern.substitute(
+                sign='--> ',
+                message_id=story_item['message_id'],
+                expression=story_item['after_value'],
+                value=''
+            )
 
-        elif expr_type_first == 'create':
-            string += f'0 -> {i["after_value"]}'
+        elif si_type == 'null':
+            string += link_pattern.substitute(
+                sign='',
+                message_id=story_item['message_id'],
+                expression='0 ',
+                value=''
+            )
 
-    string = re.sub(r'[0-9.]+', lambda x: float_to_str(float(x.group())), string)
+    string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
+                    lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
 
     return string
 
@@ -439,26 +496,31 @@ class Tracking:
         count = 0
 
         while True:
-            count += 1
-            await asyncio.sleep(1)
-            if count == 20:
-                self.user_list = await db.fetch("""
-                    SELECT * FROM user_table
-                    WHERE tracking = TRUE;
-                """)
-            for user in self.user_list:
-                await self._user_addresses_parsing(user)
+            try:
+                count += 1
+                await asyncio.sleep(2)
+                if count == 20:
+                    self.user_list = await db.fetch("""
+                        SELECT * FROM user_table
+                        WHERE tracking = TRUE;
+                    """)
+                for user in self.user_list:
+                    await self._user_addresses_parsing(user)
+            except Exception as err:
+                count += 1
+                await asyncio.sleep(5)
 
     async def _user_addresses_parsing(self, user: Record):
-        res = await db.fetch("""
+        self.res = await db.fetch("""
             SELECT * FROM crypto_parsing_table
             WHERE status = TRUE and user_pid = $1
         """, user['id'])
 
-        if not res:
+
+        if not self.res:
             return
 
-        for i in res:
+        for i in self.res:
             timedelta = time.time() - self.last_parse_time
             if timedelta < 0.35:
                 await asyncio.sleep(0.35 - timedelta)
@@ -469,11 +531,11 @@ class Tracking:
                 await asyncio.sleep(121)
 
             if token_transfer['from_address'] == i['address']:
-                return
+                continue
 
             transaction_id = token_transfer['transaction_id']
             if transaction_id == i['last_transaction_id']:
-                return
+                continue
             else:
                 await db.execute("""
                     UPDATE crypto_parsing_table
@@ -484,7 +546,7 @@ class Tracking:
             transfer_value = float(token_transfer['quant']) / 1000000
 
             if transfer_value < i['min_value']:
-                return
+                continue
 
             timestamp = token_transfer['block_ts'] / 1000
             transfer_datetime = str(datetime.datetime.utcfromtimestamp(timestamp) + datetime.timedelta(hours=3))
@@ -492,7 +554,7 @@ class Tracking:
             text = Template(self.text_pattern).substitute(
                 address=i['address'],
                 transaction_link=f'https://tronscan.org/#/transaction/{transaction_id}',
-                value=transfer_value,
+                value=float_to_str(float(transfer_value)),
                 datetime=transfer_datetime
             )
 
@@ -500,7 +562,10 @@ class Tracking:
                 chat_id=user['user_id'],
                 text=text
             )
+
             await self.bot.send_text(message_obj)
+            await asyncio.sleep(2)
+            return
 
     @staticmethod
     async def _address_parsing(address_row: Record) -> (int, dict):
@@ -530,4 +595,3 @@ class Tracking:
                 return False
             else:
                 return True
-

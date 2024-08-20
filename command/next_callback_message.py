@@ -816,6 +816,211 @@ class AdminDistributionUnpin(NextCallbackMessageCommand):
         )
 
 
+class AdminCreateFolder(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_folder/', self.cdata)
+        if rres1:
+            parent_id = int(rres1.group(1))
+            await self.process(parent_id=parent_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            INSERT INTO note_table 
+            (user_pid, title, type, parent_id)
+            VALUES
+            ($1, $2, 'folder', $3);
+        """, self.db_user['id'], self.text, kwargs['parent_id'])
+
+
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.press_message_id
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminCreateFolder']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
+class AdminCreateNote(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_note/', self.cdata)
+        if rres1:
+            parent_id = int(rres1.group(1))
+            await self.process(parent_id=parent_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            INSERT INTO note_table 
+            (user_pid, title, text, type, parent_id)
+            VALUES
+            ($1, $2, $3, 'note', $4);
+        """, self.db_user['id'], self.text[:17] + '...', self.text, kwargs['parent_id'])
+
+
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.press_message_id
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminCreateNote']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
+class AdminNoteChangeTitle(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/note/([0-9]+)/change_title/', self.cdata)
+        if rres1:
+            note_id = int(rres1.group(1))
+            await self.process(note_id=note_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['note_id'])
+
+        await self.db.execute("""
+            UPDATE note_table
+            SET title = $1
+            WHERE id = $2;
+        """, self.text, kwargs['note_id'])
+
+
+        message_obj = await self.generate_send_message(res=res, **kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.press_message_id
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminNoteChangeTitle']).substitute(
+            old_title=kwargs['res']['title'],
+            new_title=self.text
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
+class AdminNoteChangeText(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/note/([0-9]+)/change_text/', self.cdata)
+        if rres1:
+            note_id = int(rres1.group(1))
+            await self.process(note_id=note_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['note_id'])
+
+        await self.db.execute("""
+            UPDATE note_table
+            SET text = $1
+            WHERE id = $2;
+        """, self.text, kwargs['note_id'])
+
+
+        message_obj = await self.generate_send_message(res=res, **kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.press_message_id
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminNoteChangeText']).substitute(
+            title=kwargs['res']['title']
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
 class Null(NextCallbackMessageCommand):
     async def define(self):
         pass

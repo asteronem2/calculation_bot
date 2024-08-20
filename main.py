@@ -11,7 +11,7 @@ from aiogram.types.message_reaction_updated import MessageReactionUpdated
 from aiogram.types.inline_query import InlineQuery
 
 from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand
-from utils import DotEnvData, db, Tracking
+from utils import DotEnvData, db, Tracking, GetLocales
 
 EnvData = DotEnvData()
 

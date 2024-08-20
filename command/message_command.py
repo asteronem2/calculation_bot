@@ -8,7 +8,8 @@ import BotInteraction
 from command.command_interface import MessageCommand
 
 from BotInteraction import TextMessage
-from utils import str_to_float, float_to_str, markup_generate, calculate, story_generate, detail_generate, Tracking
+from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
+    story_generate
 
 
 class StartCommand(MessageCommand):
@@ -27,7 +28,16 @@ class StartCommand(MessageCommand):
         text = Template(self.texts['StartCommand']).substitute(
             first_name=self.message.from_user.first_name
         )
-        return TextMessage(self.chat.id, text, self.topic)
+        return TextMessage(chat_id=self.chat.id,
+                           text=text,
+                           message_thread_id=self.topic,
+                           markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[[
+                               aiogram.types.InlineKeyboardButton(text='приложение',
+                                                                  web_app=aiogram.types.WebAppInfo(
+                                                                      url='https://google.com/'
+                                                                  )
+                                                                  )
+                           ]]))
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -572,7 +582,7 @@ class CurrencyStoryCommand(MessageCommand):
         if not today_story:
             return await self.generate_error_message(**kwargs)
 
-        story = story_generate(today_story)
+        story = story_generate(story_items=today_story, chat_id=self.chat.id)
 
         text = Template(self.texts['CurrencyStoryCommand']).substitute(
             title=kwargs['title'].upper(),
@@ -700,7 +710,7 @@ class CurrencyDetailCommand(MessageCommand):
         if not today_story:
             return await self.generate_error_message(**kwargs)
 
-        detail = detail_generate(today_story)
+        detail = detail_generate(today_story, chat_id=self.chat.id)
 
         text = Template(self.texts['CurrencyDetailCommand']).substitute(
             title=kwargs['title'].upper(),
