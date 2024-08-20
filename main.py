@@ -46,76 +46,82 @@ async def check_define(cls_list: list, interface_class, obj):
     await interface.async_init()
     for cls in cls_list:
         define = await cls.define(interface)
-        if define:
+        if define is True:
             return cls
+        elif define:
+            return cls, define
     return None
 
 
 @dispatcher.message()
 async def telegram_message_update(message: Message):
-    if message.content_type == 'text':
-        t1 = time.time()
-        print(f'\n\n\033[1;36mMESSAGE {message.from_user.username}: \033[1;32m{message.text}\033[0;0m')
+    try:
+        if message.content_type == 'text':
+            t1 = time.time()
+            print(f'\n\n\033[1;36mMESSAGE {message.from_user.username}: \033[1;32m{message.text}\033[0;0m')
 
-        if message.text == '/fix':
-            await db.execute("""
-                DELETE FROM pressure_button_table
-            """)
-            return
+            if message.text == '/fix':
+                await db.execute("""
+                    DELETE FROM pressure_button_table
+                """)
+                return
 
-        res = await db.fetchrow("""
-            SELECT * FROM pressure_button_table
-            WHERE
-            COALESCE(chat_pid, 1) = COALESCE((SELECT id FROM chat_table WHERE chat_id = $1 LIMIT 1), 1)
-            AND
-            user_pid = (SELECT id FROM user_table WHERE user_id = $2 LIMIT 1);
-        """, None if message.chat.type == 'private' else message.chat.id,
-                                message.from_user.id)
+            res = await db.fetchrow("""
+                SELECT * FROM pressure_button_table
+                WHERE
+                COALESCE(chat_pid, 1) = COALESCE((SELECT id FROM chat_table WHERE chat_id = $1 LIMIT 1), 1)
+                AND
+                user_pid = (SELECT id FROM user_table WHERE user_id = $2 LIMIT 1);
+            """, None if message.chat.type == 'private' else message.chat.id,
+                                    message.from_user.id)
 
-        if res:
-            result: Type[MessageCommand] = await check_define(next_callback_message_cls, NextCallbackMessageCommand, message)
-            if result is None:
-                return None
+            if res:
+                result: Type[MessageCommand] = await check_define(next_callback_message_cls, NextCallbackMessageCommand, message)
+                if result is None:
+                    return None
 
-            command_obj = result(message)
-            await command_obj.async_init()
-            define = await command_obj.define()
+                command_obj = result(message)
+                await command_obj.async_init()
+                define = await command_obj.define()
 
-            if define is None:
-                return None
-        else:
-            result: Type[MessageCommand] = await check_define(message_command_cls, MessageCommand, message)
-            if result is None:
-                return None
+                if define is None:
+                    return None
+            else:
+                result: Type[MessageCommand] = await check_define(message_command_cls, MessageCommand, message)
+                if result is None:
+                    return None
 
-            command_obj = result(message)
-            await command_obj.async_init()
-            define = await command_obj.define()
+                command_obj = result(message)
+                await command_obj.async_init()
+                define = await command_obj.define()
 
-            if define is None:
-                return None
-        t2 = time.time()
-        print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
-
+                if define is None:
+                    return None
+            t2 = time.time()
+            print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
+    except:
+        pass
 
 @dispatcher.callback_query()
 async def telegram_callback_query_update(callback: CallbackQuery):
-    t1 = time.time()
-    print(f'\n\n\033[1;36mCALLBACK {callback.from_user.username}: \033[1;32m{callback.data}\033[0;0m')
-    result: Type[CallbackQueryCommand] = await check_define(callback_command_cls, CallbackQueryCommand, callback)
-    if result is None:
-        return None
+    try:
+        t1 = time.time()
+        print(f'\n\n\033[1;36mCALLBACK {callback.from_user.username}: \033[1;32m{callback.data}\033[0;0m')
+        result: Type[CallbackQueryCommand] = await check_define(callback_command_cls, CallbackQueryCommand, callback)
+        if result is None:
+            return None
 
-    command_obj = result(callback)
-    await command_obj.async_init()
-    define = await command_obj.define()
+        command_obj = result(callback)
+        await command_obj.async_init()
+        define = await command_obj.define()
 
-    if define is None:
-        return None
+        if define is None:
+            return None
 
-    t2 = time.time()
-    print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
-
+        t2 = time.time()
+        print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
+    except:
+        pass
 
 @dispatcher.message_reaction()
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
@@ -127,13 +133,16 @@ async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
 
 @dispatcher.inline_query()
 async def telegram_inline_query_update(inline: InlineQuery):
-    result: Type[InlineQueryCommand] = await check_define(inline_command_cls, InlineQueryCommand, inline)
-    if result is None:
-        return None
+    try:
+        result: Type[InlineQueryCommand] = await check_define(inline_command_cls, InlineQueryCommand, inline)
+        if result is None:
+            return None
 
-    command_obj = result(inline)
-    await command_obj.async_init()
-    define = await command_obj.define()
+        command_obj = result(inline)
+        await command_obj.async_init()
+        define = await command_obj.define()
+    except:
+        pass
 
 
 allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_query']

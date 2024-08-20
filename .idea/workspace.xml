@@ -4,18 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.93 version&#10;Fixed:&#10;1. Отслеживание криптоадресов работало только на первом адресе пользователя&#10;2. Форматирование чисел при отправке парсинга&#10;Added:&#10;1.">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.94 version&#10;Added:&#10;1. Помимо чатов в админ меню добавлены &quot;Валюты&quot;&#10;2. Добавлены заметки в админ меню, в бд добавлена таблица с заметками&#10;3. В историю и детализацию добавлены ссылки на сообщения">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/inline_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/inline_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/req.txt" beforeDir="false" afterPath="$PROJECT_DIR$/req.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +150,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723615124877</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="0.94 version&#10;Added:&#10;1. Помимо чатов в админ меню добавлены &quot;Валюты&quot;&#10;2. Добавлены заметки в админ меню, в бд добавлена таблица с заметками&#10;3. В историю и детализацию добавлены ссылки на сообщения">
+      <option name="closed" value="true" />
+      <created>1724131682314</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1724131682314</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -171,7 +172,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="master" />
+                        <option value="origin/master" />
                       </list>
                     </value>
                   </entry>
@@ -190,6 +191,7 @@
     <MESSAGE value="0.92 version&#10;Added:&#10;1. В настройках чата в меню админа есть возможность посмотреть балансы чата" />
     <MESSAGE value="0.92 version&#10;Added:&#10;1. Данные для подключения к БД теперь в .env" />
     <MESSAGE value="0.93 version&#10;Added:&#10;1. Inline калькуляция" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.93 version&#10;Added:&#10;1. Inline калькуляция" />
+    <MESSAGE value="0.94 version&#10;Added:&#10;1. Помимо чатов в админ меню добавлены &quot;Валюты&quot;&#10;2. Добавлены заметки в админ меню, в бд добавлена таблица с заметками&#10;3. В историю и детализацию добавлены ссылки на сообщения" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.94 version&#10;Added:&#10;1. Помимо чатов в админ меню добавлены &quot;Валюты&quot;&#10;2. Добавлены заметки в админ меню, в бд добавлена таблица с заметками&#10;3. В историю и детализацию добавлены ссылки на сообщения" />
   </component>
 </project>

@@ -4,12 +4,14 @@ from keyword import kwlist
 from string import Template
 
 import aiogram.types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pkg_resources import PkgResourcesDeprecationWarning
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import CallbackQueryCommand
 from utils import float_to_str, markup_generate, story_generate, detail_generate, calculate
+
 
 
 class Close(CallbackQueryCommand):
@@ -20,32 +22,24 @@ class Close(CallbackQueryCommand):
                 await self.process()
                 return True
 
+
     async def process(self, *args, **kwargs) -> None:
-        if self.chat.type == 'supergroup':
-            await self.bot.delete_message(
-                chat_id=self.chat.id,
-                message_id=self.sent_message_id
-            )
-        else:
-            message_obj = await self.generate_edit_message()
-            await self.bot.edit_text(message_obj)
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE user_pid = $1 AND 
+            COALESCE(chat_pid, 1) = COALESCE($2, 1);
+        """, self.db_user['id'], None if not self.db_chat else self.db_chat['id'])
+
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.sent_message_id
+        )
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.global_texts['message_command']['AdminMenuCommand']).substitute()
-
-        markup = markup_generate(
-            buttons=self.buttons['AdminMenuCommand']
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
-
+        pass
 
 # Команды админов в группе
 class CurrChangeTitleCommand(CallbackQueryCommand):
@@ -92,7 +86,8 @@ class CurrChangeTitleCommand(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -141,7 +136,8 @@ class CurrChangeValueCommand(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -190,7 +186,8 @@ class CurrChangePostfixCommand(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -934,7 +931,8 @@ class CurrCalculationCommand(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -1324,7 +1322,8 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2017,6 +2016,7 @@ class AdminChatChangeCodeName(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2099,6 +2099,7 @@ class AdminChatSetTag(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2140,6 +2141,7 @@ class AdminChatChangeTag(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2268,6 +2270,7 @@ class AdminEmployeesAdd(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2300,6 +2303,7 @@ class AdminEmployeesRemove(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2370,6 +2374,7 @@ class AdminDistributionPin(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2404,7 +2409,8 @@ class AdminDistributionUnpin(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2590,7 +2596,8 @@ class AdminCreateFolder(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2626,7 +2633,8 @@ class AdminCreateNote(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2708,7 +2716,8 @@ class AdminNoteChangeTitle(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 
@@ -2744,7 +2753,8 @@ class AdminNoteChangeText(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 

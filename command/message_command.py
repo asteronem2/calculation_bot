@@ -161,7 +161,7 @@ class CreateCurrencyCommand(MessageCommand):
 
     async def process(self, **kwargs) -> None:
         split_text = self.text_low.split(' ')
-        title = kwargs['title']
+        title = kwargs['title'].lower()
         value = str_to_float(kwargs['value'])
         postfix = kwargs['postfix'] if kwargs['postfix'] else None
 
