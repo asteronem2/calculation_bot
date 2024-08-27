@@ -300,7 +300,7 @@ class BalanceListCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(rf'{self.keywords["BalanceCommand"]}', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["BalanceListCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True

@@ -10,7 +10,7 @@ from aiogram.types.callback_query import CallbackQuery
 from aiogram.types.message_reaction_updated import MessageReactionUpdated
 from aiogram.types.inline_query import InlineQuery
 
-from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand
+from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand, MessageReactionCommand
 from utils import DotEnvData, db, Tracking, GetLocales
 
 EnvData = DotEnvData()
@@ -128,10 +128,26 @@ async def telegram_callback_query_update(callback: CallbackQuery):
 
 @dispatcher.message_reaction()
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
-    return
-    # define = await check_define(reaction_command_cls, reaction)
-    # if define is None:
-    #     return None
+    try:
+        if reaction.new_reaction:
+            t1 = time.time()
+            print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{reaction.new_reaction[-1].emoji}\033[0;0m')
+            result: Type[MessageReactionCommand] = await check_define(reaction_command_cls, MessageReactionCommand, reaction)
+            if result is None:
+                return None
+
+            command_obj = result(reaction)
+            await command_obj.async_init()
+            define = await command_obj.define()
+
+            if define is None:
+                return None
+
+            t2 = time.time()
+            print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
+    except Exception as err:
+        traceback.print_exc()
+        print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
 
 @dispatcher.inline_query()
