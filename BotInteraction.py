@@ -132,7 +132,8 @@ class BotInter:
     async def answer_inline_query(self, results: [aiogram.types.InlineQueryResult], query_id):
         await self.bot.answer_inline_query(
             inline_query_id=query_id,
-            results=results
+            results=results,
+            cache_time=1
         )
 
     async def _destroy_message(self, message: aiogram.types.Message, destroy_timeout: int):

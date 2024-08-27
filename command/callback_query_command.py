@@ -2200,47 +2200,6 @@ class AdminChatBalance(CallbackQueryCommand):
         pass
 
 
-# Cотрудники
-class AdminEmployees(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/employees/', self.cdata)
-            if rres:
-                await self.process()
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_edit_message()
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetch("""
-            SELECT * FROM user_table
-            WHERE access_level = 'employee';
-        """)
-
-        employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'
-                         for i in res]
-
-        text = Template(self.edit_texts['AdminEmployees']).substitute(
-            employee_list='\n'.join(employee_list)
-        )
-
-        markup = markup_generate(
-            buttons=self.buttons['AdminEmployees']
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
-
-
 class AdminEmployeesAdd(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
@@ -2758,22 +2717,11 @@ class AdminNoteChangeText(CallbackQueryCommand):
         )
 
 
-class AdminNote4(CallbackQueryCommand):
-    async def define(self):
-        pass
-
-    async def process(self, *args, **kwargs) -> None:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-
 # Настройки
 class AdminBotSettings(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/settings/', self.cdata)
+            rres = re.fullmatch(r'admin/bot_settings/', self.cdata)
             if rres:
                 await self.process()
                 return True
@@ -2788,15 +2736,190 @@ class AdminBotSettings(CallbackQueryCommand):
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.edit_texts['AdminBotSettings']).substitute()
 
+        markup = markup_generate(
+            buttons=self.buttons['AdminBotSettings']
+        )
+
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+# Cотрудники
+class AdminEmployees(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/employees/', self.cdata)
+            if rres:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message()
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM user_table
+            WHERE access_level = 'employee';
+        """)
+
+        employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'
+                         for i in res]
+
+        text = Template(self.edit_texts['AdminEmployees']).substitute(
+            employee_list='\n'.join(employee_list)
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminEmployees']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
         )
 
 
 # Команды
-class Null(CallbackQueryCommand):
+class AdminCommands(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/commands/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message()
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminCommands']).substitute()
+        markup = markup_generate(
+            self.buttons['AdminCommands']
+        )
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminCommandsList(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/commands/([^/]+)/([^/]+)/', self.cdata)
+        if rres:
+            chat_type = rres.group(1)
+            user_type = rres.group(2)
+            await self.process(chat_type=chat_type, user_type=user_type)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        chat_type = kwargs['chat_type']
+        user_type = kwargs['user_type']
+
+        command_list = []
+
+        if chat_type == 'private':
+            if user_type == 'admin':
+                command_list = ['AdminMenuCommand']
+            elif user_type == 'employee':
+                command_list = [
+                    'AddressListCommand',
+                    'TrackingCommand',
+                    'OffTrackingCommand'
+                ]
+        elif chat_type == 'group':
+            if user_type == 'admin':
+                command_list = [
+                    'UnlockChatCommand',
+                    'LockChatCommand',
+                    'EditChatThemeCommand'
+                ]
+            elif user_type == 'employee':
+                command_list = [
+                    'BalanceListCommand',
+                    'StoryCommand',
+                    'DetailCommand',
+                    'CancelCommand',
+                    'NullCommand'
+                ]
+
+        text = Template(self.edit_texts['AdminCommandsList']).substitute()
+
+        cycle = []
+
+        for key, item in self.global_texts['keywords'].items():
+            if key in command_list:
+                cycle.append({'text': item.replace('\\', ''), "title": key})
+
+        markup = markup_generate(
+            self.buttons['AdminCommandsList'],
+            cycle=cycle
+        )
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminChangeCommand(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/change_command/([^/]+)/', self.cdata)
+        if rres:
+            command = rres.group(1)
+            await self.process(command=command)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminChangeCommand']).substitute(
+            command=self.global_texts['keywords'][kwargs['command']].replace('\\', '')
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+        )
+
+
+class Null1(CallbackQueryCommand):
     async def define(self):
         pass
 

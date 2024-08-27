@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import time
 import traceback
-from typing import Type, List
+from typing import Type
 
 import aiogram
 from aiogram.types.message import Message
@@ -99,8 +99,10 @@ async def telegram_message_update(message: Message):
                     return None
             t2 = time.time()
             print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
-    except:
-        pass
+    except Exception as err:
+        traceback.print_exc()
+        print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+
 
 @dispatcher.callback_query()
 async def telegram_callback_query_update(callback: CallbackQuery):
@@ -120,8 +122,9 @@ async def telegram_callback_query_update(callback: CallbackQuery):
 
         t2 = time.time()
         print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
-    except:
-        pass
+    except Exception as err:
+        traceback.print_exc()
+        print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
 @dispatcher.message_reaction()
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
@@ -141,8 +144,9 @@ async def telegram_inline_query_update(inline: InlineQuery):
         command_obj = result(inline)
         await command_obj.async_init()
         define = await command_obj.define()
-    except:
-        pass
+    except Exception as err:
+        traceback.print_exc()
+        print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
 
 allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_query']
@@ -168,7 +172,7 @@ async def main():
         except Exception as err:
             traceback.print_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
-            time.sleep(5)
+            time.sleep(1)
 
 
 if __name__ == '__main__':

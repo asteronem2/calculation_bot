@@ -1,5 +1,8 @@
+import json
 import re
 from string import Template
+
+from aiogram.methods import SendMessage
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
@@ -1018,6 +1021,49 @@ class AdminNoteChangeText(NextCallbackMessageCommand):
         return TextMessage(
             chat_id=self.chat.id,
             text='Что-то не так'
+        )
+
+
+class AdminChangeCommand(NextCallbackMessageCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/change_command/([^/]+)/', self.cdata)
+        if rres:
+            command = rres.group(1)
+            await self.process(command=command)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        with open('locales.json', 'r') as read_file:
+            data = json.load(read_file)
+
+        before = data['ru']['keywords'][kwargs['command']]
+
+        data['ru']['keywords'][kwargs['command']] = self.text_low.replace('*', '\\*')
+
+        with open('locales.json', 'w') as write_file:
+            json.dump(data, write_file)
+
+        message_obj = await self.generate_edit_message(before=before)
+        await self.bot.delete_message(self.chat.id, self.press_message_id)
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminChangeCommand']).substitute(
+            before=kwargs['before'].replace('\\', ''),
+            after=self.text_low
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
         )
 
 

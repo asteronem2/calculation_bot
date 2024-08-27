@@ -14,7 +14,7 @@ from utils import str_to_float, float_to_str, markup_generate, calculate, detail
 
 class StartCommand(MessageCommand):
     async def define(self):
-        rres = re.fullmatch(r'/start', self.text)
+        rres = re.fullmatch(rf'{self.keywords["StartCommand"]}', self.text)
         if rres:
             await self.process()
             return True
@@ -30,14 +30,7 @@ class StartCommand(MessageCommand):
         )
         return TextMessage(chat_id=self.chat.id,
                            text=text,
-                           message_thread_id=self.topic,
-                           markup=aiogram.types.InlineKeyboardMarkup(inline_keyboard=[[
-                               aiogram.types.InlineKeyboardButton(text='приложение',
-                                                                  web_app=aiogram.types.WebAppInfo(
-                                                                      url='https://google.com/'
-                                                                  )
-                                                                  )
-                           ]]))
+                           message_thread_id=self.topic)
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -48,7 +41,7 @@ class UnlockChatCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'supergroup':
             if self.access_level == 'admin':
-                rres = re.fullmatch(r'разблокировать', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["UnlockChatCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""
                         SELECT * FROM chat_table
@@ -115,7 +108,7 @@ class LockChatCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level == 'admin':
-                rres = re.fullmatch(r'заблокировать', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["LockChatCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -262,7 +255,7 @@ class EditChatThemeCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level == 'admin':
-                rres = re.fullmatch(r'\*(тема|чат)', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["EditChatThemeCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -307,7 +300,7 @@ class BalanceListCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'баланс', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["BalanceCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -545,7 +538,7 @@ class CurrencyStoryCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'(.+) +история', self.text_low)
+                rres = re.fullmatch(rf'(.+) +{self.keywords["StoryCommand"]}', self.text_low)
                 if rres:
                     curr = rres.group(1)
                     res = await self.db.fetch("""
@@ -610,7 +603,7 @@ class StoryCommand(CurrencyStoryCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'история', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["StoryCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -673,7 +666,7 @@ class CurrencyDetailCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'(.+) +детали', self.text_low)
+                rres = re.fullmatch(rf'(.+) +{self.keywords["DetailCommand"]}', self.text_low)
                 if rres:
                     curr = rres.group(1)
                     res = await self.db.fetch("""
@@ -738,7 +731,7 @@ class DetailCommand(CurrencyDetailCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'детали', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["DetailCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -801,7 +794,7 @@ class CancelCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'отмена', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["CancelCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -948,7 +941,7 @@ class NullCommand(CurrencyNullCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'\*0', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["NullCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -1014,7 +1007,7 @@ class AdminMenuCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
             if self.db_user['access_level'] == 'admin':
-                rres = re.fullmatch(r'меню', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["AdminMenuCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -1045,7 +1038,7 @@ class AddressListCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
             if self.db_user['access_level'] in ('admin', 'employee'):
-                rres = re.fullmatch(r'адреса', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["AddressListCommand"]}', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -1185,7 +1178,7 @@ class TrackingCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
             if self.db_user['access_level'] in ('admin', 'employee'):
-                rres = re.fullmatch(r'отслеживание', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["TrackingCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""
                         SELECT tracking FROM user_table
@@ -1221,7 +1214,7 @@ class OffTrackingCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
             if self.db_user['access_level'] in ('admin', 'employee'):
-                rres = re.fullmatch(r'отслеживание', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["OffTrackingCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""
                         SELECT tracking FROM user_table

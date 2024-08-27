@@ -29,6 +29,7 @@ class MessageCommand:
         self.global_texts = self.data_locales.global_texts
         self.texts = self.data_locales.texts
         self.buttons = self.data_locales.buttons
+        self.keywords = self.global_texts['keywords']
         self.bot = BotInteraction.BotInter()
 
     async def async_init(self):
