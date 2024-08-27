@@ -3,6 +3,7 @@ import json
 import os
 import datetime
 import time
+import traceback
 from string import Template
 from typing import List
 import re
@@ -135,17 +136,24 @@ class DataDB:
         :param table_name: Название таблицы для удаления записи
         :return:
         """
-        if self.conn is None:
-            raise Exception('Необходимо сначала подключиться к базе данных')
-        async with self.conn.transaction():
-            result = await self.conn.fetchrow(query, *args)
-            if destroy_timeout != 0:
-                asyncio.create_task(self._destroy(
-                    table_name=table_name,
-                    id_=result['id'],
-                    destroy_timeout=destroy_timeout
-                ))
-        return result
+        try:
+            if self.conn is None:
+                raise Exception('Необходимо сначала подключиться к базе данных')
+            async with self.conn.transaction():
+                result = await self.conn.fetchrow(query, *args)
+                if destroy_timeout != 0:
+                    asyncio.create_task(self._destroy(
+                        table_name=table_name,
+                        id_=result['id'],
+                        destroy_timeout=destroy_timeout
+                    ))
+            return result
+        except Exception as err:
+            if err.__str__() == 'cannot perform operation: another operation is in progress':
+                pass
+            else:
+                traceback.print_exc()
+                print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
     async def execute(self, query, *args) -> str:
         if self.conn is None:

@@ -1046,7 +1046,7 @@ class AdminChangeCommand(NextCallbackMessageCommand):
         data['ru']['keywords'][kwargs['command']] = self.text_low.replace('*', '\\*')
 
         with open('locales.json', 'w') as write_file:
-            json.dump(data, write_file)
+            json.dump(data, write_file, ensure_ascii=False)
 
         message_obj = await self.generate_edit_message(before=before)
         await self.bot.delete_message(self.chat.id, self.press_message_id)

@@ -2919,6 +2919,38 @@ class AdminChangeCommand(CallbackQueryCommand):
         )
 
 
+class AdminInstruction(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/instruction/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message()
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        keywords = self.global_texts['keywords']
+
+        text = Template(self.edit_texts['AdminInstruction']).substitute(
+            **keywords
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminInstruction']
+        )
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
 class Null1(CallbackQueryCommand):
     async def define(self):
         pass
