@@ -277,6 +277,41 @@ class EditChatThemeCommand(MessageCommand):
             variable.append('1')
         chat_id = res['id']
 
+        if self.db_chat['sign'] is False:
+            variable.append('photo-')
+        else:
+            variable.append('photo+')
+
+        rres = re.findall(r'([^|]+?)\|', self.db_chat['answer_mode'])
+
+        if 'forward' in rres:
+            if 'non_forward' in rres:
+                variable.append('forward|non_forward')
+            else:
+                variable.append('forward')
+        else:
+            if 'non_forward' in rres:
+                variable.append('non_forward')
+                
+        if 'reply' in rres:
+            if 'non_reply' in rres:
+                variable.append('reply|non_reply')
+            else:
+                variable.append('reply')
+        else:
+            if 'non_reply' in rres:
+                variable.append('non_reply')
+
+        if 'quote' in rres:
+            if 'non_quote' in rres:
+                variable.append('quote|non_quote')
+            else:
+                variable.append('quote')
+        else:
+            if 'non_quote' in rres:
+                variable.append('non_quote')
+                
+
         markup = markup_generate(
             self.buttons['EditChatThemeCommand'],
             chat_id=chat_id,
@@ -481,6 +516,29 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 WHERE type = 'chat' AND chat_table.chat_id = $1; 
                             """, self.chat.id)
                         if res:
+                            answer_mode_list = re.findall(r'([^/]+?)\|', self.db_chat['answer_mode'])
+                            if self.message.forward_origin:
+                                if 'forward' not in answer_mode_list:
+                                    return
+                            else:
+                                if 'non_forward' not in answer_mode_list:
+                                    return
+
+                            if self.message.quote:
+                                if 'quote' not in answer_mode_list:
+                                    return
+                            else:
+                                if 'non_quote' not in answer_mode_list:
+                                    return
+
+                            if not self.message.quote:
+                                if self.message.reply_to_message:
+                                        if 'reply' not in answer_mode_list:
+                                            return
+                                else:
+                                    if 'non_reply' not in answer_mode_list:
+                                        return
+
                             await self.process(res=res, calc_res=calc_res, expr=expr)
                             return True
 

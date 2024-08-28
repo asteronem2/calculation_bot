@@ -76,7 +76,6 @@
         "EditChatThemeCommand": "EditChatThemeCommand",
         "ChatBalancesCommand": "<b>Список валют, выберите ту, которую желаете изменить:</b>",
         "ChatTopicsCommand": "<b>Список тем чата, выберите ту, которую желаете изменить:\n$topic_list</b>",
-        "ChatPhotoCalcCommand": "Какие подсчёты делать под фото? Сейчас <b>$sign</b>",
         "ChatLockCommand": "LockChatCommand",
         "ChatDropStory": "<b>Вы уверены?<i>\nБудет удалена история ВСЕХ валют</i></b>",
         "ChatDropStorySecond": "<b>На 100%???</b>",
@@ -230,8 +229,14 @@
             "callback_data": "chat/topics/$chat_id/"
           },
           {
-            "text": "Фото +-",
-            "callback_data": "chat/photo_calc/$chat_id/"
+            "text": "Фото +",
+            "callback_data": "chat/photo_calc/$chat_id/+/",
+            "variable": "photo+"
+          },
+          {
+            "text": "Фото -",
+            "callback_data": "chat/photo_calc/$chat_id/-/",
+            "variable": "photo-"
           }
         ],
         [
@@ -250,6 +255,21 @@
             "callback_data": "chat/general_topic/$chat_id/",
             "variable": "1"
           }
+        ],
+        [
+          {"text": "Только пересылаемые", "callback_data": "chat/mode/forward/set/non_forward/", "variable": "forward"},
+          {"text": "Только не пересылаемые", "callback_data": "chat/mode/forward/set/forward|non_forward/", "variable": "non_forward"},
+          {"text": "Пересылаемые + не пересылаемые", "callback_data": "chat/mode/forward/set/forward/", "variable": "forward|non_forward"}
+        ],
+        [
+          {"text": "Только ответы", "callback_data": "chat/mode/reply/set/non_reply/", "variable": "reply"},
+          {"text": "Только не ответы", "callback_data": "chat/mode/reply/set/reply|non_reply/", "variable": "non_reply"},
+          {"text": "Ответы + не ответы", "callback_data": "chat/mode/reply/set/reply/", "variable": "reply|non_reply"}
+        ],
+        [
+          {"text": "Только цитирование", "callback_data": "chat/mode/quote/set/non_quote/", "variable": "quote"},
+          {"text": "Только не цитирование", "callback_data": "chat/mode/quote/set/quote|non_quote/", "variable": "non_quote"},
+          {"text": "Цитирование + не цитирование", "callback_data": "chat/mode/quote/set/quote/", "variable": "quote|non_quote"}
         ],
         [
           {
@@ -444,24 +464,6 @@
           {
             "text": "Назад 🔙",
             "callback_data": "chat/topics/$chat_id/"
-          }
-        ]
-      ],
-      "ChatPhotoCalcCommand": [
-        [
-          {
-            "text": "+",
-            "callback_data": "chat/photo_calc/$chat_id/+/"
-          },
-          {
-            "text": "-",
-            "callback_data": "chat/photo_calc/$chat_id/-/"
-          }
-        ],
-        [
-          {
-            "text": "Назад 🔙",
-            "callback_data": "chat/edit_chat_theme/"
           }
         ]
       ],

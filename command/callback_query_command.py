@@ -402,23 +402,65 @@ class EditChatTheme(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['message_command']['EditChatThemeCommand']).substitute()
+
         res = await self.db.fetchrow("""
             SELECT * FROM chat_table
             WHERE id = $1;
         """, self.db_chat['id'])
 
+        variable = []
+        if res['topic'] != res['main_topic']:
+            variable.append('1')
+        chat_id = res['id']
+
+        if res['sign'] is False:
+            variable.append('photo-')
+        else:
+            variable.append('photo+')
+
+
+        rres = re.findall(r'([^|]+?)\|', res['answer_mode'])
+
+        if 'forward' in rres:
+            if 'non_forward' in rres:
+                variable.append('forward|non_forward')
+            else:
+                variable.append('forward')
+        else:
+            if 'non_forward' in rres:
+                variable.append('non_forward')
+
+        if 'reply' in rres:
+            if 'non_reply' in rres:
+                variable.append('reply|non_reply')
+            else:
+                variable.append('reply')
+        else:
+            if 'non_reply' in rres:
+                variable.append('non_reply')
+
+        if 'quote' in rres:
+            if 'non_quote' in rres:
+                variable.append('quote|non_quote')
+            else:
+                variable.append('quote')
+        else:
+            if 'non_quote' in rres:
+                variable.append('non_quote')
+
         markup = markup_generate(
             self.buttons['EditChatThemeCommand'],
-            chat_id=self.db_chat['id'],
-            variable=[] if res['topic'] == res['main_topic'] else ['1']
+            chat_id=chat_id,
+            topic=self.topic,
+            variable=variable
         )
-        text = Template(self.global_texts['message_command']['EditChatThemeCommand']).substitute()
 
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=markup
+            markup=markup,
         )
 
 
@@ -637,51 +679,13 @@ class ChatEditTopicCommand(CallbackQueryCommand):
         )
 
 
-class ChatPhotoCalcCommand(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'chat/photo_calc/([0-9]+)/', self.cdata)
-            if rres:
-                chat_id = int(rres.group(1))
-                await self.process(chat_id=chat_id)
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM chat_table
-            WHERE id = $1;
-        """, kwargs['chat_id'])
-        text = Template(self.edit_texts['ChatPhotoCalcCommand']).substitute(
-            sign='-' if res['sign'] is False else '+'
-        )
-
-        markup = markup_generate(
-            self.buttons['ChatPhotoCalcCommand'],
-            **kwargs
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
-
-
-class ChatPhotoCalc(CallbackQueryCommand):
+class ChatPhotoCalcCommand(EditChatTheme):
     async def define(self):
         if self.access_level == 'admin':
             rres = re.fullmatch(r'chat/photo_calc/([0-9]+)/([+-])/', self.cdata)
             if rres:
-                chat_id, sign = rres.groups()
-                chat_id = int(chat_id)
+                chat_id = int(rres.group(1))
+                sign = rres.group(2)
                 await self.process(chat_id=chat_id, sign=sign)
                 return True
 
@@ -690,24 +694,10 @@ class ChatPhotoCalc(CallbackQueryCommand):
             UPDATE chat_table
             set sign = $1
             WHERE id = $2;
-        """, True if kwargs['sign'] == '+' else False, kwargs['chat_id'])
+        """, True if kwargs['sign'] == '-' else False, kwargs['chat_id'])
 
-        message_obj = await self.generate_edit_message(**kwargs)
+        message_obj = await EditChatTheme.generate_edit_message(self)
         await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['ChatPhotoCalc']).substitute(
-            sign=kwargs['sign']
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id
-        )
 
 
 class ChatLockCommand(CallbackQueryCommand):
@@ -886,6 +876,39 @@ class ChatGeneralTopicCommand(CallbackQueryCommand):
             text=text,
             message_id=self.sent_message_id
         )
+
+
+class ChatMode(EditChatTheme):
+    async def define(self):
+        rres = re.fullmatch(r'chat/mode/([^/]+)/set/([^/]+)/', self.cdata)
+        if rres:
+            answer_type = rres.group(1)
+            set_mode = rres.group(2)
+            await self.process(answer_type=answer_type, set_mode=set_mode)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        set_mode = kwargs['set_mode']
+
+        new_mode = self.db_chat['answer_mode']
+
+        x = re.search(r'forward|reply|quote', set_mode).group(0)
+
+        if set_mode == f'non_{x}':
+            new_mode = new_mode.replace(f'{x}', set_mode)
+        elif set_mode == f'{x}|non_{x}':
+            new_mode = new_mode.replace(f'non_{x}', set_mode)
+        elif set_mode == f'{x}':
+            new_mode = new_mode.replace(f'{x}|non_{x}', set_mode)
+
+        await self.db.execute("""
+            UPDATE chat_table
+            SET answer_mode = $1
+            WHERE chat_id = $2;
+        """, new_mode, self.chat.id)
+
+        message_obj = await EditChatTheme.generate_edit_message(self)
+        await self.bot.edit_text(message_obj)
 
 
 # Команды сотрудников в группе

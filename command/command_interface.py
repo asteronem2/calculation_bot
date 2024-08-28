@@ -21,7 +21,7 @@ class MessageCommand:
         self.user = message.from_user
         self.text = message.text
         self.text_low = message.text.lower().strip()
-        self.topic = 0 if message.message_thread_id is None else message.message_thread_id
+        self.topic = 0 if message.is_topic_message is None else message.message_thread_id
 
         self.db = utils.db
 

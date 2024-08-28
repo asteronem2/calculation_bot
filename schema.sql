@@ -103,4 +103,7 @@ VALUES
 (0, 0, 'Заметки', 'folder', 0)
 ON CONFLICT (id) DO NOTHING;
 
+ALTER TABLE chat_table
+ADD COLUMN IF NOT EXISTS answer_mode TEXT DEFAULT 'quote|non_quote|reply|non_reply|forward|non_forward|';
+
 SET timezone = 'Europe/Moscow';
