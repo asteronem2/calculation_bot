@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.97 version&#10;Added:&#10;1. Отмена посредством реакции 👎">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
     </list>
@@ -196,7 +196,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724797291433</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений">
+      <option name="closed" value="true" />
+      <created>1724843048753</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1724843048753</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -234,6 +242,7 @@
     <MESSAGE value="0.95 version&#10;Added:&#10;1. Ключевые слова для вызова команд прописаны в json файле а не py&#10;2. Возможность изменять ключевые слова для вызова команд" />
     <MESSAGE value="0.96 version&#10;Added:&#10;1. Добавлена команда для подсказок по командам" />
     <MESSAGE value="0.97 version&#10;Added:&#10;1. Отмена посредством реакции " />
-    <option name="LAST_COMMIT_MESSAGE" value="0.97 version&#10;Added:&#10;1. Отмена посредством реакции " />
+    <MESSAGE value="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений" />
   </component>
 </project>

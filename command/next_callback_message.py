@@ -1048,14 +1048,11 @@ class AdminChangeCommand(NextCallbackMessageCommand):
         with open('locales.json', 'w') as write_file:
             json.dump(data, write_file, ensure_ascii=False)
 
-        message_obj = await self.generate_edit_message(before=before)
+        message_obj = await self.generate_send_message(before=before)
         await self.bot.delete_message(self.chat.id, self.press_message_id)
         await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.send_texts['AdminChangeCommand']).substitute(
             before=kwargs['before'].replace('\\', ''),
             after=self.text_low
@@ -1064,6 +1061,95 @@ class AdminChangeCommand(NextCallbackMessageCommand):
         return TextMessage(
             chat_id=self.chat.id,
             text=text
+        )
+
+
+class AdminRevise(NextCallbackMessageCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/revise/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE pressure_button_table
+            SET callback_data = 'admin/revise/second/'
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            UPDATE user_table
+            SET revise_expr = $1
+            WHERE id = $2;
+        """, self.text_low, self.db_user['id'])
+
+        message_obj = await self.generate_send_message()
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(self.chat.id, self.press_message_id)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminRevise']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+        )
+
+
+class AdminReviseSecond(NextCallbackMessageCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/revise/second/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            UPDATE user_table
+            SET revise_expr = NULL
+            WHERE id = $1;
+        """, self.db_user['id'])
+
+        message_obj = await self.generate_send_message()
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        first_eval = None
+        second_eval = None
+
+        try:
+            first_eval = eval(self.db_user['revise_expr'].replace(',', ''))
+        except:
+            first_eval = '❌'
+
+        try:
+            second_eval = eval(self.text_low.replace(',', '.'))
+        except:
+            second_eval = '❌'
+
+        sign = '≠'
+
+        if '❌' not in (first_eval, second_eval):
+            if first_eval == second_eval:
+                sign = '='
+
+        if type(first_eval) in (int, float):
+            first_eval = float_to_str(first_eval)
+
+        if type(second_eval) in (int, float):
+            second_eval = float_to_str(second_eval)
+
+        text = first_eval + ' ' + sign + ' ' + second_eval
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
         )
 
 

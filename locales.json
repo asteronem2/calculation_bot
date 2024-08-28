@@ -130,7 +130,8 @@
         "AdminCommands": "<b>Выберите категорию для изменения</b>",
         "AdminCommandsList": "<b>Нажмите на команду, текст вызова которой желаете поменять</b>",
         "AdminChangeCommand": "<b>Напишите новый вызов для команды $command</b>",
-        "AdminInstruction": "<b>Список команд для админа в личном чате:</b>\n<blockquote expandable><b>$AdminMenuCommand</b> - открывает меню управление ботом и чатами</blockquote>\n\n<b>Список команд для админа в группе:</b>\n<blockquote expandable><b>$UnlockChatCommand</b> - разблокирует чат\n<b>$LockChatCommand</b> - блокирует чат\n<b>$EditChatThemeCommand</b> - открывает меню управления темой чата\n<b>*«валюта»</b> - открывает меню управления валютой\n<b>«название» = «значение» «постфикс»</b> - создание валюты</blockquote>\n\n<b>Список команд для сотрудника в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд для сотрудника в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>"
+        "AdminInstruction": "<b>Список команд для админа в личном чате:</b>\n<blockquote expandable><b>$AdminMenuCommand</b> - открывает меню управление ботом и чатами</blockquote>\n\n<b>Список команд для админа в группе:</b>\n<blockquote expandable><b>$UnlockChatCommand</b> - разблокирует чат\n<b>$LockChatCommand</b> - блокирует чат\n<b>$EditChatThemeCommand</b> - открывает меню управления темой чата\n<b>*«валюта»</b> - открывает меню управления валютой\n<b>«название» = «значение» «постфикс»</b> - создание валюты</blockquote>\n\n<b>Список команд для сотрудника в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд для сотрудника в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>",
+        "AdminRevise": "<b>Напишите первое выражение для сравнения</b>"
       },
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
@@ -170,7 +171,8 @@
         "AdminCreateNote": "<b>Заметка успешно создана</b>",
         "AdminNoteChangeTitle": "<b>Название заметки $old_title изменено на $new_title</b>",
         "AdminNoteChangeText": "<b>Текст для заметки $title изменён</b>",
-        "AdminChangeCommand": "<b>Вызов команды изменён с $before на $after</b>"
+        "AdminChangeCommand": "<b>Вызов команды изменён с $before на $after</b>",
+        "AdminRevise": "<b>Теперь напишите второе выражение</b>"
       }
     },
     "reaction_command": {
@@ -894,6 +896,12 @@
           {
             "text": "Инструкция \uD83D\uDCD6",
             "callback_data": "admin/instruction/"
+          }
+        ],
+        [
+          {
+            "text": "Сверка чисел",
+            "callback_data": "admin/revise/"
           }
         ],
         [

@@ -2974,6 +2974,34 @@ class AdminInstruction(CallbackQueryCommand):
         )
 
 
+class AdminRevise(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/revise/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message()
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminRevise']).substitute()
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id
+        )
+
+
 class Null1(CallbackQueryCommand):
     async def define(self):
         pass
