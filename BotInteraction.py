@@ -90,7 +90,8 @@ class BotInter:
                     if message_obj.button_destroy != 0:
                         asyncio.create_task(self._destroy_buttons(
                             message=sent_message,
-                            destroy_timeout=message_obj.button_destroy
+                            destroy_timeout=message_obj.button_destroy,
+                            message_obj=message_obj
                         ))
 
                     return sent_message
@@ -152,14 +153,13 @@ class BotInter:
                 traceback.print_exc()
                 print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
-    async def _destroy_buttons(self, message: aiogram.types.Message, destroy_timeout: int):
+    async def _destroy_buttons(self, message: aiogram.types.Message, destroy_timeout: int, message_obj: TextMessage):
         await asyncio.sleep(destroy_timeout)
         try:
             chat_id = message.chat.id
             message_id = message.message_id
-            text = message.text
             await self.bot.edit_message_text(
-                text=text,
+                text=message_obj.text,
                 chat_id=chat_id,
                 message_id=message_id,
                 parse_mode=self._parse_mode

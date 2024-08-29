@@ -1095,7 +1095,7 @@ class AdminMenuCommand(MessageCommand):
 class AddressListCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
                 rres = re.fullmatch(rf'{self.keywords["AddressListCommand"]}', self.text_low)
                 if rres:
                     await self.process()
@@ -1144,7 +1144,7 @@ class AddressListCommand(MessageCommand):
 class AddAddressCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
                 rres = re.fullmatch(r'адрес +([^ ]+)(| +[0-9.,]+)', self.text.strip())
                 if rres:
                     address, min_value = rres.groups()
@@ -1235,7 +1235,7 @@ class AddAddressCommand(MessageCommand):
 class TrackingCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
                 rres = re.fullmatch(rf'{self.keywords["TrackingCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""
@@ -1271,7 +1271,7 @@ class TrackingCommand(MessageCommand):
 class OffTrackingCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
                 rres = re.fullmatch(rf'{self.keywords["OffTrackingCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""

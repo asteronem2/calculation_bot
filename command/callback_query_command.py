@@ -1305,7 +1305,7 @@ class CalculationCommand(CallbackQueryCommand):
 # Команды для сотрудников в лс
 class AddressChangeMinValueCommand(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing']:
             rres = re.fullmatch(r'address/change_min_value/([^/]+)/', self.cdata)
             if rres:
                 address_id = int(rres.group(1))
@@ -1352,7 +1352,7 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
 
 class AddressDelete(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing']:
             rres = re.fullmatch(r'address/delete/([^/]+)/', self.cdata)
             if rres:
                 address = rres.group(1)
@@ -1384,7 +1384,7 @@ class AddressDelete(CallbackQueryCommand):
 
 class AddressDeleteSecond(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing']:
             rres = re.fullmatch(r'address/delete/([^/]+)/([^/]+)/', self.cdata)
             if rres:
                 address_id, answer = rres.groups()
@@ -2791,6 +2791,46 @@ class AdminEmployees(CallbackQueryCommand):
         res = await self.db.fetch("""
             SELECT * FROM user_table
             WHERE access_level = 'employee';
+        """)
+
+        employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'
+                         for i in res]
+
+        text = Template(self.edit_texts['AdminEmployees']).substitute(
+            employee_list='\n'.join(employee_list)
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminEmployees']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminEmployeesParsing(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/employees_parsing/', self.cdata)
+            if rres:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message()
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM user_table
+            WHERE access_level = 'employee_parsing';
         """)
 
         employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'

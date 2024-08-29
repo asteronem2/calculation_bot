@@ -2,8 +2,6 @@ import json
 import re
 from string import Template
 
-from aiogram.methods import SendMessage
-
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import NextCallbackMessageCommand
@@ -660,6 +658,126 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
 class AdminEmployeesRemove(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/employees/remove/', self.cdata)
+        if rres1:
+            rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
+            if rres2:
+                await self.process(username_list=rres2)
+                return True
+            else:
+                await self.process(error='error')
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        if kwargs.get('error'):
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+        else:
+            for i in kwargs['username_list']:
+                await self.db.execute("""
+                        UPDATE user_table
+                        SET access_level = 'zero'
+                        WHERE username = $1
+                            AND access_level <> 'admin';
+                    """, i)
+
+            message_obj = await self.generate_send_message(**kwargs)
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminEmployeesRemove']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
+class AdminEmployeesParsingAdd(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/employees_parsing/add/', self.cdata)
+        if rres1:
+            rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
+            if rres2:
+                await self.process(username_list=rres2)
+                return True
+            else:
+                await self.process(error='error')
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        if kwargs.get('error'):
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+        else:
+            for i in kwargs['username_list']:
+                await self.db.execute("""
+                        UPDATE user_table
+                        SET access_level = 'employee_parsing'
+                        WHERE username = $1
+                            AND access_level <> 'admin';
+                    """, i)
+
+            message_obj = await self.generate_send_message(**kwargs)
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminEmployeesAdd']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
+class AdminEmployeesParsingRemove(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/employees_parsing/remove/', self.cdata)
         if rres1:
             rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
             if rres2:
