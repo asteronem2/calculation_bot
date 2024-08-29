@@ -206,7 +206,7 @@ class EditCurrencyCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level == 'admin':
-                rres = re.fullmatch(r'\*([^ ]+)', self.text_low)
+                rres = re.fullmatch(r'\*(.+)', self.text_low)
                 if rres:
                     r_curr = rres.group(1)
 

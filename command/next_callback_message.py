@@ -12,12 +12,9 @@ class CurrChangeTitleCommand(NextCallbackMessageCommand):
     async def define(self):
         rres = re.fullmatch(r'curr/change_title/([0-9]+)/', self.cdata)
         if rres:
-            if self.text_low.count(' ') == 0:
-                curr_id = int(rres.group(1))
-                await self.process(curr_id=curr_id)
-                return True
-            else:
-                await self.process(error='error')
+            curr_id = int(rres.group(1))
+            await self.process(curr_id=curr_id)
+            return True
 
     async def process(self, *args, **kwargs) -> None:
         if kwargs.get('error'):
@@ -36,7 +33,7 @@ class CurrChangeTitleCommand(NextCallbackMessageCommand):
         else:
             res = await self.db.fetchrow("""
                 SELECT * FROM currency_table
-                WHERE chat_pid = $1;
+                WHERE id = $1;
             """, kwargs['curr_id'])
 
             await self.db.execute("""
