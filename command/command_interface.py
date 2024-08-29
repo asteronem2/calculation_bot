@@ -174,6 +174,12 @@ class CallbackQueryCommand:
             WHERE sent_message_id = $1;
         """, self.sent_message_id)
 
+        self.pressure_info: asyncpg.Record = await self.db.fetchrow("""
+            SELECT * FROM pressure_button_table
+            WHERE user_pid = $1 AND 
+            COALESCE(chat_pid, 1) = COALESCE($2, 1);
+        """, self.db_user['id'], None if not self.db_chat else self.db_chat['id'])
+
         self.got_message_id = self.sent_message_id - 1
 
 
@@ -256,6 +262,7 @@ class NextCallbackMessageCommand:
             WHERE user_pid = $1 AND 
             COALESCE(chat_pid, 1) = COALESCE($2, 1);
         """, self.db_user['id'], None if not self.db_chat else self.db_chat['id'])
+
         self.cdata = self.pressure_info['callback_data']
         self.press_message_id = self.pressure_info['message_id']
 

@@ -2420,8 +2420,21 @@ class AdminFolder(CallbackQueryCommand):
             WHERE parent_id = $1;
         """, kwargs['folder_id'])
 
+        notes = ''
+
+        for i in res2:
+            if i['type'] == 'note':
+                title = i['title']
+                text = i['text']
+                if f'{text[:17]}...' == title:
+                    notes += f'<blockquote expandable>{text}</blockquote>'
+                else:
+                    notes += f'<blockquote expandable><b>{title}:</b>\n{text}</blockquote>'
+                notes += '\n'
+
         text = Template(self.edit_texts['AdminFolder']).substitute(
-            folder_title=res1['title']
+            folder_title=res1['title'],
+            notes=notes[:3900]
         )
 
         cycle_folder = [{
@@ -2524,6 +2537,10 @@ class AdminFolderDelete(CallbackQueryCommand):
         message_obj = await self.generate_edit_message(res=res, **kwargs)
         await self.bot.edit_text(message_obj)
 
+        if kwargs['stage'] == 2:
+            message_obj2 = await self.generate_send_message(res=res)
+            await self.bot.send_text(message_obj2)
+
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.edit_texts[f'AdminFolderDelete{kwargs["stage"]}']).substitute(
             title=kwargs['res']['title']
@@ -2545,6 +2562,72 @@ class AdminFolderDelete(CallbackQueryCommand):
         )
 
 
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        folder_id = kwargs['res']['parent_id']
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, folder_id)
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE parent_id = $1;
+        """, folder_id)
+
+        notes = ''
+
+        for i in res2:
+            if i['type'] == 'note':
+                title = i['title']
+                text = i['text']
+                if f'{text[:17]}...' == title:
+                    notes += f'<blockquote expandable>{text}</blockquote>'
+                else:
+                    notes += f'<blockquote expandable><b>{title}:</b>\n{text}</blockquote>'
+                notes += '\n'
+
+
+        text = Template(self.edit_texts['AdminFolder']).substitute(
+            folder_title=res1['title'],
+            notes=notes[:3900]
+        )
+
+        cycle_folder = [{
+            'child_folder_title': i['title'],
+            'child_folder_id': i['id']
+        } for i in res2 if i['type'] == 'folder' and i['id'] != 0]
+
+        cycle_note = [{
+            'note_title': i['title'],
+            'note_id': i['id']
+        } for i in res2 if i['type'] == 'note']
+
+        variable = []
+
+        if folder_id == 0:
+            variable.append('back_to_menu')
+        else:
+            variable.append('back_to_parent_folder')
+
+        if not cycle_folder and not cycle_note and folder_id != 0:
+            variable.append('delete')
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminFolder'],
+            folder_id=folder_id,
+            cycle_folder=cycle_folder,
+            cycle_note=cycle_note,
+            parent_folder_id=res1['parent_id'],
+            variable=variable
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=markup
+        )
+
+
 class AdminCreateFolder(CallbackQueryCommand):
     async def define(self):
         rres = re.fullmatch(r'admin/folder/([0-9]+)/create_folder/', self.cdata)
@@ -2554,6 +2637,12 @@ class AdminCreateFolder(CallbackQueryCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         await self.db.execute("""
             INSERT INTO pressure_button_table
             (chat_pid, user_pid, message_id, callback_data)
@@ -2579,7 +2668,7 @@ class AdminCreateFolder(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/folder/{kwargs["folder_id"]}/')]])
         )
 
 
@@ -2592,6 +2681,12 @@ class AdminCreateNote(CallbackQueryCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         await self.db.execute("""
             INSERT INTO pressure_button_table
             (chat_pid, user_pid, message_id, callback_data)
@@ -2616,7 +2711,7 @@ class AdminCreateNote(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/folder/{kwargs["folder_id"]}/')]])
         )
 
 
@@ -2645,6 +2740,10 @@ class AdminNoteDelete(CallbackQueryCommand):
         message_obj = await self.generate_edit_message(res=res, **kwargs)
         await self.bot.edit_text(message_obj)
 
+        if kwargs['stage'] == 2:
+            message_obj2 = await self.generate_send_message(res=res)
+            await self.bot.send_text(message_obj2)
+
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.edit_texts[f'AdminNoteDelete{kwargs["stage"]}']).substitute(
             title=kwargs['res']['title']
@@ -2665,6 +2764,71 @@ class AdminNoteDelete(CallbackQueryCommand):
             markup=markup
         )
 
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        folder_id = kwargs['res']['parent_id']
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, folder_id)
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE parent_id = $1;
+        """, folder_id)
+
+        notes = ''
+
+        for i in res2:
+            if i['type'] == 'note':
+                title = i['title']
+                text = i['text']
+                if f'{text[:17]}...' == title:
+                    notes += f'<blockquote expandable>{text}</blockquote>'
+                else:
+                    notes += f'<blockquote expandable><b>{title}:/b>\n{text}</blockquote>'
+                notes += '\n'
+
+
+        text = Template(self.edit_texts['AdminFolder']).substitute(
+            folder_title=res1['title'],
+            notes=notes[:3900]
+        )
+
+        cycle_folder = [{
+            'child_folder_title': i['title'],
+            'child_folder_id': i['id']
+        } for i in res2 if i['type'] == 'folder' and i['id'] != 0]
+
+        cycle_note = [{
+            'note_title': i['title'],
+            'note_id': i['id']
+        } for i in res2 if i['type'] == 'note']
+
+        variable = []
+
+        if folder_id == 0:
+            variable.append('back_to_menu')
+        else:
+            variable.append('back_to_parent_folder')
+
+        if not cycle_folder and not cycle_note and folder_id != 0:
+            variable.append('delete')
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminFolder'],
+            folder_id=folder_id,
+            cycle_folder=cycle_folder,
+            cycle_note=cycle_note,
+            parent_folder_id=res1['parent_id'],
+            variable=variable
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=markup
+        )
+
 
 class AdminNoteChangeTitle(CallbackQueryCommand):
     async def define(self):
@@ -2675,6 +2839,12 @@ class AdminNoteChangeTitle(CallbackQueryCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         await self.db.execute("""
             INSERT INTO pressure_button_table
             (chat_pid, user_pid, message_id, callback_data)
@@ -2699,7 +2869,7 @@ class AdminNoteChangeTitle(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/note/{kwargs["note_id"]}/')]])
         )
 
 
@@ -2712,6 +2882,12 @@ class AdminNoteChangeText(CallbackQueryCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         await self.db.execute("""
             INSERT INTO pressure_button_table
             (chat_pid, user_pid, message_id, callback_data)
@@ -2736,7 +2912,7 @@ class AdminNoteChangeText(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/note/{kwargs["note_id"]}/')]])
         )
 
 

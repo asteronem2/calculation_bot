@@ -5,7 +5,7 @@ from string import Template
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import NextCallbackMessageCommand
-from utils import calculate, float_to_str, str_to_float
+from utils import calculate, float_to_str, str_to_float, markup_generate
 
 
 class CurrChangeTitleCommand(NextCallbackMessageCommand):
@@ -941,8 +941,8 @@ class AdminCreateFolder(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_folder/', self.cdata)
         if rres1:
-            parent_id = int(rres1.group(1))
-            await self.process(parent_id=parent_id)
+            folder_id = int(rres1.group(1))
+            await self.process(folder_id=folder_id)
             return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -956,23 +956,89 @@ class AdminCreateFolder(NextCallbackMessageCommand):
             (user_pid, title, type, parent_id)
             VALUES
             ($1, $2, 'folder', $3);
-        """, self.db_user['id'], self.text, kwargs['parent_id'])
+        """, self.db_user['id'], self.text, kwargs['folder_id'])
 
 
-        message_obj = await self.generate_send_message(**kwargs)
+        message_obj = await self.generate_send_message(stage=1, **kwargs)
         await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
+        message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+        await self.bot.send_text(message_obj2)
+
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminCreateFolder']).substitute()
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminCreateFolder']).substitute()
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res1 = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE id = $1;
+            """, kwargs['folder_id'])
+
+            res2 = await self.db.fetch("""
+                SELECT * FROM note_table
+                WHERE parent_id = $1;
+            """, kwargs['folder_id'])
+
+            notes = ''
+
+            for i in res2:
+                if i['type'] == 'note':
+                    title = i['title']
+                    text = i['text']
+                    if f'{text[:17]}...' == title:
+                        notes += f'<blockquote expandable>{text}</blockquote>'
+                    else:
+                        notes += f'<blockquote expandable><b>{title}:</b>\n{text}</blockquote>'
+                    notes += '\n'
+
+            text = Template(self.global_texts['callback_command']['edit']['AdminFolder']).substitute(
+                folder_title=res1['title'],
+                notes=notes[:300]
+            )
+
+            cycle_folder = [{
+                'child_folder_title': i['title'],
+                'child_folder_id': i['id']
+            } for i in res2 if i['type'] == 'folder' and i['id'] != 0]
+
+            cycle_note = [{
+                'note_title': i['title'],
+                'note_id': i['id']
+            } for i in res2 if i['type'] == 'note']
+
+            variable = []
+
+            if kwargs['folder_id'] == 0:
+                variable.append('back_to_menu')
+            else:
+                variable.append('back_to_parent_folder')
+
+            if not cycle_folder and not cycle_note and kwargs['folder_id'] != 0:
+                variable.append('delete')
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminFolder'],
+                folder_id=kwargs['folder_id'],
+                cycle_folder=cycle_folder,
+                cycle_note=cycle_note,
+                parent_folder_id=res1['parent_id'],
+                variable=variable
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -989,8 +1055,8 @@ class AdminCreateNote(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_note/', self.cdata)
         if rres1:
-            parent_id = int(rres1.group(1))
-            await self.process(parent_id=parent_id)
+            folder_id = int(rres1.group(1))
+            await self.process(folder_id=folder_id)
             return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -1004,23 +1070,88 @@ class AdminCreateNote(NextCallbackMessageCommand):
             (user_pid, title, text, type, parent_id)
             VALUES
             ($1, $2, $3, 'note', $4);
-        """, self.db_user['id'], self.text[:17] + '...', self.text, kwargs['parent_id'])
+        """, self.db_user['id'], self.text[:17] + '...', self.text, kwargs['folder_id'])
 
 
-        message_obj = await self.generate_send_message(**kwargs)
+        message_obj = await self.generate_send_message(stage=1, **kwargs)
         await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
+        message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+        await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminCreateNote']).substitute()
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminCreateNote']).substitute()
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res1 = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE id = $1;
+            """, kwargs['folder_id'])
+
+            res2 = await self.db.fetch("""
+                SELECT * FROM note_table
+                WHERE parent_id = $1;
+            """, kwargs['folder_id'])
+
+            notes = ''
+
+            for i in res2:
+                if i['type'] == 'note':
+                    title = i['title']
+                    text = i['text']
+                    if f'{text[:17]}...' == title:
+                        notes += f'<blockquote expandable>{text}</blockquote>'
+                    else:
+                        notes += f'<blockquote expandable><b>{title}:</b>\n{text}</blockquote>'
+                    notes += '\n'
+
+            text = Template(self.global_texts['callback_command']['edit']['AdminFolder']).substitute(
+                folder_title=res1['title'],
+                notes=notes[:300]
+            )
+
+            cycle_folder = [{
+                'child_folder_title': i['title'],
+                'child_folder_id': i['id']
+            } for i in res2 if i['type'] == 'folder' and i['id'] != 0]
+
+            cycle_note = [{
+                'note_title': i['title'],
+                'note_id': i['id']
+            } for i in res2 if i['type'] == 'note']
+
+            variable = []
+
+            if kwargs['folder_id'] == 0:
+                variable.append('back_to_menu')
+            else:
+                variable.append('back_to_parent_folder')
+
+            if not cycle_folder and not cycle_note and kwargs['folder_id'] != 0:
+                variable.append('delete')
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminFolder'],
+                folder_id=kwargs['folder_id'],
+                cycle_folder=cycle_folder,
+                cycle_note=cycle_note,
+                parent_folder_id=res1['parent_id'],
+                variable=variable
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -1059,23 +1190,50 @@ class AdminNoteChangeTitle(NextCallbackMessageCommand):
         """, self.text, kwargs['note_id'])
 
 
-        message_obj = await self.generate_send_message(res=res, **kwargs)
+        message_obj = await self.generate_send_message(stage=1, res=res, **kwargs)
         await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminNoteChangeTitle']).substitute(
-            old_title=kwargs['res']['title'],
-            new_title=self.text
-        )
+        message_obj2 = await self.generate_send_message(stage=2, res=res, folder_id=res['parent_id'], **kwargs)
+        await self.bot.send_text(message_obj2)
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminNoteChangeTitle']).substitute(
+                old_title=kwargs['res']['title'],
+                new_title=self.text
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE id = $1;
+            """, kwargs['note_id'])
+
+            text = Template(self.global_texts['callback_command']['edit']['AdminNote']).substitute(
+                title=res['title'],
+                text=res['text']
+            )
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminNote'],
+                note_id=res['id'],
+                folder_id=res['parent_id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -1113,23 +1271,48 @@ class AdminNoteChangeText(NextCallbackMessageCommand):
             WHERE id = $2;
         """, self.text, kwargs['note_id'])
 
-
-        message_obj = await self.generate_send_message(res=res, **kwargs)
+        message_obj = await self.generate_send_message(stage=1, res=res, **kwargs)
         await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminNoteChangeText']).substitute(
-            title=kwargs['res']['title']
-        )
+        message_obj2 = await self.generate_send_message(stage=2, res=res, folder_id=res['parent_id'], **kwargs)
+        await self.bot.send_text(message_obj2)
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminNoteChangeText']).substitute(
+                title=kwargs['res']['title']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE id = $1;
+            """, kwargs['note_id'])
+            
+            text = Template(self.global_texts['callback_command']['edit']['AdminNote']).substitute(
+                title=res['title'],
+                text=res['text']
+            )
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminNote'],
+                note_id=res['id'],
+                folder_id=res['parent_id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass

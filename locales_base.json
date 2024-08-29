@@ -113,10 +113,11 @@
         "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminEmployeesAdd": "<b>Укажите username с \"@\" или без, для добавления нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
+        "AdminEmployeesParsing": "<b>Список сотрудников для отслеживания адресов:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminDistribution": "<b>Можете выбрать какую массовую рассылку планируете: с закреплением сообщений или без закрепления</b>",
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
-        "AdminFolder": "<b>Категория заметок $folder_title</b>",
+        "AdminFolder": "<b>Категория заметок $folder_title</b>\n$notes",
         "AdminNote": "Название заметки: <b>$title</b>\n<blockquote expandable>$text</blockquote>",
         "AdminCreateFolder": "<b>Укажите название новой категории в $title</b>",
         "AdminCreateNote": "<b>Напишите текст новой заметки в $title</b>",
@@ -522,6 +523,12 @@
         ],
         [
           {
+            "text": "Сверка чисел",
+            "callback_data": "admin/revise/"
+          }
+        ],
+        [
+          {
             "text": "Заметки",
             "callback_data": "admin/folder/0/"
           }
@@ -760,6 +767,9 @@
           }
         ],
         [
+          {"text": "⬆\uFE0FКатегории⬆\uFE0F | ⬇\uFE0FЗаметки⬇\uFE0F", "callback_data": "0"}
+        ],
+        [
           {
             "text": "$note_title",
             "callback_data": "admin/note/$note_id/",
@@ -833,7 +843,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "close"
+            "callback_data": "admin/folder/$folder_id/"
           }
         ]
       ],
@@ -848,6 +858,18 @@
           {
             "text": "➖ Исключить сотрудника",
             "callback_data": "admin/employees/remove/"
+          }
+        ],
+        [
+          {
+            "text": "➕ Добавить парсинг сотрудника",
+            "callback_data": "admin/employees_parsing/add/"
+          }
+        ],
+        [
+          {
+            "text": "➖ Исключить парсинг сотрудника",
+            "callback_data": "admin/employees_parsing/remove/"
           }
         ],
         [
@@ -896,12 +918,6 @@
           {
             "text": "Инструкция \uD83D\uDCD6",
             "callback_data": "admin/instruction/"
-          }
-        ],
-        [
-          {
-            "text": "Сверка чисел",
-            "callback_data": "admin/revise/"
           }
         ],
         [
