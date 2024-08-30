@@ -81,6 +81,14 @@ class BotInter:
                             disable_notification=True
                         )
 
+                        try:
+                            await self.bot.delete_message(
+                                chat_id=message_obj.chat_id,
+                                message_id=sent_message.message_id + 1,
+                            )
+                        except:
+                            pass
+
                     if message_obj.destroy_timeout != 0:
                         asyncio.create_task(self._destroy_message(
                             message=sent_message,

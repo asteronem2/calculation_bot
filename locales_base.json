@@ -253,6 +253,10 @@
           }
         ],
         [
+          {"text": "Балансы закрепляются", "callback_data": "chat/unpin_balances/", "variable": "pin_balance"},
+          {"text": "Балансы не закрепляются", "callback_data": "chat/pin_balances/", "variable": "unpin_balance"}
+        ],
+        [
           {
             "text": "📌 Сделать главной темой",
             "callback_data": "chat/general_topic/$chat_id/",

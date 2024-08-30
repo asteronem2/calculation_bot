@@ -104,7 +104,8 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE chat_table
-ADD COLUMN IF NOT EXISTS answer_mode TEXT DEFAULT 'quote|non_quote|reply|non_reply|forward|non_forward|';
+ADD COLUMN IF NOT EXISTS answer_mode TEXT DEFAULT 'quote|non_quote|reply|non_reply|forward|non_forward|',
+ADD COLUMN IF NOT EXISTS pin_balance BOOLEAN;
 
 ALTER TABLE user_table
 ADD COLUMN IF NOT EXISTS revise_expr TEXT;

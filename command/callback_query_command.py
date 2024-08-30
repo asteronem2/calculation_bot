@@ -6,6 +6,7 @@ from string import Template
 import aiogram.types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pkg_resources import PkgResourcesDeprecationWarning
+from sympy import terms_gcd
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
@@ -419,6 +420,10 @@ class EditChatTheme(CallbackQueryCommand):
         else:
             variable.append('photo+')
 
+        if res['pin_balance'] is True:
+            variable.append('pin_balance')
+        else:
+            variable.append('unpin_balance')
 
         rres = re.findall(r'([^|]+?)\|', res['answer_mode'])
 
@@ -911,6 +916,25 @@ class ChatMode(EditChatTheme):
         await self.bot.edit_text(message_obj)
 
 
+class ChatPinBalanceOption(EditChatTheme):
+    async def define(self):
+        rres = re.fullmatch(r'chat/(pin|unpin)_balances/', self.cdata)
+        if rres:
+            type_ = rres.group(1)
+            await self.process(type_=type_)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE chat_table
+            SET pin_balance = $1
+            WHERE id = $2;
+        """, True if kwargs['type_'] == 'pin' else False, self.db_chat['id'])
+
+        message_obj = await EditChatTheme.generate_edit_message(self)
+        await self.bot.edit_text(message_obj)
+
+
 # Команды сотрудников в группе
 class CurrCalculationCommand(CallbackQueryCommand):
     async def define(self):
@@ -1002,10 +1026,16 @@ class CurrSetNullCommand(CallbackQueryCommand):
             title=kwargs['res']['title'].upper()
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1065,10 +1095,16 @@ class CurrCancelCommand(CallbackQueryCommand):
             postfix=res['postfix'] if res['postfix'] else ''
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:

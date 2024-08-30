@@ -4,10 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,18 +49,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.message_command.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.utils.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/ded/bots/konstantin/calculation_bot&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;proofread&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "Python.message_command.executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.utils.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/home/ded/bots/konstantin/calculation_bot",
+    "settings.editor.selected.configurable": "proofread"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -225,7 +229,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724941045826</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом">
+      <option name="closed" value="true" />
+      <created>1724941692491</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1724941692491</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -267,6 +279,7 @@
     <MESSAGE value="0.9.2 version&#10;Added:&#10;1. Сверка чисел" />
     <MESSAGE value="0.9.3 version&#10;Added:&#10;1. Новый тип пользователей - сотрудник для парсинга" />
     <MESSAGE value="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство" />
+    <MESSAGE value="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом" />
   </component>
 </project>

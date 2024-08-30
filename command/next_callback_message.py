@@ -145,10 +145,16 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
             value=float_to_str(kwargs['value'])
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -299,10 +305,16 @@ class CurrCalculationCommand(NextCallbackMessageCommand):
             postfix=kwargs['res']['title']
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:

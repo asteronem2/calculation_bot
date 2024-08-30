@@ -87,9 +87,9 @@ class UnlockChatCommand(MessageCommand):
         else:
             await self.db.execute("""
                 INSERT INTO chat_table
-                (chat_id, type, topic, code_name, title, link, locked, super)
-                VALUES ($1, $2, $3, $4, $5, $6, FALSE, FALSE);
-            """, self.chat.id, chat_type, self.topic, str(self.chat.id), self.chat.title, link)
+                (chat_id, type, topic, code_name, title, link, locked, super, pin_balance)
+                VALUES ($1, $2, $3, $4, $5, $6, FALSE, FALSE, $7);
+            """, self.chat.id, chat_type, self.topic, str(self.chat.id), self.chat.title, link, False if self.topic == 0 else True)
 
         message_obj = await self.generate_send_message()
         await self.bot.send_text(message_obj)
@@ -262,7 +262,7 @@ class EditChatThemeCommand(MessageCommand):
 
     async def process(self, **kwargs) -> None:
         message_obj = await self.generate_send_message(**kwargs)
-        sent_message = await self.bot.send_text(message_obj)
+        await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['EditChatThemeCommand']).substitute()
@@ -281,6 +281,11 @@ class EditChatThemeCommand(MessageCommand):
             variable.append('photo-')
         else:
             variable.append('photo+')
+
+        if self.db_chat['pin_balance'] is True:
+            variable.append('pin_balance')
+        else:
+            variable.append('unpin_balance')
 
         rres = re.findall(r'([^|]+?)\|', self.db_chat['answer_mode'])
 
@@ -490,10 +495,17 @@ class CurrencyCalculationCommand(MessageCommand):
             postfix=kwargs['postfix'] if kwargs['postfix'] else ''
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic,
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -917,10 +929,17 @@ class CancelCommand(MessageCommand):
             postfix=kwargs['last_res']['currency__postfix'] if kwargs['last_res']['currency__postfix'] else ''
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_error_message(self, *args, **kwargs):
@@ -985,10 +1004,16 @@ class CurrencyNullCommand(MessageCommand):
             postfix=kwargs['postfix'] if kwargs['postfix'] else ''
         )
 
+        pin, thread = False, self.topic
+
+        if self.db_chat['pin_balance'] is True:
+            pin, thread = True, self.db_chat['main_topic']
+
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=thread,
+            pin=pin
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
