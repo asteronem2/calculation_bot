@@ -132,7 +132,7 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
                 WHERE id = $1;
             """, self.pressure_info['id'])
 
-            message_obj = await self.generate_send_message(title=res['title'], value=new_value)
+            message_obj = await self.generate_send_message(title=res['title'], value=new_value, res=res)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
@@ -142,7 +142,7 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['send']['CurrChangeValueCommand']).substitute(
             title=kwargs['title'],
-            value=float_to_str(kwargs['value'])
+            value=float_to_str(kwargs['value'], kwargs['res']['rounding'])
         )
 
         pin, thread = False, self.topic
@@ -301,7 +301,7 @@ class CurrCalculationCommand(NextCallbackMessageCommand):
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
             title=kwargs['res']['title'].upper(),
-            value=float_to_str(kwargs['after_value']),
+            value=float_to_str(kwargs['after_value'], kwargs['res']['rounding']),
             postfix=kwargs['res']['title']
         )
 
@@ -606,11 +606,12 @@ class AdminChatChangeTag(NextCallbackMessageCommand):
 
 class AdminEmployeesAdd(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/employees/add/', self.cdata)
+        rres1 = re.fullmatch(r'admin/employees/add/([^/]+)/', self.cdata)
         if rres1:
             rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
             if rres2:
-                await self.process(username_list=rres2)
+                type_ = rres1.group(1)
+                await self.process(username_list=rres2, type_=type_)
                 return True
             else:
                 await self.process(error='error')
@@ -633,10 +634,10 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
             for i in kwargs['username_list']:
                 await self.db.execute("""
                         UPDATE user_table
-                        SET access_level = 'employee'
-                        WHERE username = $1
+                        SET access_level = $1
+                        WHERE username = $2
                             AND access_level <> 'admin';
-                    """, i)
+                    """, kwargs['type_'], i)
 
             message_obj = await self.generate_send_message(**kwargs)
             await self.bot.send_text(message_obj)
@@ -666,11 +667,12 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
 
 class AdminEmployeesRemove(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/employees/remove/', self.cdata)
+        rres1 = re.fullmatch(r'admin/employees/remove/([^/]+)/', self.cdata)
         if rres1:
             rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
             if rres2:
-                await self.process(username_list=rres2)
+                type_ = rres1.group(1)
+                await self.process(username_list=rres2, type_=type_)
                 return True
             else:
                 await self.process(error='error')
@@ -695,128 +697,9 @@ class AdminEmployeesRemove(NextCallbackMessageCommand):
                         UPDATE user_table
                         SET access_level = 'zero'
                         WHERE username = $1
-                            AND access_level <> 'admin';
-                    """, i)
-
-            message_obj = await self.generate_send_message(**kwargs)
-            await self.bot.send_text(message_obj)
-            await self.bot.delete_message(
-                chat_id=self.chat.id,
-                message_id=self.press_message_id
-            )
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminEmployeesRemove']).substitute()
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text='Что-то не так'
-        )
-
-
-class AdminEmployeesParsingAdd(NextCallbackMessageCommand):
-    async def define(self):
-        rres1 = re.fullmatch(r'admin/employees_parsing/add/', self.cdata)
-        if rres1:
-            rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
-            if rres2:
-                await self.process(username_list=rres2)
-                return True
-            else:
-                await self.process(error='error')
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            DELETE FROM pressure_button_table
-            WHERE id = $1;
-        """, self.pressure_info['id'])
-
-        if kwargs.get('error'):
-            message_obj = await self.generate_error_message()
-            await self.bot.send_text(message_obj)
-            await self.bot.delete_message(
-                chat_id=self.chat.id,
-                message_id=self.press_message_id
-            )
-        else:
-            for i in kwargs['username_list']:
-                await self.db.execute("""
-                        UPDATE user_table
-                        SET access_level = 'employee_parsing'
-                        WHERE username = $1
-                            AND access_level <> 'admin';
-                    """, i)
-
-            message_obj = await self.generate_send_message(**kwargs)
-            await self.bot.send_text(message_obj)
-            await self.bot.delete_message(
-                chat_id=self.chat.id,
-                message_id=self.press_message_id
-            )
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminEmployeesAdd']).substitute()
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text='Что-то не так'
-        )
-
-
-class AdminEmployeesParsingRemove(NextCallbackMessageCommand):
-    async def define(self):
-        rres1 = re.fullmatch(r'admin/employees_parsing/remove/', self.cdata)
-        if rres1:
-            rres2 = re.findall(r'[^,./| ]+', self.text.replace('@', ''))
-            if rres2:
-                await self.process(username_list=rres2)
-                return True
-            else:
-                await self.process(error='error')
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            DELETE FROM pressure_button_table
-            WHERE id = $1;
-        """, self.pressure_info['id'])
-
-        if kwargs.get('error'):
-            message_obj = await self.generate_error_message()
-            await self.bot.send_text(message_obj)
-            await self.bot.delete_message(
-                chat_id=self.chat.id,
-                message_id=self.press_message_id
-            )
-        else:
-            for i in kwargs['username_list']:
-                await self.db.execute("""
-                        UPDATE user_table
-                        SET access_level = 'zero'
-                        WHERE username = $1
-                            AND access_level <> 'admin';
-                    """, i)
+                            AND access_level <> 'admin'
+                            AND access_level = $2;
+                    """, i, kwargs['type_'])
 
             message_obj = await self.generate_send_message(**kwargs)
             await self.bot.send_text(message_obj)

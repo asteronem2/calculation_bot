@@ -234,17 +234,22 @@ class EditCurrencyCommand(MessageCommand):
         )
 
         res = await self.db.fetchrow("""
-            SELECT id FROM currency_table
+            SELECT * FROM currency_table
             WHERE title = $1;
         """, kwargs['title'])
 
-        curr_db_id = res['id']
+        markup = markup_generate(
+            buttons=self.buttons['EditCurrencyCommand'],
+            curr_id=res['id'],
+            rounding=res['rounding'],
+            chat_id=res['chat_pid']
+        )
 
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            markup=markup_generate(self.buttons['EditCurrencyCommand'], curr_id=curr_db_id),
+            markup=markup,
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -364,7 +369,7 @@ class BalanceListCommand(MessageCommand):
         for i in args[0]:
             var = Template(self.global_texts['addition']['curr_info_list']).substitute(
                 title=i['title'].upper(),
-                value=float_to_str(i['value']),
+                value=float_to_str(i['value'], i['rounding']),
                 postfix=i['postfix'] if i['postfix'] else ''
             )
             curr_info_list += var
@@ -400,28 +405,23 @@ class CurrencyCommand(MessageCommand):
                 """, self.chat.id)
                 for i in res:
                     if self.text_low == i['title']:
-                        await self.process(title=i['title'], value=i['value'], postfix=i['postfix'], curr_id=i['id'])
+                        await self.process(curr=i)
                         return True
 
     async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_send_message(
-            title=kwargs['title'],
-            value=kwargs['value'],
-            postfix=kwargs['postfix'],
-            curr_id=kwargs['curr_id']
-        )
-        sent_message = await self.bot.send_text(message_obj)
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['CurrencyBalance']).substitute(
-            title=kwargs['title'].upper(),
-            value=float_to_str(kwargs['value']),
-            postfix=kwargs['postfix'] if kwargs['postfix'] else ''
+            title=kwargs['curr']['title'].upper(),
+            value=float_to_str(kwargs['curr']['value'], kwargs['curr']['rounding']),
+            postfix=kwargs['curr']['postfix'] if kwargs['curr']['postfix'] else ''
         )
 
         markup = markup_generate(
             buttons=self.global_texts['buttons']['CurrencyBalanceCommand'],
-            curr_id=kwargs['curr_id']
+            curr_id=kwargs['curr']['id']
         )
 
         return TextMessage(
@@ -456,30 +456,27 @@ class CurrencyCalculationCommand(MessageCommand):
                         for i in res:
                             if curr == i['title']:
                                 await self.process(
-                                    title=i['title'],
-                                    value=i['value'],
-                                    postfix=i['postfix'],
-                                    curr_id=i['id'],
+                                    curr=i,
                                     calc_res=calc_res,
                                     expr=expr
                                 )
                                 return True
 
     async def process(self, *args, **kwargs) -> None:
-        new_value = kwargs['value'] + kwargs['calc_res']
+        new_value = kwargs['curr']['value'] + kwargs['calc_res']
 
         res = await self.db.fetchrow("""
             UPDATE currency_table
             SET value = $1
             WHERE id = $2
             RETURNING *;
-        """, new_value, kwargs['curr_id'])
+        """, new_value, kwargs['curr']['id'])
 
         await self.db.add_story(
             curr_id=res['id'],
             user_id=self.db_user['id'],
             expr_type='add',
-            before_value=kwargs['value'],
+            before_value=kwargs['curr']['value'],
             after_value=new_value,
             message_id=self.message.message_id,
             expression=kwargs['expr']
@@ -490,9 +487,9 @@ class CurrencyCalculationCommand(MessageCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['CurrencyBalance']).substitute(
-            title=kwargs['title'].upper(),
-            value=float_to_str(kwargs['new_value']),
-            postfix=kwargs['postfix'] if kwargs['postfix'] else ''
+            title=kwargs['curr']['title'].upper(),
+            value=float_to_str(kwargs['new_value'], kwargs['curr']['rounding']),
+            postfix=kwargs['curr']['postfix'] if kwargs['curr']['postfix'] else ''
         )
 
         pin, thread = False, self.topic
@@ -557,10 +554,7 @@ class CalculationCommand(CurrencyCalculationCommand):
     async def process(self, *args, **kwargs) -> None:
         if len(kwargs['res']) == 1:
             await super().process(
-                title=kwargs['res'][0]['title'],
-                value=kwargs['res'][0]['value'],
-                postfix=kwargs['res'][0]['postfix'],
-                curr_id=kwargs['res'][0]['id'],
+                curr=kwargs['res'][0],
                 **kwargs
             )
         else:
@@ -879,6 +873,7 @@ class CancelCommand(MessageCommand):
                 story_table.id AS story__id,
                 currency_table.title AS currency__title,
                 currency_table.postfix AS currency__postfix
+                currency_table.rounding AS currency__rounding
                 
             FROM story_table
             JOIN currency_table ON story_table.currency_pid = currency_table.id
@@ -925,7 +920,7 @@ class CancelCommand(MessageCommand):
             expr_link=expr_link,
             expression=expression,
             title=kwargs['last_res']['currency__title'].upper(),
-            value=float_to_str(kwargs['last_res']['story__before_value']),
+            value=float_to_str(kwargs['last_res']['story__before_value'], kwargs['last_res']['currency_rounding']),
             postfix=kwargs['last_res']['currency__postfix'] if kwargs['last_res']['currency__postfix'] else ''
         )
 

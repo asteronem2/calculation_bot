@@ -5,6 +5,7 @@ from string import Template
 
 import aiogram.types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from mpmath.libmp import round_nearest
 from pkg_resources import PkgResourcesDeprecationWarning
 from sympy import terms_gcd
 
@@ -131,7 +132,7 @@ class CurrChangeValueCommand(CallbackQueryCommand):
         """, int(kwargs['curr_id']))
         text = Template(self.edit_texts['CurrChangeValueCommand']).substitute(
             title=res['title'].upper(),
-            value=float_to_str(res['value'])
+            value=float_to_str(res['value'], res['rounding'])
         )
 
         return EditMessage(
@@ -492,16 +493,17 @@ class EditCurrency(CallbackQueryCommand):
         """, kwargs['curr_id'])
 
         text = Template(self.global_texts['message_command']['EditCurrencyCommand']).substitute(
-            title=res['title'],
-            value=float_to_str(res['value']),
+            title=res['title'].upper(),
+            value=float_to_str(res['value'], res['rounding']),
             postfix=res['postfix'] if res['postfix'] else ''
         )
 
         markup = markup_generate(
             buttons=self.buttons['EditCurrencyCommand'],
-            variable=['2'],
+            variable=['1'],
             curr_id=kwargs['curr_id'],
-            chat_id=self.db_chat['id']
+            chat_id=self.db_chat['id'],
+            rounding=res['rounding']
         )
 
         return EditMessage(
@@ -510,49 +512,6 @@ class EditCurrency(CallbackQueryCommand):
             message_id=self.sent_message_id,
             markup=markup
         )
-
-
-# class CurrencyBalance(CallbackQueryCommand):
-#     async def define(self):
-#         if self.access_level == 'admin':
-#             rres = re.fullmatch(r'chat/curr_balance/([0-9]+)/', self.cdata)
-#             if rres:
-#                 curr_id = int(rres.group(1))
-#                 await self.process(curr_id=curr_id)
-#                 return True
-#
-#     async def process(self, *args, **kwargs) -> None:
-#         message_obj = await self.generate_edit_message(**kwargs)
-#         await self.bot.edit_text(message_obj)
-#
-#     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-#         pass
-#
-#     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-#         res = await self.db.fetchrow("""
-#             SELECT * FROM currency_table
-#             WHERE id = $1;
-#         """, kwargs['curr_id'])
-#
-#         text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
-#             title=res['title'],
-#             value=float_to_str(res['value']),
-#             postfix=res['postfix'] if res['postfix'] else ''
-#         )
-#
-#         markup = markup_generate(
-#             buttons=self.buttons['CurrencyBalanceCommand'],
-#             variable=['1'],
-#             curr_id=kwargs['curr_id'],
-#             chat_id=self.db_chat['id']
-#         )
-#
-#         return EditMessage(
-#             chat_id=self.chat.id,
-#             text=text,
-#             message_id=self.sent_message_id,
-#             markup=markup
-#         )
 
 
 class ChatBalancesCommand(CallbackQueryCommand):
@@ -577,7 +536,7 @@ class ChatBalancesCommand(CallbackQueryCommand):
         """, self.db_chat['id'])
         cycle = [
             {'title': i['title'].upper(),
-             'value': float_to_str(i['value']),
+             'value': float_to_str(i['value'], i['rounding']),
              'postfix': i['postfix'] if i['postfix'] else '',
              'curr_id': i['id']}
             for i in res
@@ -935,6 +894,30 @@ class ChatPinBalanceOption(EditChatTheme):
         await self.bot.edit_text(message_obj)
 
 
+class CurrencyRounding(EditCurrency):
+    async def define(self):
+        rres = re.fullmatch(r'curr/rounding/([0-9]+)/([0-5])/', self.cdata)
+        if rres:
+            curr_pk = int(rres.group(1))
+            rounding = int(rres.group(2))
+            await self.process(curr_pk=curr_pk, rounding=rounding)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        new_rounding = kwargs['rounding'] + 1
+        
+        if new_rounding == 6:
+            new_rounding = 0
+        
+        await self.db.execute("""
+            UPDATE currency_table 
+            SET rounding = $1
+            WHERE id = $2;
+        """, new_rounding, kwargs['curr_pk'])
+        
+        message_obj = await EditCurrency.generate_edit_message(self, curr_id=kwargs['curr_pk'])
+        await self.bot.edit_text(message_obj)
+
 # Команды сотрудников в группе
 class CurrCalculationCommand(CallbackQueryCommand):
     async def define(self):
@@ -1091,7 +1074,7 @@ class CurrCancelCommand(CallbackQueryCommand):
             expr_link=f'https://t.me/c/{str(self.chat.id)[4:]}/{kwargs["res"]["message_id"]}/',
             expression=kwargs['res']['expression'],
             title=res['title'].upper(),
-            value=float_to_str(res['value']),
+            value=float_to_str(res['value'], res['rounding']),
             postfix=res['postfix'] if res['postfix'] else ''
         )
 
@@ -1324,7 +1307,7 @@ class CalculationCommand(CallbackQueryCommand):
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
             title=kwargs['res']['title'].upper(),
-            value=float_to_str(kwargs['after_value']),
+            value=float_to_str(kwargs['after_value'], kwargs['res']['rounding']),
             postfix=kwargs['res']['postfix'] if kwargs['res']['postfix'] else ''
         )
 
@@ -1529,7 +1512,7 @@ class AdminBalances(CallbackQueryCommand):
             for ii in var_res2:
                 curr_info_list += '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
                     title=ii['title'].upper(),
-                    value=float_to_str(ii['value']),
+                    value=float_to_str(ii['value'], ii['rounding']),
                     postfix=ii['postfix'] if ii['postfix'] else ''
                 )
 
@@ -1591,7 +1574,7 @@ class AdminBalance(CallbackQueryCommand):
         for item in res2:
             curr_info_list += '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
                 title=item['title'].upper(),
-                value=float_to_str(item['value']),
+                value=float_to_str(item['value'], item['rounding']),
                 postfix=item['postfix'] or ''
             )
 
@@ -2233,7 +2216,7 @@ class AdminChatBalance(CallbackQueryCommand):
         for i in res2:
             curr_info_list = curr_info_list + '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
                 title=i['title'].upper(),
-                value=float_to_str(i['value']),
+                value=float_to_str(i['value'], i['rounding']),
                 postfix=i['postfix'] if i['postfix'] else ''
             )
 
@@ -2257,72 +2240,6 @@ class AdminChatBalance(CallbackQueryCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
-
-
-class AdminEmployeesAdd(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/employees/add/', self.cdata)
-            if rres:
-                await self.process()
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            INSERT INTO pressure_button_table
-            (chat_pid, user_pid, message_id, callback_data)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
-        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
-
-        message_obj = await self.generate_edit_message()
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminEmployeesAdd']).substitute()
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
-        )
-
-
-class AdminEmployeesRemove(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/employees/remove/', self.cdata)
-            if rres:
-                await self.process()
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            INSERT INTO pressure_button_table
-            (chat_pid, user_pid, message_id, callback_data)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
-        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
-
-        message_obj = await self.generate_edit_message()
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminEmployeesRemove']).substitute()
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
-        )
 
 
 # Рассылки
@@ -2442,6 +2359,12 @@ class AdminFolder(CallbackQueryCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -2518,8 +2441,13 @@ class AdminNote(CallbackQueryCommand):
             await self.process(note_id=note_id)
             return True
 
-
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -2993,6 +2921,12 @@ class AdminEmployees(CallbackQueryCommand):
                 return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         message_obj = await self.generate_edit_message()
         await self.bot.edit_text(message_obj)
 
@@ -3024,15 +2958,61 @@ class AdminEmployees(CallbackQueryCommand):
         )
 
 
-class AdminEmployeesParsing(CallbackQueryCommand):
+class AdminEmployeesAdd(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/employees_parsing/', self.cdata)
+            rres = re.fullmatch(r'admin/employees/add/([^/]+)/', self.cdata)
             if rres:
                 await self.process()
                 return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminEmployeesAdd']).substitute()
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/employees/')]])
+        )
+
+
+class AdminEmployeesRemove(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/employees/remove/', self.cdata)
+            if rres:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
         message_obj = await self.generate_edit_message()
         await self.bot.edit_text(message_obj)
 
@@ -3040,27 +3020,13 @@ class AdminEmployeesParsing(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetch("""
-            SELECT * FROM user_table
-            WHERE access_level = 'employee_parsing';
-        """)
-
-        employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'
-                         for i in res]
-
-        text = Template(self.edit_texts['AdminEmployees']).substitute(
-            employee_list='\n'.join(employee_list)
-        )
-
-        markup = markup_generate(
-            buttons=self.buttons['AdminEmployees']
-        )
+        text = Template(self.edit_texts['AdminEmployeesRemove']).substitute()
 
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=markup
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
         )
 
 

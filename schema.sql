@@ -110,4 +110,7 @@ ADD COLUMN IF NOT EXISTS pin_balance BOOLEAN;
 ALTER TABLE user_table
 ADD COLUMN IF NOT EXISTS revise_expr TEXT;
 
+ALTER TABLE currency_table
+ADD COLUMN IF NOT EXISTS rounding INTEGER DEFAULT 2;
+
 SET timezone = 'Europe/Moscow';

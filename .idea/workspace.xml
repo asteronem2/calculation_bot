@@ -4,14 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.36 version&#10;Added:&#10;1. Закрепление балансов">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,7 +237,15 @@
       <option name="project" value="LOCAL" />
       <updated>1724941692491</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="0.9.36 version&#10;Added:&#10;1. Закрепление балансов">
+      <option name="closed" value="true" />
+      <created>1725004079131</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1725004079131</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -280,6 +288,7 @@
     <MESSAGE value="0.9.3 version&#10;Added:&#10;1. Новый тип пользователей - сотрудник для парсинга" />
     <MESSAGE value="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство" />
     <MESSAGE value="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом" />
+    <MESSAGE value="0.9.36 version&#10;Added:&#10;1. Закрепление балансов" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.36 version&#10;Added:&#10;1. Закрепление балансов" />
   </component>
 </project>

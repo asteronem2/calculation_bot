@@ -204,7 +204,7 @@ def str_to_float(value: str):
         return None
 
 
-def float_to_str(value: float) -> str:
+def float_to_str(value: float, rounding: int = 2) -> str:
     if int == type(value):
         value = float(value)
     value = str(value)
@@ -221,10 +221,15 @@ def float_to_str(value: float) -> str:
 
     after_dot = split_value[1]
 
-    if after_dot[:2] in ['0', '00']:
+    zero_max = '0'*(rounding+1)
+    zero_list = []
+    for i in range(len(zero_max)):
+        zero_list.append(zero_max[:i])
+
+    if after_dot[:rounding] in zero_list:
         final_after_dot_str = None
     else:
-        final_after_dot_str = after_dot[:2]
+        final_after_dot_str = after_dot[:rounding]
 
     if final_after_dot_str:
         return final_before_dot_str + ',' + final_after_dot_str

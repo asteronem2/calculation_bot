@@ -164,8 +164,8 @@
         "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - <code>$code_name</code></b>",
         "AdminChatSetTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
         "AdminChatChangeTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
-        "AdminEmployeesAdd": "<b>Пользователи, раннее написавшие боту теперь сотрудники</b>",
-        "AdminEmployeesRemove": "<b>Пользователи, раннее имеющие уровень доступа \"сотрудник\" теперь обладают уровнем доступа \"нулевой\"</b>",
+        "AdminEmployeesAdd": "<b>Пользователи добавлены</b>",
+        "AdminEmployeesRemove": "<b>Пользователи исключены</b>",
         "AdminDistributionPin": "Текст успешно разослан и закреплён",
         "AdminDistributionUnpin": "Текст успешно разослан",
         "AdminCreateFolder": "<b>Категория успешно создана</b>",
@@ -190,12 +190,14 @@
             "callback_data": "curr/change_title/$curr_id/"
           },
           {
-            "text": "🔄 Смена значения",
-            "callback_data": "curr/change_value/$curr_id/"
-          },
-          {
             "text": "🔄 Смена постфикса",
             "callback_data": "curr/change_postfix/$curr_id/"
+          }
+        ],
+        [
+          {
+            "text": "🔄 Смена значения",
+            "callback_data": "curr/change_value/$curr_id/"
           }
         ],
         [
@@ -209,15 +211,16 @@
           }
         ],
         [
+          {"text": "Округление: $rounding", "callback_data": "curr/rounding/$curr_id/$rounding/"}
+        ],
+        [
           {
-            "text": "❎ Закрыть",
-            "callback_data": "close",
-            "variable": "1"
+            "text": "К балансам",
+            "callback_data": "chat/balances/$chat_id/"
           },
           {
-            "text": "Назад 🔙",
-            "callback_data": "chat/balances/$chat_id/",
-            "variable": "2"
+            "text": "❎ Закрыть",
+            "callback_data": "close"
           }
         ]
       ],
@@ -855,25 +858,37 @@
         [
           {
             "text": "➕ Добавить сотрудника",
-            "callback_data": "admin/employees/add/"
+            "callback_data": "admin/employees/add/employee/"
           }
         ],
         [
           {
             "text": "➖ Исключить сотрудника",
-            "callback_data": "admin/employees/remove/"
+            "callback_data": "admin/employees/remove/employee/"
           }
         ],
         [
           {
             "text": "➕ Добавить парсинг сотрудника",
-            "callback_data": "admin/employees_parsing/add/"
+            "callback_data": "admin/employees/add/employee_parsing/"
           }
         ],
         [
           {
             "text": "➖ Исключить парсинг сотрудника",
-            "callback_data": "admin/employees_parsing/remove/"
+            "callback_data": "admin/employees/remove/employee_parsing/"
+          }
+        ],
+        [
+          {
+            "text": "➕ Добавить контрагента",
+            "callback_data": "admin/employees/add/client/"
+          }
+        ],
+        [
+          {
+            "text": "➖ Добавить контрагента",
+            "callback_data": "admin/employees/remove/client/"
           }
         ],
         [
