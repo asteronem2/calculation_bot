@@ -1112,6 +1112,47 @@ class AdminMenuCommand(MessageCommand):
 
 
 # Команды для сотрудников в приватном чате
+class EmployeeMenuCommand(MessageCommand):
+    async def define(self):
+        if self.chat.type == 'private':
+            if self.db_user['access_level'] in ['employee', 'client', 'employee_parsing']:
+                rres = re.fullmatch(rf'{self.keywords["EmployeeMenuCommand"]}', self.text_low)
+                if rres:
+                    await self.process()
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_send_message()
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.texts['EmployeeMenuCommand']).substitute()
+
+        variable = []
+
+        if self.db_user['access_level'] == 'employee':
+            variable.append('employee')
+            variable.append('client')
+            variable.append('employee_parsing')
+        elif self.db_user['access_level'] == 'client':
+            variable.append('client')
+        elif self.db_user['access_level'] == 'employee_parsing':
+            variable.append('employee_parsing')
+
+        markup = markup_generate(
+            self.global_texts['buttons']['EmployeeMenuCommand'],
+            variable=variable
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=markup
+        )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
 class AddressListCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':

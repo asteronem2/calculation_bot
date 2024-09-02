@@ -16,7 +16,8 @@
       "IncorrectCalculation": "<b>Для калькуляции необходимо число или корректная формула</b>",
       "MinValueMustBeFloat": "<b>Минимальное значение для поступлений должно быть числом</b>",
       "CodeNameCantWithSpace": "<b>Новое кодовое название должно быть без пробелов</b>",
-      "TagCantWithSpace": "<b>Тег должен быть без пробелов</b>"
+      "TagCantWithSpace": "<b>Тег должен быть без пробелов</b>",
+      "TagMaxLen32": "<b>Максимальная длина тега 32 символа</b>"
     },
     "message_command": {
       "StartCommand": "<b>Приветствую тебя, $first_name, это бот для калькуляции</b>",
@@ -44,9 +45,7 @@
       "TrackingCommand": "<b>Отслеживание включено</b>",
       "OffTrackingCommand": "<b>Отслеживание отключено</b>",
       "AdminMenuCommand": "<b>Данное меню позволяет управлять ботом, чатами, сотрудниками и командами:</b>",
-      "null_1": "",
-      "null_2": "",
-      "null_3": ""
+      "EmployeeMenuCommand": "<b>Меню:</b>"
     },
     "keywords": {
       "StartCommand": "/start",
@@ -61,7 +60,8 @@
       "AddressListCommand": "адреса",
       "TrackingCommand": "отслеживание",
       "OffTrackingCommand": "отслеживание",
-      "AdminMenuCommand": "меню"
+      "AdminMenuCommand": "меню",
+      "EmployeeMenuCommand": "меню"
     },
     "callback_command": {
       "edit": {
@@ -132,7 +132,18 @@
         "AdminCommandsList": "<b>Нажмите на команду, текст вызова которой желаете поменять</b>",
         "AdminChangeCommand": "<b>Напишите новый вызов для команды $command</b>",
         "AdminInstruction": "<b>Список команд для админа в личном чате:</b>\n<blockquote expandable><b>$AdminMenuCommand</b> - открывает меню управление ботом и чатами</blockquote>\n\n<b>Список команд для админа в группе:</b>\n<blockquote expandable><b>$UnlockChatCommand</b> - разблокирует чат\n<b>$LockChatCommand</b> - блокирует чат\n<b>$EditChatThemeCommand</b> - открывает меню управления темой чата\n<b>*«валюта»</b> - открывает меню управления валютой\n<b>«название» = «значение» «постфикс»</b> - создание валюты</blockquote>\n\n<b>Список команд для сотрудника в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд для сотрудника в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>",
-        "AdminRevise": "<b>Напишите первое выражение для сравнения</b>"
+        "AdminRevise": "<b>Напишите первое выражение для сравнения</b>",
+        "AdminTags": "<b>Все теги:</b>",
+        "AdminTag": "<b>Параметры тега $tag</b>",
+        "AdminTagChangeTag": "<b>Напишите новое название для тега $tag</b>",
+        "AdminTagChangeChats": "<b>Выберите чаты, которым желаете поставить тег $tag</b>\n<i>Если чату присвоить тег, прошлый снесётся</i>",
+        "AdminTagChangeUsers": "<b>Выберите пользователей, которым желаете дать доступ к тегу $tag</b>\n<i>Если пользователю присвоить тег, прошлый снесётся</i>",
+        "AdminTagDeleteTag1": "<b>Уверены?</b>",
+        "AdminTagDeleteTag2": "<b>Тег $tag удалён</b>",
+        "EmployeeMenuCommand": "<b>Меню:</b>",
+        "EmployeeMenuInfoNull": "<b>У вас нет доступа к информации</b>",
+        "EmployeeMenuFolder": "AdminFolder",
+        "EmployeeMenuCommands": "<b>Список команд в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>"
       },
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
@@ -164,8 +175,8 @@
         "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - <code>$code_name</code></b>",
         "AdminChatSetTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
         "AdminChatChangeTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
-        "AdminEmployeesAdd": "<b>Пользователи, раннее написавшие боту теперь сотрудники</b>",
-        "AdminEmployeesRemove": "<b>Пользователи, раннее имеющие уровень доступа \"сотрудник\" теперь обладают уровнем доступа \"нулевой\"</b>",
+        "AdminEmployeesAdd": "<b>Пользователи добавлены</b>",
+        "AdminEmployeesRemove": "<b>Пользователи исключены</b>",
         "AdminDistributionPin": "Текст успешно разослан и закреплён",
         "AdminDistributionUnpin": "Текст успешно разослан",
         "AdminCreateFolder": "<b>Категория успешно создана</b>",
@@ -173,7 +184,8 @@
         "AdminNoteChangeTitle": "<b>Название заметки $old_title изменено на $new_title</b>",
         "AdminNoteChangeText": "<b>Текст для заметки $title изменён</b>",
         "AdminChangeCommand": "<b>Вызов команды изменён с $before на $after</b>",
-        "AdminRevise": "<b>Теперь напишите второе выражение</b>"
+        "AdminRevise": "<b>Теперь напишите второе выражение</b>",
+        "AdminTagChangeTag": "<b>Тег $old_tag сменён на $new_tag</b>"
       }
     },
     "reaction_command": {
@@ -190,12 +202,14 @@
             "callback_data": "curr/change_title/$curr_id/"
           },
           {
-            "text": "🔄 Смена значения",
-            "callback_data": "curr/change_value/$curr_id/"
-          },
-          {
             "text": "🔄 Смена постфикса",
             "callback_data": "curr/change_postfix/$curr_id/"
+          }
+        ],
+        [
+          {
+            "text": "🔄 Смена значения",
+            "callback_data": "curr/change_value/$curr_id/"
           }
         ],
         [
@@ -209,15 +223,16 @@
           }
         ],
         [
+          {"text": "Округление: $rounding", "callback_data": "curr/rounding/$curr_id/$rounding/"}
+        ],
+        [
           {
-            "text": "❎ Закрыть",
-            "callback_data": "close",
-            "variable": "1"
+            "text": "К балансам",
+            "callback_data": "chat/balances/$chat_id/"
           },
           {
-            "text": "Назад 🔙",
-            "callback_data": "chat/balances/$chat_id/",
-            "variable": "2"
+            "text": "❎ Закрыть",
+            "callback_data": "close"
           }
         ]
       ],
@@ -796,6 +811,11 @@
           },
           {
             "text": "Назад 🔙",
+            "callback_data": "admin/tag/$tag/",
+            "variable": "back_to_tag"
+          },
+          {
+            "text": "Назад 🔙",
             "callback_data": "admin/menu/",
             "variable": "back_to_menu"
           }
@@ -855,25 +875,37 @@
         [
           {
             "text": "➕ Добавить сотрудника",
-            "callback_data": "admin/employees/add/"
+            "callback_data": "admin/employees/add/employee/"
           }
         ],
         [
           {
             "text": "➖ Исключить сотрудника",
-            "callback_data": "admin/employees/remove/"
+            "callback_data": "admin/employees/remove/employee/"
           }
         ],
         [
           {
             "text": "➕ Добавить парсинг сотрудника",
-            "callback_data": "admin/employees_parsing/add/"
+            "callback_data": "admin/employees/add/employee_parsing/"
           }
         ],
         [
           {
             "text": "➖ Исключить парсинг сотрудника",
-            "callback_data": "admin/employees_parsing/remove/"
+            "callback_data": "admin/employees/remove/employee_parsing/"
+          }
+        ],
+        [
+          {
+            "text": "➕ Добавить контрагента",
+            "callback_data": "admin/employees/add/client/"
+          }
+        ],
+        [
+          {
+            "text": "➖ Добавить контрагента",
+            "callback_data": "admin/employees/remove/client/"
           }
         ],
         [
@@ -891,9 +923,76 @@
           }
         ],
         [
+          {"text": "Теги", "callback_data": "admin/tags/"}
+        ],
+        [
           {
             "text": "Назад 🔙",
             "callback_data": "admin/menu/"
+          }
+        ]
+      ],
+      "AdminTags": [
+        [
+          {
+            "text": "$tag",
+            "callback_data": "admin/tag/$tag/",
+            "cycle": "cycle",
+            "row_width": 1
+          }
+        ],
+        [
+          {
+            "text": "Назад 🔙",
+            "callback_data": "admin/bot_settings/"
+          }
+        ]
+      ],
+      "AdminTag": [
+        [
+          {"text": "Сменить название", "callback_data": "admin/tag/$tag/change_tag/"}
+        ],
+        [
+          {"text": "Изменить чаты", "callback_data": "admin/tag/$tag/change_chats/"}
+        ],
+        [
+          {"text": "Изменить пользователей", "callback_data": "admin/tag/$tag/change_users/"}
+        ],
+        [
+          {"text": "Информация", "callback_data": "admin/folder/$folder_id/"}
+        ],
+        [
+          {"text": "Удалить тег", "callback_data": "admin/tag/$tag/delete/1/"}
+        ],
+        [
+          {"text": "Назад 🔙","callback_data": "admin/tags/"}
+        ]
+      ],
+      "AdminTagChangeChats": [
+        [
+          {"text": "$status $code_name ($title)", "callback_data": "admin/tag/$tag/change_chat/$chat_pk/", "cycle": "cycle", "row_width": 1}
+        ],
+        [
+          {"text": "Назад 🔙","callback_data": "admin/tag/$tag/"}
+        ]
+      ],
+      "AdminTagChangeUsers": [
+        [
+          {"text": "$status $username ($access_level)", "callback_data": "admin/tag/$tag/change_user/$user_pk/", "cycle": "cycle", "row_width": 1}
+        ],
+        [
+          {"text": "Назад 🔙","callback_data": "admin/tag/$tag/"}
+        ]
+      ],
+      "AdminTagDeleteTag": [
+        [
+          {
+            "text": "🟢 Да",
+            "callback_data": "admin/tag/$tag/delete/2/"
+          },
+          {
+            "text": "🔴 Нет",
+            "callback_data": "admin/tag/$tag/"
           }
         ]
       ],
@@ -953,6 +1052,56 @@
             "text": "Назад 🔙",
             "callback_data": "admin/commands/"
           }
+        ]
+      ],
+      "EmployeeMenuCommand": [
+        [
+          {"text": "Информация", "callback_data": "employee/menu/info/", "variable": "client"}
+        ],
+        [
+          {"text": "Парсинг", "callback_data": "employee/menu/parsing/", "variable": "employee_parsing"}
+        ],
+        [
+          {"text": "Команды", "callback_data": "employee/menu/commands/", "variable": "employee"}
+        ]
+      ],
+      "EmployeeMenuInfoNull": [
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/"}
+        ]
+      ],
+      "EmployeeMenuFolder": [
+        [
+          {"text": "$title", "callback_data": "employee/menu/folder/$folder_id/", "cycle": "folder_cycle", "row_width": 2}
+        ],
+        [
+          {"text": "⬆\uFE0FКатегории⬆\uFE0F | ⬇\uFE0FЗаметки⬇\uFE0F", "callback_data": "0"}
+        ],
+        [
+          {"text": "$title", "callback_data": "employee/menu/note/$note_id/", "cycle": "note_cycle", "row_width": 2}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/folder/$parent_folder_id/", "variable": "back_to_parent_folder"},
+          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/", "variable": "back_to_menu"}
+        ]
+      ],
+      "EmployeeMenuNote": [
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/folder/$parent_folder_id/"}
+        ]
+      ],
+      "EmployeeMenuCommands": [
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/"}
+        ]
+      ],
+      "EmployeeMenuParsing": [
+        [
+          {"text": "▶\uFE0F Начать парсинг", "callback_data": "employee/menu/parsing/on/", "variable": "off"},
+          {"text": "⏸ Остановить парсинг", "callback_data": "employee/menu/parsing/off/", "variable": "on"}
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/"}
         ]
       ]
     },

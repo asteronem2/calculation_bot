@@ -470,7 +470,7 @@ class AdminChatSetTag(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/chat/([^/]+)/set_tag/', self.cdata)
         if rres1:
-            if self.text_low.count(' '):
+            if len(self.text_low) > 32:
                 await self.process(error='error')
                 return True
             else:
@@ -492,7 +492,21 @@ class AdminChatSetTag(NextCallbackMessageCommand):
                 message_id=self.press_message_id
             )
         else:
-            tag = self.text_low
+            tag = self.text_low.replace('/', '\\')
+
+            res = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE tag = $1;
+            """, tag)
+
+            if not res:
+                await self.db.execute("""
+                    INSERT INTO note_table
+                    (id, user_pid, title, type, parent_id, tag)
+                    VALUES
+                    ((SELECT MAX(id) from note_table) + 1, $1, $2, 'folder', (SELECT MAX(id) from note_table) + 1, $3)
+                """, self.db_user['id'], tag, tag)
+
             await self.db.execute("""
                 UPDATE chat_table
                 SET tag = $1
@@ -527,7 +541,7 @@ class AdminChatSetTag(NextCallbackMessageCommand):
         pass
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.global_texts['error']['TagCantWithSpace']).substitute()
+        text = Template(self.global_texts['error']['TagMaxLen32']).substitute()
 
         return TextMessage(
             chat_id=self.chat.id,
@@ -539,7 +553,7 @@ class AdminChatChangeTag(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/chat/([^/]+)/change_tag/', self.cdata)
         if rres1:
-            if self.text_low.count(' '):
+            if len(self.text_low) > 32:
                 await self.process(error='error')
                 return True
             else:
@@ -561,7 +575,21 @@ class AdminChatChangeTag(NextCallbackMessageCommand):
                 message_id=self.press_message_id
             )
         else:
-            tag = self.text_low if self.text_low != '*' else None
+            tag = self.text_low.replace('/', '\\')
+
+            res = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE tag = $1;
+            """, tag)
+
+            if not res:
+                await self.db.execute("""
+                    INSERT INTO note_table
+                    (id, user_pid, title, type, parent_id, tag)
+                    VALUES
+                    ((SELECT MAX(id) from note_table) + 1, $1, $2, 'folder', (SELECT MAX(id) from note_table) + 1, $3)
+                """, self.db_user['id'], tag, tag)
+
             await self.db.execute("""
                 UPDATE chat_table
                 SET tag = $1
@@ -596,7 +624,83 @@ class AdminChatChangeTag(NextCallbackMessageCommand):
         pass
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.global_texts['error']['TagCantWithSpace']).substitute()
+        text = Template(self.global_texts['error']['TagMaxLen32']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+
+class AdminTagChangeTag(NextCallbackMessageCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/tag/([^/]+?)/change_tag/', self.cdata)
+        if rres:
+            if len(self.text_low) > 32:
+                await self.process(error='error')
+                return True
+            else:
+                tag = rres.group(1)
+                await self.process(tag=tag)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        if kwargs.get('error'):
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+        else:
+            new_tag = self.text_low.replace('/', '\\')
+            old_tag = kwargs['tag']
+
+            await self.db.execute("""
+                UPDATE chat_table
+                SET tag = $1
+                WHERE tag = $2;
+            """, new_tag, old_tag)
+
+            await self.db.execute("""
+                UPDATE note_table
+                SET title = $1
+                WHERE id = parent_id
+                    AND tag = $2;
+            """, new_tag, old_tag)
+
+            await self.db.execute("""
+                UPDATE note_table
+                SET tag = $1
+                WHERE tag = $2;
+            """, new_tag, old_tag)
+
+            message_obj = await self.generate_send_message(new_tag=new_tag, old_tag=old_tag, **kwargs)
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.send_texts['AdminTagChangeTag']).substitute(
+            old_tag=kwargs['old_tag'],
+            new_tag=kwargs['new_tag']
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['TagMaxLen32']).substitute()
 
         return TextMessage(
             chat_id=self.chat.id,
@@ -1013,7 +1117,7 @@ class AdminCreateNote(NextCallbackMessageCommand):
             cycle_folder = [{
                 'child_folder_title': i['title'],
                 'child_folder_id': i['id']
-            } for i in res2 if i['type'] == 'folder' and i['id'] != 0]
+            } for i in res2 if i['type'] == 'folder' and i['id'] != i['parent_id']]
 
             cycle_note = [{
                 'note_title': i['title'],
@@ -1022,12 +1126,12 @@ class AdminCreateNote(NextCallbackMessageCommand):
 
             variable = []
 
-            if kwargs['folder_id'] == 0:
+            if res1['id'] == res1['parent_id']:
                 variable.append('back_to_menu')
             else:
                 variable.append('back_to_parent_folder')
 
-            if not cycle_folder and not cycle_note and kwargs['folder_id'] != 0:
+            if not cycle_folder and not cycle_note and res1['id'] != res1['parent_id']:
                 variable.append('delete')
 
             markup = markup_generate(

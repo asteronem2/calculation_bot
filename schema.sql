@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS user_table (
     tracking BOOLEAN DEFAULT FALSE
 );
 
-
 CREATE TABLE IF NOT EXISTS chat_table (
     id SERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL,
@@ -97,20 +96,24 @@ VALUES
 (0, 0, 'infinity')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO note_table
-(id, user_pid, title, type, parent_id)
-VALUES
-(0, 0, 'Заметки', 'folder', 0)
-ON CONFLICT (id) DO NOTHING;
-
 ALTER TABLE chat_table
 ADD COLUMN IF NOT EXISTS answer_mode TEXT DEFAULT 'quote|non_quote|reply|non_reply|forward|non_forward|',
 ADD COLUMN IF NOT EXISTS pin_balance BOOLEAN;
 
 ALTER TABLE user_table
-ADD COLUMN IF NOT EXISTS revise_expr TEXT;
+ADD COLUMN IF NOT EXISTS revise_expr TEXT,
+ADD COLUMN IF NOT EXISTS tag TEXT DEFAULT NULL;
 
 ALTER TABLE currency_table
 ADD COLUMN IF NOT EXISTS rounding INTEGER DEFAULT 2;
+
+ALTER TABLE note_table
+ADD COLUMN IF NOT EXISTS tag TEXT DEFAULT NULL;
+
+INSERT INTO note_table
+(id, user_pid, title, type, parent_id, tag)
+VALUES
+(0, 0, 'Заметки', 'folder', 0, 'admin')
+ON CONFLICT (id) DO NOTHING;
 
 SET timezone = 'Europe/Moscow';
