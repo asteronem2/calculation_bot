@@ -1,14 +1,8 @@
 import datetime
 import re
-from keyword import kwlist
 from string import Template
 
-import aiogram.types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from asyncpg import TargetServerAttributeNotMatched
-from mpmath.libmp import round_nearest
-from pkg_resources import PkgResourcesDeprecationWarning
-from sympy import terms_gcd
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
