@@ -19,9 +19,10 @@ class MessageCommand:
         self.message = message
         self.chat = message.chat
         self.user = message.from_user
-        self.text = message.text
-        self.text_low = message.text.lower().strip()
+        self.text = message.text if message.text else (message.caption if message.caption else '')
+        self.text_low = self.text.lower().strip()
         self.topic = 0 if message.is_topic_message is None else message.message_thread_id
+        self.photo = True if message.content_type == 'photo' else False
 
         self.db = utils.db
 

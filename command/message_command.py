@@ -443,6 +443,9 @@ class CurrencyCalculationCommand(MessageCommand):
                 rres = re.fullmatch(r'(.+) +([*+%/0-9., -]+)', self.text_low)
                 if rres:
                     curr, expr = rres.groups()
+                    if self.photo is True and self.db_chat['sign'] is False:
+                        expr = f'-({expr})'
+
                     calc_res = calculate(expr)
                     if calc_res is not False:
 
@@ -516,6 +519,8 @@ class CalculationCommand(CurrencyCalculationCommand):
                 rres = re.fullmatch(r'[*+%/0-9., -]+', self.text_low)
                 if rres:
                     expr = rres.group()
+                    if self.photo is True and self.db_chat['sign'] is False:
+                        expr = f'-({expr})'
                     calc_res = calculate(expr)
                     if calc_res is not False:
                         res = await self.db.fetch("""

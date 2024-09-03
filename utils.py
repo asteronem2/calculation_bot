@@ -5,7 +5,7 @@ import datetime
 import time
 import traceback
 from string import Template
-from typing import List
+from typing import List, Any
 import re
 
 import aiogram
