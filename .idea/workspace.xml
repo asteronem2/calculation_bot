@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.37 version&#10;Added:&#10;1. Добавлен параметр изменения округления валют&#10;2. Добавлен новый тип сотрудников контрагенты (client)&#10;3. Корректно работает добавление всех типов пользователей">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.38 version&#10;Added:&#10;1. Добавлено меню для сотрудников&#10;2. Настройка, управление и заметки тегов&#10;3.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,7 +251,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725015284031</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="0.9.38 version&#10;Added:&#10;1. Добавлено меню для сотрудников&#10;2. Настройка, управление и заметки тегов&#10;3.">
+      <option name="closed" value="true" />
+      <created>1725295876049</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1725295876049</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -297,6 +304,7 @@
     <MESSAGE value="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом" />
     <MESSAGE value="0.9.36 version&#10;Added:&#10;1. Закрепление балансов" />
     <MESSAGE value="0.9.37 version&#10;Added:&#10;1. Добавлен параметр изменения округления валют&#10;2. Добавлен новый тип сотрудников контрагенты (client)&#10;3. Корректно работает добавление всех типов пользователей" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.37 version&#10;Added:&#10;1. Добавлен параметр изменения округления валют&#10;2. Добавлен новый тип сотрудников контрагенты (client)&#10;3. Корректно работает добавление всех типов пользователей" />
+    <MESSAGE value="0.9.38 version&#10;Added:&#10;1. Добавлено меню для сотрудников&#10;2. Настройка, управление и заметки тегов&#10;3." />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.38 version&#10;Added:&#10;1. Добавлено меню для сотрудников&#10;2. Настройка, управление и заметки тегов&#10;3." />
   </component>
 </project>
