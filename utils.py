@@ -207,8 +207,7 @@ def str_to_float(value: str):
 def float_to_str(value: float, rounding: int = 2) -> str:
     if int == type(value):
         value = float(value)
-    value = round(value, rounding)
-    value = str(value)
+    value = f'{value:.{rounding}f}'
     split_value = value.split('.')
     before_dot = split_value[0][::-1]
 
@@ -222,7 +221,7 @@ def float_to_str(value: float, rounding: int = 2) -> str:
     update_before_dot = [i[::-1] for i in update_before_dot[::-1]]
     final_before_dot_str = ' '.join(update_before_dot)
 
-    after_dot = split_value[1]
+    after_dot = split_value[1] if len(split_value) == 2 else '0'
 
     # for i in range(len(after_dot) - rounding, 1):
     #     if after_dot[-i] in '01234':

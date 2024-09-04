@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.40 unstable version">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.41 unstable version&#10;1. Округление цифр (а не срезание символов, как ранее)&#10;2. Вызов меню через /menu&#10;3. Рассылка изменена">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/inline_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/inline_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -284,7 +281,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725345865139</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="0.9.41 unstable version&#10;1. Округление цифр (а не срезание символов, как ранее)&#10;2. Вызов меню через /menu&#10;3. Рассылка изменена">
+      <option name="closed" value="true" />
+      <created>1725432756398</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1725432756398</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -332,6 +337,7 @@
     <MESSAGE value="0.9.38 version&#10;Added:&#10;1. Добавлено меню для сотрудников&#10;2. Настройка, управление и заметки тегов&#10;3." />
     <MESSAGE value="0.9.39 unstable version&#10;Added:&#10;1. Поддержка калькуляции с фото" />
     <MESSAGE value="0.9.40 unstable version" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.40 unstable version" />
+    <MESSAGE value="0.9.41 unstable version&#10;1. Округление цифр (а не срезание символов, как ранее)&#10;2. Вызов меню через /menu&#10;3. Рассылка изменена" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.41 unstable version&#10;1. Округление цифр (а не срезание символов, как ранее)&#10;2. Вызов меню через /menu&#10;3. Рассылка изменена" />
   </component>
 </project>
