@@ -877,7 +877,7 @@ class CancelCommand(MessageCommand):
                 story_table.message_id AS story__message_id,
                 story_table.id AS story__id,
                 currency_table.title AS currency__title,
-                currency_table.postfix AS currency__postfix
+                currency_table.postfix AS currency__postfix,
                 currency_table.rounding AS currency__rounding
                 
             FROM story_table
@@ -925,7 +925,7 @@ class CancelCommand(MessageCommand):
             expr_link=expr_link,
             expression=expression,
             title=kwargs['last_res']['currency__title'].upper(),
-            value=float_to_str(kwargs['last_res']['story__before_value'], kwargs['last_res']['currency_rounding']),
+            value=float_to_str(kwargs['last_res']['story__before_value'], kwargs['last_res']['currency__rounding']),
             postfix=kwargs['last_res']['currency__postfix'] if kwargs['last_res']['currency__postfix'] else ''
         )
 
