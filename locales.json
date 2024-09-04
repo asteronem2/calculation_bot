@@ -32,9 +32,9 @@
       "CurrencyCalculationCommand": "CurrencyBalance",
       "CalculationCommand": "<b>Выберите валюту, с которой желаете произвести калькуляцию</b>\n<i>$expression</i>",
       "StoryCommand": "<b>Выберите валюту, у которой желаете посмотреть историю</b>",
-      "CurrencyStoryCommand": "🗂 История валюты <b>$title</b>:\n$story",
+      "CurrencyStoryCommand": "\uD83D\uDDC4 История валюты <b>$title</b>:\n$story",
       "DetailCommand": "<b>Выберите валюту, у которой желаете посмотреть детализацию</b>",
-      "CurrencyDetailCommand": "Детализация валюты <b>$title</b>:\n$detail",
+      "CurrencyDetailCommand": "\uD83E\uDDFE Детализация валюты <b>$title</b>:\n$detail",
       "CancelCommand": "Последняя операция <i><a href='$expr_link'>$expression</a></i> отменена, значение <b>$title</b> = <i>$value $postfix</i>",
       "CurrencyNullCommand": "CurrencyBalance",
       "NullCommand": "<b>Выберите валюту, которую желаете обнулить</b>",
@@ -198,10 +198,43 @@
     "buttons": {
       "EditCurrencyCommand": [
         [
+          {"text": "\uD83D\uDD8A Операции с валютой", "callback_data": "curr/balance/$curr_id/"}
+        ],
+        [
+          {"text": "\uD83D\uDD04 Изменить", "callback_data": "curr/edit/edit/$curr_id/"},
+          {"text": "Округление: $rounding", "callback_data": "curr/rounding/$curr_id/$rounding/"}
+        ],
+        [
+          {
+            "text": "⭕️ Обнулить историю 🔒",
+            "callback_data": "curr/null_story/$curr_id/"
+          }
+        ],
+        [
+          {
+            "text": "❌ Удалить валюту 🔒",
+            "callback_data": "curr/drop_curr/$curr_id/"
+          }
+        ],
+        [
+          {
+            "text": "\uD83D\uDCB5 К валютам",
+            "callback_data": "chat/balances/$chat_id/"
+          },
+          {
+            "text": "❎ Закрыть",
+            "callback_data": "close"
+          }
+        ]
+      ],
+      "EditCurrencyEdit": [
+        [
           {
             "text": "🔂 Смена названия",
             "callback_data": "curr/change_title/$curr_id/"
-          },
+          }
+        ],
+        [
           {
             "text": "🔄 Смена постфикса",
             "callback_data": "curr/change_postfix/$curr_id/"
@@ -214,27 +247,7 @@
           }
         ],
         [
-          {
-            "text": "⭕️Обнулить историю 🔒",
-            "callback_data": "curr/null_story/$curr_id/"
-          },
-          {
-            "text": "❌ Удалить валюту 🔒",
-            "callback_data": "curr/drop_curr/$curr_id/"
-          }
-        ],
-        [
-          {"text": "Округление: $rounding", "callback_data": "curr/rounding/$curr_id/$rounding/"}
-        ],
-        [
-          {
-            "text": "К балансам",
-            "callback_data": "chat/balances/$chat_id/"
-          },
-          {
-            "text": "❎ Закрыть",
-            "callback_data": "close"
-          }
+          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_currency/$curr_id/"}
         ]
       ],
       "EditChatThemeCommand": [
@@ -310,11 +323,11 @@
         ],
         [
           {
-            "text": "Обнулить",
+            "text": "0\uFE0F⃣ Обнулить",
             "callback_data": "curr/set_null/$curr_id/"
           },
           {
-            "text": "Отменить",
+            "text": "↪\uFE0F Отменить",
             "callback_data": "curr/cancel/$curr_id/"
           }
         ],
@@ -327,6 +340,9 @@
             "text": "🧾 Детализация",
             "callback_data": "curr/detailing/$curr_id/"
           }
+        ],
+        [
+          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_currency/$curr_id/", "variable": "1"}
         ]
       ],
       "CalculationCommand": [
@@ -403,7 +419,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "curr/null_story/$curr_id/no/"
+            "callback_data": "chat/edit_currency/$curr_id/"
           }
         ]
       ],
@@ -415,7 +431,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "curr/drop_curr/$curr_id/no/"
+            "callback_data": "chat/edit_currency/$curr_id/"
           }
         ]
       ],
@@ -427,7 +443,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "curr/drop_curr/$curr_id/yes/no/"
+            "callback_data": "chat/edit_currency/$curr_id/"
           }
         ]
       ],

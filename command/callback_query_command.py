@@ -39,6 +39,103 @@ class Close(CallbackQueryCommand):
         pass
 
 # Команды админов в группе
+class EditCurrencyEdit(CallbackQueryCommand):
+    async def define(self):
+        if self.db_chat and self.db_chat['locked'] is False:
+            if self.access_level == 'admin':
+                rres = re.fullmatch(r'curr/edit/edit/([0-9]+)/', self.cdata)
+                if rres:
+                    curr_pk = int(rres.group(1))
+                    await self.process(curr_pk=curr_pk)
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_pk'])
+
+        title = res['title']
+
+        text = Template(self.global_texts['message_command']['EditCurrencyCommand']).substitute(
+            title=title.upper()
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['EditCurrencyEdit'],
+            curr_id=kwargs['curr_pk']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class CurrencyBalance(CallbackQueryCommand):
+    async def define(self):
+        if self.db_chat and self.db_chat['locked'] is False:
+            if self.access_level == 'admin':
+                rres = re.fullmatch(r'curr/balance/([0-9]+)/', self.cdata)
+                if rres:
+                    curr_pk = int(rres.group(1))
+                    await self.process(curr_pk=curr_pk)
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_pk'])
+
+        text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+            title=res['title'].upper(),
+            value=float_to_str(res['value'], res['rounding']),
+            postfix=res['postfix'] if res['postfix'] else ''
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['CurrencyBalanceCommand'],
+            curr_id=res['id'],
+            variable=['1']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
 class CurrChangeTitleCommand(CallbackQueryCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
@@ -84,7 +181,7 @@ class CurrChangeTitleCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -134,7 +231,7 @@ class CurrChangeValueCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -184,7 +281,7 @@ class CurrChangePostfixCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -475,6 +572,12 @@ class EditCurrency(CallbackQueryCommand):
                 return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 

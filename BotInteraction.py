@@ -11,6 +11,7 @@ from aiogram.types import Message
 @dataclass
 class Message:
     chat_id: int
+    text: str
 
 
 @dataclass
@@ -29,7 +30,8 @@ class EditMessage(Message):
     chat_id: int
     text: str
     message_id: int
-    markup: aiogram.types.InlineKeyboardMarkup = None
+    markup: aiogram.types.InlineKeyboardMarkup = None,
+    button_destroy: int = 0
 
 
 # noinspection PyAsyncCall
@@ -97,7 +99,8 @@ class BotInter:
 
                     if message_obj.button_destroy != 0:
                         asyncio.create_task(self._destroy_buttons(
-                            message=sent_message,
+                            chat_id=sent_message.chat.id,
+                            message_id=sent_message.message_id,
                             destroy_timeout=message_obj.button_destroy,
                             message_obj=message_obj
                         ))
@@ -122,6 +125,13 @@ class BotInter:
             parse_mode=self._parse_mode,
             disable_web_page_preview=self.disable_web_page_preview
         )
+        if message_obj.button_destroy != 0:
+            asyncio.create_task(self._destroy_buttons(
+                chat_id=message_obj.chat_id,
+                message_id=message_obj.message_id,
+                destroy_timeout=message_obj.button_destroy,
+                message_obj=message_obj
+            ))
 
     async def delete_message(self, chat_id: int, message_id:int):
         try:
@@ -161,11 +171,9 @@ class BotInter:
                 traceback.print_exc()
                 print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
-    async def _destroy_buttons(self, message: aiogram.types.Message, destroy_timeout: int, message_obj: TextMessage):
+    async def _destroy_buttons(self, chat_id: int, message_id: int, destroy_timeout: int, message_obj: Message):
         await asyncio.sleep(destroy_timeout)
         try:
-            chat_id = message.chat.id
-            message_id = message.message_id
             await self.bot.edit_message_text(
                 text=message_obj.text,
                 chat_id=chat_id,
