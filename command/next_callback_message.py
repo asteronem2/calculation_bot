@@ -845,12 +845,18 @@ class AdminDistributionPin(NextCallbackMessageCommand):
             WHERE id = $1;
         """, self.pressure_info['id'])
 
-        res = await self.db.fetch("""
-            SELECT * FROM chat_table
-            WHERE type = 'chat' 
-                AND super = FALSE
-                AND COALESCE(tag, '1') = COALESCE($1, '1');
-        """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
+        if kwargs['tag'] != 'to_all':
+            res = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE type = 'chat' 
+                    AND super = FALSE
+                    AND COALESCE(tag, '1') = COALESCE($1, '1');
+            """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
+        else:
+            res = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE super = FALSE;
+            """)
 
         for i in res:
             message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=True)
@@ -896,12 +902,18 @@ class AdminDistributionUnpin(NextCallbackMessageCommand):
             WHERE id = $1;
         """, self.pressure_info['id'])
 
-        res = await self.db.fetch("""
-            SELECT * FROM chat_table
-            WHERE type = 'chat' 
-                AND super = FALSE
-                AND COALESCE(tag, '1') = COALESCE($1, '1');
-        """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
+        if kwargs['tag'] != 'to_all':
+            res = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE type = 'chat' 
+                    AND super = FALSE
+                    AND COALESCE(tag, '1') = COALESCE($1, '1');
+            """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
+        else:
+            res = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE super = FALSE;
+            """)
 
         for i in res:
             message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=False)

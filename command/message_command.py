@@ -1091,6 +1091,8 @@ class AdminMenuCommand(MessageCommand):
         if self.chat.type == 'private':
             if self.db_user['access_level'] == 'admin':
                 rres = re.fullmatch(rf'{self.keywords["AdminMenuCommand"]}', self.text_low)
+                if not rres:
+                    rres = re.fullmatch(r'/menu|/menu +@.+', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -1122,6 +1124,8 @@ class EmployeeMenuCommand(MessageCommand):
         if self.chat.type == 'private':
             if self.db_user['access_level'] in ['employee', 'client', 'employee_parsing']:
                 rres = re.fullmatch(rf'{self.keywords["EmployeeMenuCommand"]}', self.text_low)
+                if not rres:
+                    rres = re.fullmatch(r'/menu|/menu +@.+', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -1157,6 +1161,7 @@ class EmployeeMenuCommand(MessageCommand):
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
 
 class AddressListCommand(MessageCommand):
     async def define(self):

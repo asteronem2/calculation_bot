@@ -207,9 +207,12 @@ def str_to_float(value: str):
 def float_to_str(value: float, rounding: int = 2) -> str:
     if int == type(value):
         value = float(value)
+    value = round(value, rounding)
     value = str(value)
     split_value = value.split('.')
     before_dot = split_value[0][::-1]
+
+
 
     update_before_dot = []
     while before_dot:
@@ -221,6 +224,19 @@ def float_to_str(value: float, rounding: int = 2) -> str:
 
     after_dot = split_value[1]
 
+    # for i in range(len(after_dot) - rounding, 1):
+    #     if after_dot[-i] in '01234':
+    #         after_dot = after_dot[:-(i+1)]
+    #     elif after_dot[-i] == '9':
+    #         cond = True
+    #         num = 0
+    #         while cond is True:
+    #             if after_dot[-(i+num)] == '9':
+    #                 after_dot = after_dot[:-(i+num-1)]
+    #             else:
+    #                 cond = False
+    #     else:
+    #         after_dot = after_dot[:-(i + 1)] + str(int(after_dot[-(i + 1)]) + 1)
     zero_max = '0'*(rounding+1)
     zero_list = []
     for i in range(len(zero_max)):

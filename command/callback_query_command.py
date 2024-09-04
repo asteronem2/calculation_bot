@@ -2122,17 +2122,35 @@ class AdminChats(CallbackQueryCommand):
             WHERE type = 'chat';
         """)
 
-        chat_list = [f'<b><a href="{i["link"]}">{i["title"]}</a></b>: <code>{i["code_name"]}</code>'
-                     for i in res]
+        chat_balance_list = ''
 
-        chat_list_links = '\n'.join(chat_list)
+        for i in res:
+            var_res2 = await self.db.fetch("""
+                SELECT * FROM currency_table
+                WHERE chat_pid = $1;
+            """, i['id'])
 
-        text = Template(self.edit_texts['AdminChats']).substitute(
-            chat_list_links=chat_list_links
+            curr_info_list = ''
+
+            for ii in var_res2:
+                curr_info_list += '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
+                    title=ii['title'].upper(),
+                    value=float_to_str(ii['value'], ii['rounding']),
+                    postfix=ii['postfix'] if ii['postfix'] else ''
+                )
+
+            chat_balance_list += Template(self.global_texts['addition']['chat_balance']).substitute(
+                title=i['title'],
+                code_name=i['code_name'],
+                curr_info_list=curr_info_list
+            )
+
+        text = Template(self.edit_texts['AdminBalances']).substitute(
+            chat_balance=chat_balance_list
         )
 
         markup = markup_generate(
-            buttons=self.buttons['AdminChats'],
+            buttons=self.buttons['AdminBalances'],
             cycle=[{'title': i['title'],
                     'code_name': i['code_name'],
                     'chat_pk': i['id']
@@ -2145,6 +2163,34 @@ class AdminChats(CallbackQueryCommand):
             message_id=self.sent_message_id,
             markup=markup
         )
+        # res = await self.db.fetch("""
+        #     SELECT * FROM chat_table
+        #     WHERE type = 'chat';
+        # """)
+        #
+        # chat_list = [f'<b><a href="{i["link"]}">{i["title"]}</a></b>: <code>{i["code_name"]}</code>'
+        #              for i in res]
+        #
+        # chat_list_links = '\n'.join(chat_list)
+        #
+        # text = Template(self.edit_texts['AdminChats']).substitute(
+        #     chat_list_links=chat_list_links
+        # )
+        #
+        # markup = markup_generate(
+        #     buttons=self.buttons['AdminChats'],
+        #     cycle=[{'title': i['title'],
+        #             'code_name': i['code_name'],
+        #             'chat_pk': i['id']
+        #             } for i in res]
+        # )
+        #
+        # return EditMessage(
+        #     chat_id=self.chat.id,
+        #     text=text,
+        #     message_id=self.sent_message_id,
+        #     markup=markup
+        # )
 
 
 class AdminChat(CallbackQueryCommand):
@@ -2574,6 +2620,38 @@ class AdminDistribution(CallbackQueryCommand):
         markup = markup_generate(
             buttons=self.buttons['AdminDistribution'],
             cycle=[{'tag': i['tag']} for i in res if i['tag']]
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminDistributionChoice(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/distribution/choice/([^/]+)/', self.cdata)
+            if rres:
+                tag = rres.group(1)
+                await self.process(tag=tag)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminDistributionChoice']).substitute()
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminDistributionChoice'],
+            tag=kwargs['tag']
         )
 
         return EditMessage(

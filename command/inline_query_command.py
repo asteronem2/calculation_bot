@@ -194,8 +194,11 @@ class InlineCalculation(InlineQueryCommand):
         return True
 
     async def process(self, *args, **kwargs):
-        results = await self.generate_results()
-        await self.bot.answer_inline_query(results=results, query_id=self.inline.id)
+        try:
+            results = await self.generate_results()
+            await self.bot.answer_inline_query(results=results, query_id=self.inline.id)
+        except:
+            pass
 
     async def generate_results(self, *args, **kwargs) -> [InlineQueryResultArticle]:
         result = mega_eval(self.query)
