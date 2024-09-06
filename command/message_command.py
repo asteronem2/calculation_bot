@@ -440,7 +440,7 @@ class CurrencyCalculationCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'(.+) +([*+%/0-9., -]+)', self.text_low)
+                rres = re.fullmatch(r'(.+) +([*+%/0-9., ()-]+)', self.text_low)
                 if rres:
                     curr, expr = rres.groups()
                     if self.photo is True and self.db_chat['sign'] is False:
@@ -516,7 +516,7 @@ class CalculationCommand(CurrencyCalculationCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'[*+%/0-9., -]+', self.text_low)
+                rres = re.fullmatch(r'[*+%/0-9., ()-]+', self.text_low)
                 if rres:
                     expr = rres.group()
                     if self.photo is True and self.db_chat['sign'] is False:
@@ -1274,7 +1274,7 @@ class AddAddressCommand(MessageCommand):
 
             markup = markup_generate(
                 self.buttons['AddAddressCommandEdit'],
-                address=kwargs['record']['id']
+                address_id=kwargs['record']['id']
             )
 
             return TextMessage(

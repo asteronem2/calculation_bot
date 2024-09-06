@@ -1060,7 +1060,7 @@ class CurrCalculationCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/balance/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -1420,10 +1420,48 @@ class CalculationCommand(CallbackQueryCommand):
 
 
 # Команды для сотрудников в лс
+class AddressEditCommand(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level in ['admin', 'employee', 'employee_parsing']:
+            rres = re.fullmatch(r'address/([0-9]+)/', self.cdata)
+            if rres:
+                address_id = int(rres.group(1))
+                await self.process(address_id=address_id)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['message_command']['AddAddressCommandEdit']).substitute()
+
+        markup = markup_generate(
+            self.buttons['AddAddressCommandEdit'],
+            address_id=kwargs['address_id']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
 class AddressChangeMinValueCommand(CallbackQueryCommand):
     async def define(self):
         if self.access_level in ['admin', 'employee', 'employee_parsing']:
-            rres = re.fullmatch(r'address/change_min_value/([^/]+)/', self.cdata)
+            rres = re.fullmatch(r'address/change_min_value/([0-9]+)/', self.cdata)
             if rres:
                 address_id = int(rres.group(1))
                 res = await self.db.fetchrow("""
@@ -1455,6 +1493,7 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
             SELECT * FROM crypto_parsing_table
             WHERE id = $1;
         """, kwargs['address_id'])
+
         text = Template(self.edit_texts['AddressChangeMinValueCommand']).substitute(
             address=res['address']
         )
@@ -1463,17 +1502,17 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'address/{res["id"]}/')]])
         )
 
 
 class AddressDelete(CallbackQueryCommand):
     async def define(self):
         if self.access_level in ['admin', 'employee', 'employee_parsing']:
-            rres = re.fullmatch(r'address/delete/([^/]+)/', self.cdata)
+            rres = re.fullmatch(r'address/delete/([0-9]+)/', self.cdata)
             if rres:
-                address = rres.group(1)
-                await self.process(address=address)
+                address_id = int(rres.group(1))
+                await self.process(address_id=address_id)
                 return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -1488,7 +1527,7 @@ class AddressDelete(CallbackQueryCommand):
 
         markup = markup_generate(
             buttons=self.buttons['AddressDeleteCommand'],
-            address=kwargs['address']
+            address_id=kwargs['address_id']
         )
 
         return EditMessage(
@@ -1502,7 +1541,7 @@ class AddressDelete(CallbackQueryCommand):
 class AddressDeleteSecond(CallbackQueryCommand):
     async def define(self):
         if self.access_level in ['admin', 'employee', 'employee_parsing']:
-            rres = re.fullmatch(r'address/delete/([^/]+)/([^/]+)/', self.cdata)
+            rres = re.fullmatch(r'address/delete/([0-9]+)/([^/]+)/', self.cdata)
             if rres:
                 address_id, answer = rres.groups()
                 address_id = int(address_id)
@@ -1923,6 +1962,7 @@ class AdminBalances(CallbackQueryCommand):
             chat_balance_list += Template(self.global_texts['addition']['chat_balance']).substitute(
                 title=i['title'],
                 code_name=i['code_name'],
+                link=i['link'],
                 curr_info_list=curr_info_list
             )
 
@@ -1985,6 +2025,7 @@ class AdminBalance(CallbackQueryCommand):
         text = Template(self.global_texts['addition']['chat_balance']).substitute(
             title=res['title'],
             code_name=res['code_name'],
+            link=res['link'],
             curr_info_list=''.join(curr_info_list)
         )
 
@@ -2236,7 +2277,7 @@ class AdminChats(CallbackQueryCommand):
             curr_info_list = ''
 
             for ii in var_res2:
-                curr_info_list += '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
+                curr_info_list += '    ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
                     title=ii['title'].upper(),
                     value=float_to_str(ii['value'], ii['rounding']),
                     postfix=ii['postfix'] if ii['postfix'] else ''
@@ -2245,6 +2286,7 @@ class AdminChats(CallbackQueryCommand):
             chat_balance_list += Template(self.global_texts['addition']['chat_balance']).substitute(
                 title=i['title'],
                 code_name=i['code_name'],
+                link=i['link'],
                 curr_info_list=curr_info_list
             )
 
@@ -2253,7 +2295,7 @@ class AdminChats(CallbackQueryCommand):
         )
 
         markup = markup_generate(
-            buttons=self.buttons['AdminBalances'],
+            buttons=self.buttons['AdminChats'],
             cycle=[{'title': i['title'],
                     'code_name': i['code_name'],
                     'chat_pk': i['id']
@@ -2326,6 +2368,7 @@ class AdminChat(CallbackQueryCommand):
 
         text = Template(self.edit_texts['AdminChat']).substitute(
             title=res['title'],
+            link=res['link'],
             code_name=res['code_name']
         )
 
@@ -2337,17 +2380,15 @@ class AdminChat(CallbackQueryCommand):
 
         if res['locked'] is False:
             variable_list.append('lock')
+        else:
+            variable_list.append('unlock')
 
         if res['super'] is True:
             variable_list.append('unset_super')
         else:
             variable_list.append('set_super')
 
-        if res['tag']:
-            variable_list.append('change_tag')
-            markup_kwargs['tag'] = res['tag']
-        else:
-            variable_list.append('set_tag')
+        markup_kwargs['tag'] = res['tag'] if res['tag'] else 'Пусто'
 
         markup = markup_generate(
             buttons=self.buttons['AdminChat'],
@@ -2463,23 +2504,23 @@ class AdminChatDelete(CallbackQueryCommand):
             )
 
 
-class AdminChatLock(AdminChat):
+class AdminChatLockUnlock(AdminChat):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/chat/([0-9]+)/lock/', self.cdata)
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/(lock|unlock)/', self.cdata)
             if rres:
                 chat_pk = int(rres.group(1))
-                await self.process(chat_pk=chat_pk)
+                type_ = rres.group(2)
+                await self.process(chat_pk=chat_pk, type_=type_)
                 return True
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
             UPDATE chat_table
-            SET locked = TRUE
-            WHERE id = $1;
-        """, kwargs['chat_pk'])
+            SET locked = $1
+            WHERE id = $2;
+        """, True if kwargs['type_'] == 'lock' else False,kwargs['chat_pk'])
 
-        await self.bot.answer_clb_query(self.callback.id, 'Чат заблокирован')
         message_obj = await AdminChat.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -2514,7 +2555,7 @@ class AdminChatChangeCodeName(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/chat/{kwargs["chat_pk"]}/')]])
         )
 
 
@@ -2611,13 +2652,6 @@ class AdminChatChangeTag(CallbackQueryCommand):
                 return True
 
     async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            INSERT INTO pressure_button_table
-            (chat_pid, user_pid, message_id, callback_data)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
-        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
-
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -2625,22 +2659,72 @@ class AdminChatChangeTag(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
+        res = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE id = parent_id
+                AND id <> 0;
+        """)
+
+        res2 = await self.db.fetchrow("""
             SELECT * FROM chat_table
             WHERE id = $1;
         """, kwargs['chat_pk'])
+
         text = Template(self.edit_texts['AdminChatChangeTag']).substitute(
-            title=res['title'],
-            code_name=res['code_name'],
-            tag=res['tag']
+            title=res2['title'],
+            code_name=res2['code_name']
+        )
+
+        cycle = []
+
+        for i in res:
+            status = '⏺'
+
+            if i['tag'] == res2['tag']:
+                status = '✅'
+
+            cycle.append({
+                'status': status,
+                'tag': i['tag'],
+                'chat_pk': kwargs['chat_pk']
+            })
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminChatChangeTag'],
+            chat_pk=kwargs['chat_pk'],
+            cycle=cycle,
         )
 
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/chat/{res["id"]}/')]])
+            markup=markup
         )
+
+
+class AdminChatChangeTagSet(AdminChatChangeTag):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/set_tag/([^/]+)/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                tag = rres.group(2)
+                await self.process(chat_pk=chat_pk, tag=tag)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE chat_table
+            SET tag = CASE
+                    WHEN tag = $1 THEN NULL
+                    ELSE $1
+                END
+            WHERE id = $2;
+        """, kwargs['tag'] if kwargs['tag'] != 'null' else None, kwargs['chat_pk'])
+
+        message_obj = await AdminChatChangeTag.generate_edit_message(self, **kwargs)
+        await self.bot.edit_text(message_obj)
 
 
 class AdminChatBalance(CallbackQueryCommand):
@@ -2670,15 +2754,13 @@ class AdminChatBalance(CallbackQueryCommand):
         curr_info_list = ''
 
         for i in res2:
-            curr_info_list = curr_info_list + '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
+            curr_info_list += Template(self.global_texts['addition']['little_balance']).substitute(
                 title=i['title'].upper(),
                 value=float_to_str(i['value'], i['rounding']),
                 postfix=i['postfix'] if i['postfix'] else ''
             )
 
-        text = Template(self.global_texts['addition']['chat_balance']).substitute(
-            title=res1['title'],
-            code_name=res1['code_name'],
+        text = Template(self.global_texts['message_command']['BalanceListCommand']).substitute(
             curr_info_list=curr_info_list
         )
 
@@ -2797,7 +2879,7 @@ class AdminDistributionPin(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
         )
 
 
@@ -2833,7 +2915,7 @@ class AdminDistributionUnpin(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
         )
 
 
@@ -3412,6 +3494,12 @@ class AdminTags(CallbackQueryCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         message_obj = await self.generate_edit_message()
         await self.bot.edit_text(message_obj)
 
@@ -3446,6 +3534,8 @@ class AdminTag(CallbackQueryCommand):
         rres = re.fullmatch(r'admin/tag/([^/]+)/', self.cdata)
         if rres:
             tag = rres.group(1)
+            if tag == 'create_tag':
+                return
             await self.process(tag=tag)
             return True
 
@@ -3470,12 +3560,50 @@ class AdminTag(CallbackQueryCommand):
             WHERE tag = $1;
         """, tag)
 
-        print(tag)
-
         markup = markup_generate(
             buttons=self.buttons['AdminTag'],
             tag=tag,
             folder_id=res['id']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminTagCreateTag(AdminTag):
+    async def define(self):
+        rres = re.fullmatch(r'admin/tag/create_tag/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminTagCreateTag']).substitute()
+
+        markup = markup_generate(
+            buttons=self.global_texts['cancel'],
+            callback='admin/tags/'
         )
 
         return EditMessage(
@@ -3546,6 +3674,7 @@ class AdminTagChangeChats(CallbackQueryCommand):
 
         res = await self.db.fetch("""
             SELECT * FROM chat_table
+            WHERE type = 'chat'
             ORDER BY id ASC;
         """)
 
@@ -3723,6 +3852,10 @@ class AdminTagDeleteTag(AdminTagChangeChats):
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
+        if kwargs['stage'] == '2':
+            message_obj = await self.generate_send_message()
+            await self.bot.send_text(message_obj)
+
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == '1':
             text = Template(self.edit_texts['AdminTagDeleteTag1']).substitute()
@@ -3747,7 +3880,29 @@ class AdminTagDeleteTag(AdminTagChangeChats):
         )
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
+        text = Template(self.edit_texts['AdminTags']).substitute()
+
+        res = await self.db.fetch("""
+            SELECT tag FROM note_table
+            WHERE id = parent_id
+                AND tag <> 'admin';
+        """)
+
+        cycle = [{
+            'tag': i['tag']
+        } for i in res if i['tag'] and i['tag'] != 'admin']
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminTags'],
+            cycle=cycle
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic,
+            markup=markup
+        )
 
 # Cотрудники
 class AdminEmployees(CallbackQueryCommand):
@@ -3773,15 +3928,30 @@ class AdminEmployees(CallbackQueryCommand):
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
-            SELECT * FROM user_table
-            WHERE access_level = 'employee';
+            SELECT * FROM user_table;
         """)
 
-        employee_list = [f'<b>{i["first_name"] if i["first_name"] else "Без имени"}</b> ({"@" + i["username"] if i["username"] else i["user_id"]})'
-                         for i in res]
+        employees = ''
+
+        employees_parsing = ''
+
+        clients = ''
+
+        for i in res:
+            acs_lvl = i['access_level']
+            first_name = i["first_name"] if i["first_name"] else "Без имени"
+            username = ('@' + i["username"]) if i["username"] else i["user_id"]
+            if acs_lvl == 'employee':
+                employees += f'<b>{first_name}</b> ({username})\n'
+            elif acs_lvl == 'employee_parsing':
+                employees_parsing += f'<b>{first_name}</b> ({username})\n'
+            elif acs_lvl == 'client':
+                clients += f'<b>{first_name}</b> ({username})\n'
 
         text = Template(self.edit_texts['AdminEmployees']).substitute(
-            employee_list='\n'.join(employee_list)
+            employees=employees,
+            employees_parsing=employees_parsing,
+            clients=clients
         )
 
         markup = markup_generate(
@@ -3838,12 +4008,18 @@ class AdminEmployeesAdd(CallbackQueryCommand):
 class AdminEmployeesRemove(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/employees/remove/', self.cdata)
+            rres = re.fullmatch(r'admin/employees/remove/([^/]+)/', self.cdata)
             if rres:
                 await self.process()
                 return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         await self.db.execute("""
             INSERT INTO pressure_button_table
             (chat_pid, user_pid, message_id, callback_data)
@@ -3851,20 +4027,20 @@ class AdminEmployeesRemove(CallbackQueryCommand):
             ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
         """, None, self.db_user['id'], self.sent_message_id, self.cdata)
 
-        message_obj = await self.generate_edit_message()
+        message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminEmployeesRemove']).substitute()
+        text = Template(self.edit_texts['AdminEmployeesAdd']).substitute()
 
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/employees/')]])
         )
 
 
@@ -3994,7 +4170,7 @@ class AdminChangeCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='close')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/commands/')]])
         )
 
 

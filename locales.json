@@ -26,15 +26,15 @@
       "CreateCurrencyCommand": "Создана валюта <b>«$title»</b> со значением <b>$value $postfix</b>",
       "EditCurrencyCommand": "Меню валюты <b>$title</b>",
       "EditChatThemeCommand": "<b>Меню настройки чата/темы</b>",
-      "BalanceListCommand": "<b>Балансы всех валют чата:</b>\n\n<blockquote expandable>$curr_info_list</blockquote>",
+      "BalanceListCommand": "<b>Балансы всех валют чата:</b>\n<blockquote expandable>$curr_info_list</blockquote>",
       "CurrencyBalance": "Баланс <b>$title</b>: <i>$value $postfix</i>",
       "CurrencyCommand": "CurrencyBalance",
       "CurrencyCalculationCommand": "CurrencyBalance",
       "CalculationCommand": "<b>Выберите валюту, с которой желаете произвести калькуляцию</b>\n<i>$expression</i>",
       "StoryCommand": "<b>Выберите валюту, у которой желаете посмотреть историю</b>",
-      "CurrencyStoryCommand": "\uD83D\uDDC4 История валюты <b>$title</b>:\n$story",
+      "CurrencyStoryCommand": "🗄 История валюты <b>$title</b>:\n$story",
       "DetailCommand": "<b>Выберите валюту, у которой желаете посмотреть детализацию</b>",
-      "CurrencyDetailCommand": "\uD83E\uDDFE Детализация валюты <b>$title</b>:\n$detail",
+      "CurrencyDetailCommand": "🧾 Детализация валюты <b>$title</b>:\n$detail",
       "CancelCommand": "Последняя операция <i><a href='$expr_link'>$expression</a></i> отменена, значение <b>$title</b> = <i>$value $postfix</i>",
       "CurrencyNullCommand": "CurrencyBalance",
       "NullCommand": "<b>Выберите валюту, которую желаете обнулить</b>",
@@ -101,16 +101,16 @@
         "AdminBalanceStory": "Истории всех валют чата $title ($code_name):\n$curr_story_list",
         "AdminBalanceDetail": "Детализация всех валют чата $title ($code_name):\n$curr_detail_list",
         "AdminChats": "<b>Список всех чатов и их кодовых имён:</b>\n<blockquote expandable>$chat_list_links</blockquote>",
-        "AdminChat": "Выберите что желаете сделать с чатом <b>$title (<code>$code_name</code>):</b>",
+        "AdminChat": "Выберите что желаете сделать с чатом <a href='$link'><b>$title</b></a> <b>($code_name):</b>",
         "AdminChatDelete": "<b>Вы уверены?\n<i>Данные нельзя будет вернуть</i></b>",
         "AdminChatDelete2": "<b>На 100%???</b>",
         "AdminChatDelete3": "<b>Чат $title ($code_name) канул в Лету</b>",
-        "AdminChatLock": "<b>Чат $title (<code>$code_name</code>) заблокирован</b>",
+        "AdminChatLock": "<b>Чат $title ($code_name) заблокирован</b>",
         "AdminChatChangeCodeName": "Введите новый код для чата:",
-        "AdminChatSetTag": "Напишите тег для чата <b>$title</b> (<code>$code_name</code>):",
-        "AdminChatChangeTag": "Напишите новый тег для чата <b>$title</b> (<code>$code_name</code>), текущий <i>$tag</i>:\n<i>если желаете удалить тег, напишите \"*\"</i>",
-        "AdminChatBalance": "chat_balance",
-        "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employee_list</blockquote>",
+        "AdminChatSetTag": "Напишите тег для чата <b>$title</b> ($code_name):",
+        "AdminChatChangeTag": "Выберите новый тег для чата <b>$title</b> ($code_name):",
+        "AdminChatBalance": "<b>💰 Балансы всех валют чата:</b>\n<blockquote>$balances</blockquote>",
+        "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employees</blockquote>\n<b>Список сотрудников для парсинга:</b>\n<blockquote expandable>$employees_parsing</blockquote>\n<b>Список контрагентов:</b>\n<blockquote expandable>$clients</blockquote>",
         "AdminEmployeesAdd": "<b>Укажите username с \"@\" или без, для добавления нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesParsing": "<b>Список сотрудников для отслеживания адресов:</b>\n<blockquote expandable>$employee_list</blockquote>",
@@ -135,6 +135,7 @@
         "AdminInstruction": "<b>Список команд для админа в личном чате:</b>\n<blockquote expandable><b>$AdminMenuCommand</b> - открывает меню управление ботом и чатами</blockquote>\n\n<b>Список команд для админа в группе:</b>\n<blockquote expandable><b>$UnlockChatCommand</b> - разблокирует чат\n<b>$LockChatCommand</b> - блокирует чат\n<b>$EditChatThemeCommand</b> - открывает меню управления темой чата\n<b>*«валюта»</b> - открывает меню управления валютой\n<b>«название» = «значение» «постфикс»</b> - создание валюты</blockquote>\n\n<b>Список команд для сотрудника в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд для сотрудника в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>",
         "AdminRevise": "<b>Напишите первое выражение для сравнения</b>",
         "AdminTags": "<b>Все теги:</b>",
+        "AdminTagCreateTag": "<b>Напишите название для нового тега:</b>",
         "AdminTag": "<b>Параметры тега $tag</b>",
         "AdminTagChangeTag": "<b>Напишите новое название для тега $tag</b>",
         "AdminTagChangeChats": "<b>Выберите чаты, которым желаете поставить тег $tag</b>\n<i>Если чату присвоить тег, прошлый снесётся</i>",
@@ -173,9 +174,9 @@
         "CurrChangePostfixCommand": "Новый постфикс для <b>$title</b>: $postfix",
         "CurrCalculationCommand": "CurrencyBalance",
         "AddressChangeMinValueCommand": "Новое минимальное значение <i>$min_value</i> для криптоадреса:\n<code>$address</code>",
-        "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - <code>$code_name</code></b>",
-        "AdminChatSetTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
-        "AdminChatChangeTag": "Новый тег для чата <b>$title</b> (<code>$code_name</code>) - $tag",
+        "AdminChatChangeCodeName": "<b>Теперь новое кодовое имя для чата $title - $code_name</b>",
+        "AdminChatSetTag": "Новый тег для чата <b>$title</b> ($code_name) - $tag",
+        "AdminChatChangeTag": "Новый тег для чата <b>$title</b> ($code_name) - $tag",
         "AdminEmployeesAdd": "<b>Пользователи добавлены</b>",
         "AdminEmployeesRemove": "<b>Пользователи исключены</b>",
         "AdminDistributionPin": "Текст успешно разослан и закреплён",
@@ -186,7 +187,8 @@
         "AdminNoteChangeText": "<b>Текст для заметки $title изменён</b>",
         "AdminChangeCommand": "<b>Вызов команды изменён с $before на $after</b>",
         "AdminRevise": "<b>Теперь напишите второе выражение</b>",
-        "AdminTagChangeTag": "<b>Тег $old_tag сменён на $new_tag</b>"
+        "AdminTagChangeTag": "<b>Тег $old_tag сменён на $new_tag</b>",
+        "AdminTagCreateTag": "<b>Тег $tag успешно создан</b>"
       }
     },
     "reaction_command": {
@@ -198,11 +200,20 @@
     "buttons": {
       "EditCurrencyCommand": [
         [
-          {"text": "\uD83D\uDD8A Операции с валютой", "callback_data": "curr/balance/$curr_id/"}
+          {
+            "text": "🖊 Операции с валютой",
+            "callback_data": "curr/balance/$curr_id/"
+          }
         ],
         [
-          {"text": "\uD83D\uDD04 Изменить", "callback_data": "curr/edit/edit/$curr_id/"},
-          {"text": "Округление: $rounding", "callback_data": "curr/rounding/$curr_id/$rounding/"}
+          {
+            "text": "🔄 Изменить",
+            "callback_data": "curr/edit/edit/$curr_id/"
+          },
+          {
+            "text": "Округление: $rounding",
+            "callback_data": "curr/rounding/$curr_id/$rounding/"
+          }
         ],
         [
           {
@@ -218,7 +229,7 @@
         ],
         [
           {
-            "text": "\uD83D\uDCB5 К валютам",
+            "text": "💵 К валютам",
             "callback_data": "chat/balances/$chat_id/"
           },
           {
@@ -247,7 +258,10 @@
           }
         ],
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_currency/$curr_id/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "chat/edit_currency/$curr_id/"
+          }
         ]
       ],
       "EditChatThemeCommand": [
@@ -282,8 +296,16 @@
           }
         ],
         [
-          {"text": "Балансы закрепляются", "callback_data": "chat/unpin_balances/", "variable": "pin_balance"},
-          {"text": "Балансы не закрепляются", "callback_data": "chat/pin_balances/", "variable": "unpin_balance"}
+          {
+            "text": "Балансы закрепляются",
+            "callback_data": "chat/unpin_balances/",
+            "variable": "pin_balance"
+          },
+          {
+            "text": "Балансы не закрепляются",
+            "callback_data": "chat/pin_balances/",
+            "variable": "unpin_balance"
+          }
         ],
         [
           {
@@ -293,19 +315,55 @@
           }
         ],
         [
-          {"text": "Только пересылаемые", "callback_data": "chat/mode/forward/set/non_forward/", "variable": "forward"},
-          {"text": "Только не пересылаемые", "callback_data": "chat/mode/forward/set/forward|non_forward/", "variable": "non_forward"},
-          {"text": "Пересылаемые + не пересылаемые", "callback_data": "chat/mode/forward/set/forward/", "variable": "forward|non_forward"}
+          {
+            "text": "Только пересылаемые",
+            "callback_data": "chat/mode/forward/set/non_forward/",
+            "variable": "forward"
+          },
+          {
+            "text": "Только не пересылаемые",
+            "callback_data": "chat/mode/forward/set/forward|non_forward/",
+            "variable": "non_forward"
+          },
+          {
+            "text": "Пересылаемые + не пересылаемые",
+            "callback_data": "chat/mode/forward/set/forward/",
+            "variable": "forward|non_forward"
+          }
         ],
         [
-          {"text": "Только ответы", "callback_data": "chat/mode/reply/set/non_reply/", "variable": "reply"},
-          {"text": "Только не ответы", "callback_data": "chat/mode/reply/set/reply|non_reply/", "variable": "non_reply"},
-          {"text": "Ответы + не ответы", "callback_data": "chat/mode/reply/set/reply/", "variable": "reply|non_reply"}
+          {
+            "text": "Только ответы",
+            "callback_data": "chat/mode/reply/set/non_reply/",
+            "variable": "reply"
+          },
+          {
+            "text": "Только не ответы",
+            "callback_data": "chat/mode/reply/set/reply|non_reply/",
+            "variable": "non_reply"
+          },
+          {
+            "text": "Ответы + не ответы",
+            "callback_data": "chat/mode/reply/set/reply/",
+            "variable": "reply|non_reply"
+          }
         ],
         [
-          {"text": "Только цитирование", "callback_data": "chat/mode/quote/set/non_quote/", "variable": "quote"},
-          {"text": "Только не цитирование", "callback_data": "chat/mode/quote/set/quote|non_quote/", "variable": "non_quote"},
-          {"text": "Цитирование + не цитирование", "callback_data": "chat/mode/quote/set/quote/", "variable": "quote|non_quote"}
+          {
+            "text": "Только цитирование",
+            "callback_data": "chat/mode/quote/set/non_quote/",
+            "variable": "quote"
+          },
+          {
+            "text": "Только не цитирование",
+            "callback_data": "chat/mode/quote/set/quote|non_quote/",
+            "variable": "non_quote"
+          },
+          {
+            "text": "Цитирование + не цитирование",
+            "callback_data": "chat/mode/quote/set/quote/",
+            "variable": "quote|non_quote"
+          }
         ],
         [
           {
@@ -323,11 +381,11 @@
         ],
         [
           {
-            "text": "0\uFE0F⃣ Обнулить",
+            "text": "0️⃣ Обнулить",
             "callback_data": "curr/set_null/$curr_id/"
           },
           {
-            "text": "↪\uFE0F Отменить",
+            "text": "↪️ Отменить",
             "callback_data": "curr/cancel/$curr_id/"
           }
         ],
@@ -342,7 +400,11 @@
           }
         ],
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "chat/edit_currency/$curr_id/", "variable": "1"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "chat/edit_currency/$curr_id/",
+            "variable": "1"
+          }
         ]
       ],
       "CalculationCommand": [
@@ -389,13 +451,13 @@
         [
           {
             "text": "Изменить минимальное значение",
-            "callback_data": "address/change_min_value/$address/"
+            "callback_data": "address/change_min_value/$address_id/"
           }
         ],
         [
           {
             "text": "Удалить",
-            "callback_data": "address/delete/$address/"
+            "callback_data": "address/delete/$address_id/"
           }
         ]
       ],
@@ -403,11 +465,11 @@
         [
           {
             "text": "🟢 Да",
-            "callback_data": "address/delete/$address/yes/"
+            "callback_data": "address/delete/$address_id/yes/"
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "address/delete/$address/no/"
+            "callback_data": "address/$address_id/"
           }
         ]
       ],
@@ -514,7 +576,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "chat/drop_story/$chat_id/no/"
+            "callback_data": "chat/edit_chat_theme/"
           }
         ]
       ],
@@ -526,7 +588,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "chat/drop_story/$chat_id/yes/no/"
+            "callback_data": "chat/edit_chat_theme/"
           }
         ]
       ],
@@ -562,7 +624,10 @@
           }
         ],
         [
-          {"text": "Закрыть меню", "callback_data": "close"}
+          {
+            "text": "Закрыть меню",
+            "callback_data": "close"
+          }
         ]
       ],
       "AdminBalances": [
@@ -584,17 +649,17 @@
       "AdminBalance": [
         [
           {
-            "text": "История",
+            "text": "🗄 История",
             "callback_data": "admin/balance/$chat_pk/story/"
           },
           {
-            "text": "Детализация",
+            "text": "🧾 Детализация",
             "callback_data": "admin/balance/$chat_pk/detail/"
           }
         ],
         [
           {
-            "text": "📑 Выгрузить таблицу",
+            "text": "📑 Выгрузить",
             "callback_data": "admin/balance/$chat_pk/table/"
           },
           {
@@ -644,48 +709,32 @@
       "AdminChat": [
         [
           {
-            "text": "Баланс чата",
+            "text": "💰 Баланс чата",
             "callback_data": "admin/chat/$chat_pk/balance/"
-          }
-        ],
-        [
-          {
-            "text": "Удалить чат 🔒",
-            "callback_data": "admin/chat/$chat_pk/delete/"
-          }
-        ],
-        [
-          {
-            "text": "Заблокировать",
-            "callback_data": "admin/chat/$chat_pk/lock/",
-            "variable": "lock"
           },
           {
-            "text": "🔄 Сменить кодовое имя",
+            "text": "🔄 Сменить имя",
             "callback_data": "admin/chat/$chat_pk/change_code_name/"
           }
         ],
         [
           {
-            "text": "Поставить супер статус",
-            "callback_data": "admin/chat/$chat_pk/set_super/",
-            "variable": "set_super"
+            "text": "🔒 Заблокировать",
+            "callback_data": "admin/chat/$chat_pk/lock/",
+            "variable": "lock"
           },
           {
-            "text": "Убрать супер статус",
-            "callback_data": "admin/chat/$chat_pk/unset_super/",
-            "variable": "unset_super"
+            "text": "🔓 Разблокировать",
+            "callback_data": "admin/chat/$chat_pk/unlock/",
+            "variable": "unlock"
           },
           {
-            "text": "#️⃣ Поставить тег",
-            "callback_data": "admin/chat/$chat_pk/set_tag/",
-            "variable": "set_tag"
-          },
-          {
-            "text": "🔁 Изменить тег ($tag)",
-            "callback_data": "admin/chat/$chat_pk/change_tag/",
-            "variable": "change_tag"
+            "text": "❌ Удалить чат",
+            "callback_data": "admin/chat/$chat_pk/delete/"
           }
+        ],
+        [
+          {"text": "Поменять тег ($tag)", "callback_data": "admin/chat/$chat_pk/change_tag/"}
         ],
         [
           {
@@ -693,6 +742,10 @@
             "callback_data": "admin/chats/"
           }
         ]
+      ],
+      "AdminChatChangeTag": [
+        [{"text": "$status $tag", "callback_data": "admin/chat/$chat_pk/set_tag/$tag/", "cycle": "cycle", "row_width": 1}],
+        [{"text": "Назад \uD83D\uDD19", "callback_data": "admin/chat/$chat_pk/"}]
       ],
       "AdminChatDelete": [
         [
@@ -702,7 +755,7 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "admin/chat/$chat_pk/delete/no/"
+            "callback_data": "admin/chat/$chat_pk/"
           }
         ]
       ],
@@ -714,24 +767,24 @@
           },
           {
             "text": "🔴 Нет",
-            "callback_data": "admin/chat/$chat_pk/delete/yes/no/"
+            "callback_data": "admin/chat/$chat_pk/"
           }
         ]
       ],
       "AdminChatBalance": [
         [
           {
-            "text": "История",
+            "text": "🗄 История",
             "callback_data": "admin/chat/$chat_pk/story/"
           },
           {
-            "text": "Детализация",
+            "text": "🧾 Детализация",
             "callback_data": "admin/chat/$chat_pk/detail/"
           }
         ],
         [
           {
-            "text": "📑 Выгрузить таблицу",
+            "text": "📑 Выгрузить",
             "callback_data": "admin/chat/$chat_pk/table/"
           },
           {
@@ -749,7 +802,7 @@
       "AdminDistribution": [
         [
           {
-            "text": "📌 ВСЕМ",
+            "text": "📢 ВСЕМ 📬",
             "callback_data": "admin/distribution/choice/to_all/"
           }
         ],
@@ -770,8 +823,14 @@
       ],
       "AdminDistributionChoice": [
         [
-          {"text": "С закреплением", "callback_data": "admin/distribution/pin/$tag/"},
-          {"text": "Без закрепления", "callback_data": "admin/distribution/unpin/$tag/"}
+          {
+            "text": "С закреплением",
+            "callback_data": "admin/distribution/pin/$tag/"
+          },
+          {
+            "text": "Без закрепления",
+            "callback_data": "admin/distribution/unpin/$tag/"
+          }
         ],
         [
           {
@@ -800,7 +859,10 @@
           }
         ],
         [
-          {"text": "⬆\uFE0FКатегории⬆\uFE0F | ⬇\uFE0FЗаметки⬇\uFE0F", "callback_data": "0"}
+          {
+            "text": "⬆️Категории⬆️ | ⬇️Заметки⬇️",
+            "callback_data": "0"
+          }
         ],
         [
           {
@@ -937,7 +999,10 @@
           }
         ],
         [
-          {"text": "Теги", "callback_data": "admin/tags/"}
+          {
+            "text": "Теги",
+            "callback_data": "admin/tags/"
+          }
         ],
         [
           {
@@ -956,6 +1021,9 @@
           }
         ],
         [
+          {"text": "Создать новый тег", "callback_data": "admin/tag/create_tag/"}
+        ],
+        [
           {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
@@ -964,38 +1032,72 @@
       ],
       "AdminTag": [
         [
-          {"text": "Сменить название", "callback_data": "admin/tag/$tag/change_tag/"}
+          {
+            "text": "Сменить название",
+            "callback_data": "admin/tag/$tag/change_tag/"
+          }
         ],
         [
-          {"text": "Изменить чаты", "callback_data": "admin/tag/$tag/change_chats/"}
+          {
+            "text": "Изменить чаты",
+            "callback_data": "admin/tag/$tag/change_chats/"
+          }
         ],
         [
-          {"text": "Изменить пользователей", "callback_data": "admin/tag/$tag/change_users/"}
+          {
+            "text": "Изменить пользователей",
+            "callback_data": "admin/tag/$tag/change_users/"
+          }
         ],
         [
-          {"text": "Информация", "callback_data": "admin/folder/$folder_id/"}
+          {
+            "text": "Информация",
+            "callback_data": "admin/folder/$folder_id/"
+          }
         ],
         [
-          {"text": "Удалить тег", "callback_data": "admin/tag/$tag/delete/1/"}
+          {
+            "text": "Удалить тег",
+            "callback_data": "admin/tag/$tag/delete/1/"
+          }
         ],
         [
-          {"text": "Назад 🔙","callback_data": "admin/tags/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "admin/tags/"
+          }
         ]
       ],
       "AdminTagChangeChats": [
         [
-          {"text": "$status $code_name ($title)", "callback_data": "admin/tag/$tag/change_chat/$chat_pk/", "cycle": "cycle", "row_width": 1}
+          {
+            "text": "$status $code_name ($title)",
+            "callback_data": "admin/tag/$tag/change_chat/$chat_pk/",
+            "cycle": "cycle",
+            "row_width": 1
+          }
         ],
         [
-          {"text": "Назад 🔙","callback_data": "admin/tag/$tag/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "admin/tag/$tag/"
+          }
         ]
       ],
       "AdminTagChangeUsers": [
         [
-          {"text": "$status $username ($access_level)", "callback_data": "admin/tag/$tag/change_user/$user_pk/", "cycle": "cycle", "row_width": 1}
+          {
+            "text": "$status $username ($access_level)",
+            "callback_data": "admin/tag/$tag/change_user/$user_pk/",
+            "cycle": "cycle",
+            "row_width": 1
+          }
         ],
         [
-          {"text": "Назад 🔙","callback_data": "admin/tag/$tag/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "admin/tag/$tag/"
+          }
         ]
       ],
       "AdminTagDeleteTag": [
@@ -1033,7 +1135,7 @@
         ],
         [
           {
-            "text": "Инструкция \uD83D\uDCD6",
+            "text": "Инструкция 📖",
             "callback_data": "admin/instruction/"
           }
         ],
@@ -1070,61 +1172,123 @@
       ],
       "EmployeeMenuCommand": [
         [
-          {"text": "Информация", "callback_data": "employee/menu/info/", "variable": "client"}
+          {
+            "text": "Информация",
+            "callback_data": "employee/menu/info/",
+            "variable": "client"
+          }
         ],
         [
-          {"text": "Парсинг", "callback_data": "employee/menu/parsing/", "variable": "employee_parsing"}
+          {
+            "text": "Парсинг",
+            "callback_data": "employee/menu/parsing/",
+            "variable": "employee_parsing"
+          }
         ],
         [
-          {"text": "Команды", "callback_data": "employee/menu/commands/", "variable": "employee"}
+          {
+            "text": "Команды",
+            "callback_data": "employee/menu/commands/",
+            "variable": "employee"
+          }
         ]
       ],
       "EmployeeMenuInfoNull": [
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "employee/menu/"
+          }
         ]
       ],
       "EmployeeMenuFolder": [
         [
-          {"text": "$title", "callback_data": "employee/menu/folder/$folder_id/", "cycle": "folder_cycle", "row_width": 2}
+          {
+            "text": "$title",
+            "callback_data": "employee/menu/folder/$folder_id/",
+            "cycle": "folder_cycle",
+            "row_width": 2
+          }
         ],
         [
-          {"text": "⬆\uFE0FКатегории⬆\uFE0F | ⬇\uFE0FЗаметки⬇\uFE0F", "callback_data": "0"}
+          {
+            "text": "⬆️Категории⬆️ | ⬇️Заметки⬇️",
+            "callback_data": "0"
+          }
         ],
         [
-          {"text": "$title", "callback_data": "employee/menu/note/$note_id/", "cycle": "note_cycle", "row_width": 2}
+          {
+            "text": "$title",
+            "callback_data": "employee/menu/note/$note_id/",
+            "cycle": "note_cycle",
+            "row_width": 2
+          }
         ],
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/folder/$parent_folder_id/", "variable": "back_to_parent_folder"},
-          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/", "variable": "back_to_menu"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "employee/menu/folder/$parent_folder_id/",
+            "variable": "back_to_parent_folder"
+          },
+          {
+            "text": "Назад 🔙",
+            "callback_data": "employee/menu/",
+            "variable": "back_to_menu"
+          }
         ]
       ],
       "EmployeeMenuNote": [
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/folder/$parent_folder_id/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "employee/menu/folder/$parent_folder_id/"
+          }
         ]
       ],
       "EmployeeMenuCommands": [
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "employee/menu/"
+          }
         ]
       ],
       "EmployeeMenuParsing": [
         [
-          {"text": "▶\uFE0F Начать парсинг", "callback_data": "employee/menu/parsing/on/", "variable": "off"},
-          {"text": "⏸ Остановить парсинг", "callback_data": "employee/menu/parsing/off/", "variable": "on"}
+          {
+            "text": "▶️ Начать парсинг",
+            "callback_data": "employee/menu/parsing/on/",
+            "variable": "off"
+          },
+          {
+            "text": "⏸ Остановить парсинг",
+            "callback_data": "employee/menu/parsing/off/",
+            "variable": "on"
+          }
         ],
         [
-          {"text": "Назад \uD83D\uDD19", "callback_data": "employee/menu/"}
+          {
+            "text": "Назад 🔙",
+            "callback_data": "employee/menu/"
+          }
         ]
       ]
     },
     "addition": {
-      "curr_info_list": "<b>$title</b>: <i>$value $postfix</i>\n",
+      "curr_info_list": "💰 Баланс <u>$title:</u> <b>$value $postfix</b>\n",
       "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
       "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime",
-      "chat_balance": "<blockquote expandable>Баланс чата <b>$title</b> (<code>$code_name</code>):\n$curr_info_list</blockquote>"
-    }
+      "chat_balance": "<blockquote expandable>Баланс чата <a href='$link'><b>$title</b></a> ($code_name):\n$curr_info_list</blockquote>",
+      "little_balance": "<u>$title:</u> <b>$value $postfix</b>\n"
+    },
+    "cancel": [
+      [
+        {
+          "text": "Отмена",
+          "callback_data": "$callback"
+        }
+      ]
+    ]
   },
   "en": {}
 }

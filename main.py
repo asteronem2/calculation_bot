@@ -69,7 +69,7 @@ async def telegram_message_update(message: Message):
             res = await db.fetchrow("""
                 SELECT * FROM pressure_button_table
                 WHERE
-                COALESCE(chat_pid, 1) = COALESCE((SELECT id FROM chat_table WHERE chat_id = $1 LIMIT 1), 1)
+                COALESCE(chat_pid, 1) = COALESCE((SELECT id FROM chat_table WHERE chat_id = $1 AND type = 'chat' LIMIT 1), 1)
                 AND
                 user_pid = (SELECT id FROM user_table WHERE user_id = $2 LIMIT 1);
             """, None if message.chat.type == 'private' else message.chat.id,

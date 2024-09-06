@@ -117,6 +117,8 @@ class BotInter:
     async def edit_text(self, message_obj: EditMessage):
         rres = re.sub(r'<.+?>|/n', '', message_obj.text)
         print(f'\033[1;36mEDIT BOT: \033[1;32m{rres}\033[0;0m')
+        if message_obj.markup == (None,):
+            message_obj.markup = None
         await self.bot.edit_message_text(
             chat_id=message_obj.chat_id,
             text=message_obj.text,

@@ -2,6 +2,8 @@ import json
 import re
 from string import Template
 
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import NextCallbackMessageCommand
@@ -47,24 +49,49 @@ class CurrChangeTitleCommand(NextCallbackMessageCommand):
                 WHERE id = $1;
             """, self.pressure_info['id'])
 
-            message_obj = await self.generate_send_message(title1=res['title'], title2=self.text_low)
+            # message_obj = await self.generate_send_message(title1=res['title'], title2=self.text_low)
+            # await self.bot.send_text(message_obj)
+            # await self.bot.delete_message(
+            #     chat_id=self.chat.id,
+            #     message_id=self.press_message_id
+            # )
+            message_obj = await self.generate_send_message(stage=1,title1=res['title'], title2=self.text_low, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
+            message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+            await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['CurrChangeTitleCommand']).substitute(
-            title1=kwargs['title1'].upper(),
-            title2=kwargs['title2'].upper()
-        )
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['CurrChangeTitleCommand']).substitute(
+                title1=kwargs['title1'].upper(),
+                title2=kwargs['title2'].upper()
+            )
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_thread_id=self.topic
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic
+            )
+        else:
+            text = Template(self.global_texts['message_command']['EditCurrencyCommand']).substitute(
+                title=self.text_low.upper()
+            )
+            markup = markup_generate(
+                self.buttons['EditCurrencyEdit'],
+                curr_id=kwargs['curr_id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
+
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -132,30 +159,55 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
                 WHERE id = $1;
             """, self.pressure_info['id'])
 
-            message_obj = await self.generate_send_message(title=res['title'], value=new_value, res=res)
+            # message_obj = await self.generate_send_message(title=res['title'], value=new_value, res=res)
+            # await self.bot.send_text(message_obj)
+            # await self.bot.delete_message(
+            #     chat_id=self.chat.id,
+            #     message_id=self.press_message_id
+            # )
+            message_obj = await self.generate_send_message(stage=1, title=res['title'], value=new_value, res=res, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
+            message_obj2 = await self.generate_send_message(stage=2, title=res['title'], res=res, **kwargs)
+            await self.bot.send_text(message_obj2)
+
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.texts['send']['CurrChangeValueCommand']).substitute(
-            title=kwargs['title'],
-            value=float_to_str(kwargs['value'], kwargs['res']['rounding'])
-        )
+        if kwargs['stage'] == 1:
+            text = Template(self.texts['send']['CurrChangeValueCommand']).substitute(
+                title=kwargs['title'],
+                value=float_to_str(kwargs['value'], kwargs['res']['rounding'])
+            )
 
-        pin, thread = False, self.topic
+            pin, thread = False, self.topic
 
-        if self.db_chat['pin_balance'] is True:
-            pin, thread = True, self.db_chat['main_topic']
+            if self.db_chat['pin_balance'] is True:
+                pin, thread = True, self.db_chat['main_topic']
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_thread_id=thread,
-            pin=pin
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=thread,
+                pin=pin
+            )
+        else:
+            text = Template(self.global_texts['message_command']['EditCurrencyCommand']).substitute(
+                title=kwargs['title'].upper()
+            )
+            markup = markup_generate(
+                self.buttons['EditCurrencyEdit'],
+                curr_id=kwargs['res']['id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -206,24 +258,43 @@ class CurrChangePostfixCommand(NextCallbackMessageCommand):
                 WHERE id = $2;
             """, new_postfix, kwargs['curr_id'])
 
-            message_obj = await self.generate_send_message(title=res['title'], postfix=new_postfix)
+            message_obj = await self.generate_send_message(stage=1, title=res['title'], postfix=new_postfix)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.texts['send']['CurrChangePostfixCommand']).substitute(
-            title=kwargs['title'],
-            postfix=kwargs['postfix']
-        )
+            message_obj2 = await self.generate_send_message(stage=2, res=res, **kwargs)
+            await self.bot.send_text(message_obj2)
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_thread_id=self.topic
-        )
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.texts['send']['CurrChangePostfixCommand']).substitute(
+                title=kwargs['title'],
+                postfix=kwargs['postfix']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic
+            )
+        else:
+            text = Template(self.global_texts['message_command']['EditCurrencyCommand']).substitute(
+                title=kwargs['res']['title'].upper()
+            )
+            markup = markup_generate(
+                self.buttons['EditCurrencyEdit'],
+                curr_id=kwargs['res']['id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -291,31 +362,54 @@ class CurrCalculationCommand(NextCallbackMessageCommand):
                 expression=self.text_low
             )
 
-            message_obj = await self.generate_send_message(res=res, after_value=after_value, **kwargs)
+            message_obj = await self.generate_send_message(stage=1, res=res, after_value=after_value, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
+            message_obj2 = await self.generate_send_message(stage=2, res=res, **kwargs)
+            await self.bot.send_text(message_obj2)
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
-            title=kwargs['res']['title'].upper(),
-            value=float_to_str(kwargs['after_value'], kwargs['res']['rounding']),
-            postfix=kwargs['res']['title']
-        )
+        if kwargs['stage'] == 1:
+            text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+                title=kwargs['res']['title'].upper(),
+                value=float_to_str(kwargs['after_value'], kwargs['res']['rounding']),
+                postfix=kwargs['res']['title']
+            )
 
-        pin, thread = False, self.topic
+            pin, thread = False, self.topic
 
-        if self.db_chat['pin_balance'] is True:
-            pin, thread = True, self.db_chat['main_topic']
+            if self.db_chat['pin_balance'] is True:
+                pin, thread = True, self.db_chat['main_topic']
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_thread_id=thread,
-            pin=pin
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=thread,
+                pin=pin
+            )
+        else:
+            text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+                title=kwargs['res']['title'].upper(),
+                value=float_to_str(kwargs['res']['value'], kwargs['res']['rounding']),
+                postfix=kwargs['res']['postfix']
+            )
+            markup = markup_generate(
+                self.buttons['CurrencyBalanceCommand'],
+                curr_id=kwargs['res']['id'],
+                chat_id=kwargs['res']['chat_pid'],
+                rounding=kwargs['res']['rounding'],
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -400,15 +494,15 @@ class AddressChangeMinValueCommand(NextCallbackMessageCommand):
 
 class AdminChatChangeCodeName(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/chat/([^/]+)/change_code_name/', self.cdata)
+        rres1 = re.fullmatch(r'admin/chat/([0-9]+)/change_code_name/', self.cdata)
         if rres1:
-            if self.text_low.count(' '):
-                await self.process(error='error')
-                return True
-            else:
-                chat_pk = int(rres1.group(1))
-                await self.process(chat_pk=chat_pk)
-                return True
+            # if self.text_low.count(' '):
+            #     await self.process(error='error')
+            #     return True
+            # else:
+            chat_pk = int(rres1.group(1))
+            await self.process(chat_pk=chat_pk)
+            return True
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
@@ -431,28 +525,78 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
                 WHERE id = $2;
             """, new_code_name, kwargs['chat_pk'])
 
-            message_obj = await self.generate_send_message(new_code_name=new_code_name, **kwargs)
+            message_obj = await self.generate_send_message(stage=1, new_code_name=new_code_name, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
+            message_obj2 = await self.generate_send_message(stage=2, new_code_name=new_code_name, **kwargs)
+            await self.bot.send_text(message_obj2)
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM chat_table
-            WHERE id = $1;
-        """, kwargs['chat_pk'])
+        if kwargs['stage'] == 1:
+            res = await self.db.fetchrow("""
+                SELECT * FROM chat_table
+                WHERE id = $1;
+            """, kwargs['chat_pk'])
 
-        text = Template(self.send_texts['AdminChatChangeCodeName']).substitute(
-            title=res['title'],
-            code_name=res['code_name']
-        )
+            text = Template(self.send_texts['AdminChatChangeCodeName']).substitute(
+                title=res['title'],
+                code_name=res['code_name']
+            )
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res = await self.db.fetchrow("""
+                SELECT * FROM chat_table
+                WHERE id = $1;
+            """, kwargs['chat_pk'])
+
+            text = Template(self.call_edit_texts['AdminChat']).substitute(
+                title=res['title'],
+                link=res['link'],
+                code_name=res['code_name']
+            )
+
+            variable_list = []
+
+            markup_kwargs = {
+                'chat_pk': kwargs['chat_pk']
+            }
+
+            if res['locked'] is False:
+                variable_list.append('lock')
+            else:
+                variable_list.append('unlock')
+
+            if res['super'] is True:
+                variable_list.append('unset_super')
+            else:
+                variable_list.append('set_super')
+
+            if res['tag']:
+                variable_list.append('change_tag')
+                markup_kwargs['tag'] = res['tag']
+            else:
+                variable_list.append('set_tag')
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminChat'],
+                variable=variable_list,
+                **markup_kwargs
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -466,7 +610,7 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
         )
 
 
-class AdminChatSetTag(NextCallbackMessageCommand):
+class AdminChatSetTag(AdminChatChangeCodeName):
     async def define(self):
         rres1 = re.fullmatch(r'admin/chat/([^/]+)/set_tag/', self.cdata)
         if rres1:
@@ -495,7 +639,7 @@ class AdminChatSetTag(NextCallbackMessageCommand):
             tag = self.text_low.replace('/', '\\')
 
             res = await self.db.fetch("""
-                SELECT * FROM chat_table
+                SELECT * FROM note_table
                 WHERE tag = $1;
             """, tag)
 
@@ -511,31 +655,37 @@ class AdminChatSetTag(NextCallbackMessageCommand):
                 UPDATE chat_table
                 SET tag = $1
                 WHERE id = $2;
-            """, tag, kwargs['chat_pk'])
+            """, tag if tag != '*' else None, kwargs['chat_pk'])
 
-            message_obj = await self.generate_send_message(**kwargs)
+            message_obj = await self.generate_send_message(stage=1, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
+            message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+            await self.bot.send_text(message_obj2)
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM chat_table
-            WHERE id = $1;
-        """, kwargs['chat_pk'])
+        if kwargs['stage'] == 1:
+            res = await self.db.fetchrow("""
+                SELECT * FROM chat_table
+                WHERE id = $1;
+            """, kwargs['chat_pk'])
 
-        text = Template(self.send_texts['AdminChatSetTag']).substitute(
-            title=res['title'],
-            code_name=res['code_name'],
-            tag=res['tag'] if res['tag'] else 'отсутствует'
-        )
+            text = Template(self.send_texts['AdminChatSetTag']).substitute(
+                title=res['title'],
+                code_name=res['code_name'],
+                tag=res['tag'] if res['tag'] else 'отсутствует'
+            )
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            return await AdminChatChangeCodeName.generate_send_message(self, **kwargs)
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -549,7 +699,7 @@ class AdminChatSetTag(NextCallbackMessageCommand):
         )
 
 
-class AdminChatChangeTag(NextCallbackMessageCommand):
+class AdminChatChangeTag(AdminChatChangeCodeName):
     async def define(self):
         rres1 = re.fullmatch(r'admin/chat/([^/]+)/change_tag/', self.cdata)
         if rres1:
@@ -578,7 +728,7 @@ class AdminChatChangeTag(NextCallbackMessageCommand):
             tag = self.text_low.replace('/', '\\')
 
             res = await self.db.fetch("""
-                SELECT * FROM chat_table
+                SELECT * FROM note_table
                 WHERE tag = $1;
             """, tag)
 
@@ -594,31 +744,37 @@ class AdminChatChangeTag(NextCallbackMessageCommand):
                 UPDATE chat_table
                 SET tag = $1
                 WHERE id = $2;
-            """, tag, kwargs['chat_pk'])
+            """, tag if tag != '*' else None, kwargs['chat_pk'])
 
-            message_obj = await self.generate_send_message(tag=tag, **kwargs)
+            message_obj = await self.generate_send_message(stage=1, tag=tag, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
+            message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+            await self.bot.send_text(message_obj2)
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM chat_table
-            WHERE id = $1;
-        """, kwargs['chat_pk'])
+        if kwargs['stage'] == 1:
+            res = await self.db.fetchrow("""
+                SELECT * FROM chat_table
+                WHERE id = $1;
+            """, kwargs['chat_pk'])
 
-        text = Template(self.send_texts['AdminChatChangeTag']).substitute(
-            title=res['title'],
-            code_name=res['code_name'],
-            tag=res['tag'] if res['tag'] else 'отсутствует'
-        )
+            text = Template(self.send_texts['AdminChatChangeTag']).substitute(
+                title=res['title'],
+                code_name=res['code_name'],
+                tag=res['tag'] if res['tag'] else 'отсутствует'
+            )
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            return await AdminChatChangeCodeName.generate_send_message(self, **kwargs)
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -680,24 +836,145 @@ class AdminTagChangeTag(NextCallbackMessageCommand):
                 WHERE tag = $2;
             """, new_tag, old_tag)
 
-            message_obj = await self.generate_send_message(new_tag=new_tag, old_tag=old_tag, **kwargs)
+            message_obj = await self.generate_send_message(stage=1, new_tag=new_tag, old_tag=old_tag)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
+            message_obj2 = await self.generate_send_message(stage=2, tag=new_tag)
+            await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminTagChangeTag']).substitute(
-            old_tag=kwargs['old_tag'],
-            new_tag=kwargs['new_tag']
-        )
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminTagChangeTag']).substitute(
+                old_tag=kwargs['old_tag'],
+                new_tag=kwargs['new_tag']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            tag = kwargs['tag']
+            text = Template(self.call_edit_texts['AdminTag']).substitute(
+                tag=tag
+            )
+
+            res = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE tag = $1;
+            """, tag)
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminTag'],
+                tag=tag,
+                folder_id=res['id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['TagMaxLen32']).substitute()
 
         return TextMessage(
             chat_id=self.chat.id,
             text=text
         )
+
+
+class AdminTagCreateTag(NextCallbackMessageCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/tag/create_tag/', self.cdata)
+        if rres:
+            if len(self.text_low) > 32:
+                await self.process(error='to_many_symbols')
+                return True
+            else:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        tag = self.text_low.replace('/', '\\')
+
+        if kwargs.get('error'):
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+        else:
+            res = await self.db.fetch("""
+                SELECT * FROM note_table
+                WHERE tag = $1;
+            """, tag)
+
+            if not res:
+                await self.db.execute("""
+                    INSERT INTO note_table
+                    (id, user_pid, title, type, parent_id, tag)
+                    VALUES
+                    ((SELECT MAX(id) from note_table) + 1, $1, $2, 'folder', (SELECT MAX(id) from note_table) + 1, $3)
+                """, self.db_user['id'], tag, tag)
+                message_obj = await self.generate_send_message(stage=1, tag=tag)
+                await self.bot.send_text(message_obj)
+                await self.bot.delete_message(
+                    chat_id=self.chat.id,
+                    message_id=self.press_message_id
+                )
+            else:
+                pass
+
+
+        message_obj2 = await self.generate_send_message(stage=2, tag=tag)
+        await self.bot.send_text(message_obj2)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminTagCreateTag']).substitute(
+                tag=kwargs['tag']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            tag = kwargs['tag']
+            text = Template(self.call_edit_texts['AdminTag']).substitute(
+                tag=tag
+            )
+
+            res = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE tag = $1;
+            """, tag)
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminTag'],
+                tag=tag,
+                folder_id=res['id']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.global_texts['error']['TagMaxLen32']).substitute()
@@ -743,20 +1020,62 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
                             AND access_level <> 'admin';
                     """, kwargs['type_'], i)
 
-            message_obj = await self.generate_send_message(**kwargs)
+            message_obj = await self.generate_send_message(stage=1, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminEmployeesAdd']).substitute()
+            message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+            await self.bot.send_text(message_obj2)
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminEmployeesAdd']).substitute()
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res = await self.db.fetch("""
+                SELECT * FROM user_table;
+            """)
+
+            employees = ''
+
+            employees_parsing = ''
+
+            clients = ''
+
+            for i in res:
+                acs_lvl = i['access_level']
+                first_name = i["first_name"] if i["first_name"] else "Без имени"
+                username = ('@' + i["username"]) if i["username"] else i["user_id"]
+                if acs_lvl == 'employee':
+                    employees += f'<b>{first_name}</b> ({username})\n'
+                elif acs_lvl == 'employee_parsing':
+                    employees_parsing += f'<b>{first_name}</b> ({username})\n'
+                elif acs_lvl == 'client':
+                    clients += f'<b>{first_name}</b> ({username})\n'
+
+            text = Template(self.call_edit_texts['AdminEmployees']).substitute(
+                employees=employees,
+                employees_parsing=employees_parsing,
+                clients=clients
+            )
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminEmployees']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -769,7 +1088,7 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
         )
 
 
-class AdminEmployeesRemove(NextCallbackMessageCommand):
+class AdminEmployeesRemove(AdminEmployeesAdd):
     async def define(self):
         rres1 = re.fullmatch(r'admin/employees/remove/([^/]+)/', self.cdata)
         if rres1:
@@ -805,12 +1124,16 @@ class AdminEmployeesRemove(NextCallbackMessageCommand):
                             AND access_level = $2;
                     """, i, kwargs['type_'])
 
-            message_obj = await self.generate_send_message(**kwargs)
+            message_obj = await self.generate_send_message(stage=1, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
+
+            message_obj2 = await AdminEmployeesAdd.generate_send_message(self, stage=2, **kwargs)
+            await self.bot.send_text(message_obj2)
+
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.send_texts['AdminEmployeesRemove']).substitute()
@@ -862,20 +1185,41 @@ class AdminDistributionPin(NextCallbackMessageCommand):
             message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=True)
             await self.bot.send_text(message_obj)
 
-        message_obj = await self.generate_send_message(**kwargs)
+        message_obj = await self.generate_send_message(stage=1, **kwargs)
         await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminDistributionPin']).substitute()
+        message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+        await self.bot.send_text(message_obj2)
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminDistributionPin']).substitute()
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res = await self.db.fetch("""
+                SELECT DISTINCT tag FROM chat_table;
+            """)
+            text = Template(self.call_edit_texts['AdminDistribution']).substitute()
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminDistribution'],
+                cycle=[{'tag': i['tag']} for i in res if i['tag']]
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -888,7 +1232,7 @@ class AdminDistributionPin(NextCallbackMessageCommand):
         )
 
 
-class AdminDistributionUnpin(NextCallbackMessageCommand):
+class AdminDistributionUnpin(AdminDistributionPin):
     async def define(self):
         rres1 = re.fullmatch(r'admin/distribution/unpin/([^/]+)/', self.cdata)
         if rres1:
@@ -919,12 +1263,15 @@ class AdminDistributionUnpin(NextCallbackMessageCommand):
             message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=False)
             await self.bot.send_text(message_obj)
 
-        message_obj = await self.generate_send_message(**kwargs)
+        message_obj = await self.generate_send_message(stage=1, **kwargs)
         await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
+
+        message_obj2 = await AdminDistributionPin.generate_send_message(self, stage=2, **kwargs)
+        await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.send_texts['AdminDistributionUnpin']).substitute()
@@ -1357,20 +1704,36 @@ class AdminChangeCommand(NextCallbackMessageCommand):
         with open('locales.json', 'w') as write_file:
             json.dump(data, write_file, ensure_ascii=False)
 
-        message_obj = await self.generate_send_message(before=before)
+        message_obj = await self.generate_send_message(stage=1, before=before)
         await self.bot.delete_message(self.chat.id, self.press_message_id)
         await self.bot.send_text(message_obj)
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminChangeCommand']).substitute(
-            before=kwargs['before'].replace('\\', ''),
-            after=self.text_low
-        )
+        message_obj2 = await self.generate_send_message(stage=2, before=before)
+        await self.bot.send_text(message_obj2)
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminChangeCommand']).substitute(
+                before=kwargs['before'].replace('\\', ''),
+                after=self.text_low
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            text = Template(self.call_edit_texts['AdminCommands']).substitute()
+            markup = markup_generate(
+                self.buttons['AdminCommands']
+            )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
 
 class AdminRevise(NextCallbackMessageCommand):

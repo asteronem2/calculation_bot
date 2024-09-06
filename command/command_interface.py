@@ -202,6 +202,7 @@ class NextCallbackMessageCommand:
         self.global_texts = self.data_locales.global_texts
         self.texts = self.data_locales.texts
         self.send_texts = self.texts['send']
+        self.call_edit_texts = self.global_texts['callback_command']['edit']
         self.buttons = self.data_locales.buttons
         self.bot = BotInteraction.BotInter()
 
