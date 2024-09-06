@@ -2277,7 +2277,7 @@ class AdminChats(CallbackQueryCommand):
             curr_info_list = ''
 
             for ii in var_res2:
-                curr_info_list += '    ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
+                curr_info_list += '    ' + Template(self.global_texts['addition']['little_balance']).substitute(
                     title=ii['title'].upper(),
                     value=float_to_str(ii['value'], ii['rounding']),
                     postfix=ii['postfix'] if ii['postfix'] else ''

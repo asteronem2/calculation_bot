@@ -367,7 +367,7 @@ class BalanceListCommand(MessageCommand):
         curr_info_list = ''
 
         for i in args[0]:
-            var = Template(self.global_texts['addition']['curr_info_list']).substitute(
+            var = Template(self.global_texts['addition']['little_balance']).substitute(
                 title=i['title'].upper(),
                 value=float_to_str(i['value'], i['rounding']),
                 postfix=i['postfix'] if i['postfix'] else ''

@@ -26,8 +26,8 @@
       "CreateCurrencyCommand": "Создана валюта <b>«$title»</b> со значением <b>$value $postfix</b>",
       "EditCurrencyCommand": "Меню валюты <b>$title</b>",
       "EditChatThemeCommand": "<b>Меню настройки чата/темы</b>",
-      "BalanceListCommand": "<b>Балансы всех валют чата:</b>\n<blockquote expandable>$curr_info_list</blockquote>",
-      "CurrencyBalance": "Баланс <b>$title</b>: <i>$value $postfix</i>",
+      "BalanceListCommand": "<b>\uD83D\uDCB0 Балансы всех валют чата:</b>\n<blockquote expandable>$curr_info_list</blockquote>",
+      "CurrencyBalance": "\uD83D\uDCB0 Баланс <u>$title:</u> <b>$value $postfix</b>",
       "CurrencyCommand": "CurrencyBalance",
       "CurrencyCalculationCommand": "CurrencyBalance",
       "CalculationCommand": "<b>Выберите валюту, с которой желаете произвести калькуляцию</b>\n<i>$expression</i>",
@@ -605,7 +605,7 @@
         ],
         [
           {
-            "text": "Заметки",
+            "text": "\uD83D\uDCDD Заметки",
             "callback_data": "admin/folder/0/"
           },
           {
@@ -842,11 +842,11 @@
       "AdminFolder": [
         [
           {
-            "text": "Создать категорию",
+            "text": "➕\uD83D\uDDC2 Категория",
             "callback_data": "admin/folder/$folder_id/create_folder/"
           },
           {
-            "text": "Создать заметку",
+            "text": "➕\uD83D\uDCDD Заметка",
             "callback_data": "admin/folder/$folder_id/create_note/"
           }
         ],
@@ -860,7 +860,7 @@
         ],
         [
           {
-            "text": "⬆️Категории⬆️ | ⬇️Заметки⬇️",
+            "text": "⬆️\uD83D\uDDC2 Категории⬆️ | ⬇️\uD83D\uDCDD Заметки⬇️",
             "callback_data": "0"
           }
         ],
@@ -1278,7 +1278,7 @@
       "curr_info_list": "💰 Баланс <u>$title:</u> <b>$value $postfix</b>\n",
       "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
       "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime",
-      "chat_balance": "<blockquote expandable>Баланс чата <a href='$link'><b>$title</b></a> ($code_name):\n$curr_info_list</blockquote>",
+      "chat_balance": "<blockquote expandable>\uD83D\uDCB0 Баланс чата <a href='$link'><b>$title</b></a> ($code_name):\n$curr_info_list</blockquote>",
       "little_balance": "<u>$title:</u> <b>$value $postfix</b>\n"
     },
     "cancel": [
