@@ -90,6 +90,17 @@ CREATE TABLE IF NOT EXISTS note_table (
     parent_id INTEGER REFERENCES note_table(id)
 );
 
+CREATE TABLE IF NOT EXISTS message_table (
+    id SERIAL PRIMARY KEY,
+    user_pid INTEGER REFERENCES user_table(id) NOT NULL,
+    chat_pid INTEGER REFERENCES chat_table(id) DEFAULT NULL,
+    message_id INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    type TEXT NOT NULL,
+    is_bot_message BOOLEAN,
+    addition TEXT
+);
+
 INSERT INTO user_table
 (id, user_id, access_level)
 VALUES

@@ -8,6 +8,7 @@ from aiogram.types.inline_query import InlineQuery
 
 import BotInteraction
 import utils
+from BotInteraction import EditMessage
 
 
 class MessageCommand:
@@ -53,6 +54,9 @@ class MessageCommand:
 
     @abstractmethod
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> EditMessage:
         pass
 
     async def _get_addition_from_db(self):
@@ -116,6 +120,21 @@ class CallbackQueryCommand:
 
     async def async_init(self):
         await self._get_addition_from_db()
+        res = await self.db.fetch("""
+            SELECT * FROM message_table
+            WHERE user_pid = $1;
+        """, self.db_user['id'])
+
+        await self.db.execute("""
+            DELETE FROM message_table
+            WHERE user_pid = $1;
+        """, self.db_user['id'])
+
+        for i in res:
+            await self.bot.delete_message(
+                chat_id=self.db_user['user_id'],
+                message_id=i['message_id']
+            )
 
     @abstractmethod
     async def define(self):

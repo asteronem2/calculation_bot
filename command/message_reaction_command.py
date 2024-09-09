@@ -3,9 +3,11 @@ from command.command_interface import MessageReactionCommand
 
 class CancelReaction(MessageReactionCommand):
     async def define(self):
-        if self.emoji == '👎':
-            await self.process()
-            return True
+        if self.chat.type == 'supergroup':
+            if self.db_user['access_level'] in ['admin', 'employee']:
+                if self.emoji == '👎':
+                    await self.process()
+                    return True
 
     async def process(self, *args, **kwargs) -> None:
         res = await self.db.fetch("""
@@ -23,8 +25,9 @@ class CancelReaction(MessageReactionCommand):
             JOIN chat_table ON currency_table.chat_pid = chat_table.id 
             WHERE chat_table.chat_id = $1
                 AND story_table.status = TRUE
-                AND chat_table.type = 'chat';
-        """, self.chat.id)
+                AND chat_table.type = 'chat'
+                AND story_table.message_id = $2;
+        """, self.chat.id, self.message_id)
 
         if len(res) == 0:
             return
@@ -50,3 +53,27 @@ class CancelReaction(MessageReactionCommand):
                     chat_id=self.chat.id,
                     message_id=self.message_id
                 )
+
+
+class DeleteNote(MessageReactionCommand):
+    async def define(self):
+        if self.db_user['access_level'] == 'admin':
+            if self.emoji == '💔':
+                res = await self.db.fetchrow("""
+                    SELECT * FROM message_table
+                    WHERE type = 'note' AND message_id = $1;
+                """, self.message_id)
+                if res:
+                    await self.process(res=res)
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM note_table
+            WHERE id = $1;
+        """, int(kwargs['res']['addition']))
+
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.message_id
+        )

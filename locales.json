@@ -17,7 +17,8 @@
       "MinValueMustBeFloat": "<b>Минимальное значение для поступлений должно быть числом</b>",
       "CodeNameCantWithSpace": "<b>Новое кодовое название должно быть без пробелов</b>",
       "TagCantWithSpace": "<b>Тег должен быть без пробелов</b>",
-      "TagMaxLen32": "<b>Максимальная длина тега 32 символа</b>"
+      "TagMaxLen32": "<b>Максимальная длина тега 32 символа</b>",
+      "NotFound": "По данному запросу ничего не найдено"
     },
     "message_command": {
       "StartCommand": "<b>Приветствую тебя, $first_name, это бот для калькуляции</b>",
@@ -45,7 +46,8 @@
       "TrackingCommand": "<b>Отслеживание включено</b>",
       "OffTrackingCommand": "<b>Отслеживание отключено</b>",
       "AdminMenuCommand": "<b>Данное меню позволяет управлять ботом, чатами, сотрудниками и командами:</b>",
-      "EmployeeMenuCommand": "<b>Меню:</b>"
+      "EmployeeMenuCommand": "<b>Меню:</b>",
+      "FindCommand": "<b>По вашему запросу найдено:</b>"
     },
     "keywords": {
       "StartCommand": "/start",
@@ -119,7 +121,7 @@
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "AdminFolder": "<b>Категория заметок $folder_title</b>\n$notes",
-        "AdminNote": "Название заметки: <b>$title</b>\n<blockquote expandable>$text</blockquote>",
+        "AdminNote": "$text",
         "AdminCreateFolder": "<b>Укажите название новой категории в $title</b>",
         "AdminCreateNote": "<b>Напишите текст новой заметки в $title</b>",
         "AdminNoteDelete1": "<b>Вы уверены?</b>",
@@ -860,23 +862,21 @@
         ],
         [
           {
-            "text": "⬆️\uD83D\uDDC2 Категории⬆️ | ⬇️\uD83D\uDCDD Заметки⬇️",
-            "callback_data": "0"
-          }
-        ],
-        [
-          {
-            "text": "$note_title",
-            "callback_data": "admin/note/$note_id/",
-            "cycle": "cycle_note",
-            "row_width": 2
-          }
-        ],
-        [
-          {
             "text": "Удалить категорию",
             "callback_data": "admin/folder/$folder_id/delete/1/",
             "variable": "delete"
+          }
+        ],
+        [
+          {
+            "text": "Свернуть заметки",
+            "callback_data": "admin/folder/$folder_id/collapse/",
+            "variable": "collapse"
+          },
+          {
+            "text": "Развернуть заметки",
+            "callback_data": "admin/folder/$folder_id/expand/",
+            "variable": "expand"
           }
         ],
         [

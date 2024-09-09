@@ -1,13 +1,15 @@
 import datetime
+import inspect
 import re
+import sys
 from string import Template
 
-import aiogram
+from aiogram.types import InlineKeyboardMarkup as IMarkup, InlineKeyboardButton as IButton
 
 import BotInteraction
 from command.command_interface import MessageCommand
 
-from BotInteraction import TextMessage
+from BotInteraction import TextMessage, EditMessage
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
     story_generate
 
@@ -1116,6 +1118,131 @@ class AdminMenuCommand(MessageCommand):
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
+
+class AdminChangeNote(MessageCommand):
+    async def define(self):
+        if self.chat.type == 'private':
+            if self.db_user['access_level'] == 'admin':
+                if self.message.quote:
+                    res = await self.db.fetchrow("""
+                        SELECT * FROM message_table
+                        WHERE type = 'note'
+                            AND is_bot_message = TRUE
+                            AND message_id = $1;
+                    """, self.message.reply_to_message.message_id)
+                    if res:
+                        await self.process(res=res)
+                        return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, int(kwargs['res']['addition']))
+
+        new_text = res['text'].replace(self.message.quote.text, self.text)
+
+        await self.db.execute("""
+            UPDATE note_table
+            SET text = $1
+            WHERE id = $2;
+        """, new_text, res['id'])
+
+        message_obj = await self.generate_edit_message(res=res)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> EditMessage:
+        new_res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['res']['id'])
+
+        text = new_res['text']
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.message.reply_to_message.message_id
+        )
+
+
+class FindCommand(MessageCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            from main import check_define
+            cls_list = []
+            self_module = sys.modules[__name__]
+            for name, obj in inspect.getmembers(self_module, inspect.isclass):
+                if obj.__dict__['__module__'] == self_module.__dict__['__name__']:
+                    if obj != FindCommand:
+                        cls_list.append(obj)
+
+            if await check_define(cls_list, MessageCommand, self.message) is None:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res1 = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE id <> parent_id;
+        """)
+
+        markup = []
+
+        word = self.text_low
+        len_word = len(word)
+        if len_word >= 3:
+            patterns_list = [word[:i] + '.' + word[i+1:] for i in range(len_word)]
+        else:
+            patterns_list = [word]
+
+        for i in res1:
+            string = i['title'].lower().strip()
+            find = False
+            for patt in patterns_list:
+                if re.search(patt, string):
+                    find = True
+                    break
+            if find is True:
+                note_type = i['type']
+                type_text = 'Заметка' if note_type == 'note' else 'Категория'
+                note_title = i['title']
+                note_id = i['id']
+                markup.append([IButton(text=f'{type_text} {note_title}', callback_data=f'admin/{note_type}/{note_id}/')])
+
+        if len(markup) == 0:
+            message_obj = await self.generate_error_message()
+        else:
+            message_obj = await self.generate_send_message(markup=markup)
+
+        await self.bot.send_text(message_obj)
+
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.texts['FindCommand']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=IMarkup(inline_keyboard=kwargs['markup']),
+            destroy_timeout=30
+        )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['NotFound']).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            destroy_timeout=30
+        )
 
 
 # Команды для сотрудников в приватном чате
