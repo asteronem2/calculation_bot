@@ -57,8 +57,6 @@ async def check_define(cls_list: list, interface_class, obj):
 @dispatcher.message()
 async def telegram_message_update(message: Message):
     try:
-        print(message.entities)
-        utils.entities_to_html(message.text, message.entities)
         if message.content_type in ['text', 'photo']:
             t1 = time.time()
             print(f'\n\n\033[1;36mMESSAGE {message.from_user.username}: \033[1;32m{message.text}\033[0;0m')

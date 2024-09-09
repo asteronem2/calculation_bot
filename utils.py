@@ -508,7 +508,8 @@ def detail_generate(story_items: List[Record], chat_id: int, days: int = 1) -> s
 
 def entities_to_html(text: str, entities: List[aiogram.types.MessageEntity]) -> str:
     plus_len = 0
-
+    if not entities:
+        return text
     for ent in entities:
         if ent.type == 'bold':
             tag = 'b'
