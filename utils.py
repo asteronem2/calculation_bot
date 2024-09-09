@@ -506,6 +506,52 @@ def detail_generate(story_items: List[Record], chat_id: int, days: int = 1) -> s
     return string
 
 
+def entities_to_html(text: str, entities: List[aiogram.types.MessageEntity]) -> str:
+    plus_len = 0
+
+    for ent in entities:
+        if ent.type == 'bold':
+            tag = 'b'
+            pll1 = 1
+            pll2 = 1
+        elif ent.type == 'italic':
+            tag = 'i'
+            pll1 = 1
+            pll2 = 1
+        elif ent.type == 'underline':
+            tag = 'u'
+            pll1 = 1
+            pll2 = 1
+        elif ent.type == 'strikethrough':
+            tag = 's'
+            pll1 = 1
+            pll2 = 1
+        elif ent.type == 'code':
+            tag = 'code'
+            pll1 = 4
+            pll2 = 4
+        elif ent.type == 'blockquote':
+            tag = 'blockquote'
+            pll1 = 10
+            pll2 = 10
+        elif ent.type == 'pre':
+            tag = 'pre'
+            pll1 = 3
+            pll2 = 3
+        elif ent.type == 'spoiler':
+            tag = 'tg_spoiler'
+            pll1 = 10
+            pll2 = 10
+        else:
+            continue
+
+        text = text[:ent.offset+plus_len] + f'<{tag}>' + text[ent.offset+plus_len:]
+        text = text[:ent.offset+ent.length+plus_len+pll1+2] + f'</{tag}>' + text[ent.offset+ent.length+plus_len+pll1+2:]
+
+        plus_len += 5 + pll1 + pll2
+
+    return text
+
 class Tracking:
     address_list = [str]
     user_list: [Record] = None

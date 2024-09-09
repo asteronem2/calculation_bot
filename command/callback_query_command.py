@@ -2935,10 +2935,14 @@ class AdminFolder(CallbackQueryCommand):
                 WHERE id = $1;
             """, self.pressure_info['id'])
 
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
+        await self.bot.delete_message(self.chat.id, self.sent_message_id)
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
 
     async def generate_edit_message(self, send_notes: bool = True, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_send_message(self, send_notes: bool = True, *args, **kwargs) -> BotInteraction.Message:
         res1 = await self.db.fetchrow("""
             SELECT * FROM note_table
             WHERE id = $1;
@@ -3019,10 +3023,9 @@ class AdminFolder(CallbackQueryCommand):
             tag=res1['tag']
         )
 
-        return EditMessage(
+        return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id,
             markup=markup
         )
 
@@ -3038,12 +3041,9 @@ class AdminFolderCollapseExpand(AdminFolder):
 
     async def process(self, *args, **kwargs) -> None:
         type_ = kwargs['type_']
-        if type_ == 'expand':
-            message_obj = await AdminFolder.generate_edit_message(self, **kwargs, send_notes=True)
-            await self.bot.edit_text(message_obj)
-        else:
-            message_obj = await AdminFolder.generate_edit_message(self, **kwargs, send_notes=False)
-            await self.bot.edit_text(message_obj)
+        await self.bot.delete_message(self.chat.id, self.sent_message_id)
+        message_obj = await AdminFolder.generate_send_message(self, **kwargs, send_notes=False if type_ == 'collapse' else True)
+        await self.bot.send_text(message_obj)
 
 
 class AdminNote(CallbackQueryCommand):

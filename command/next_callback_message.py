@@ -7,7 +7,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import NextCallbackMessageCommand
-from utils import calculate, float_to_str, str_to_float, markup_generate
+from utils import calculate, float_to_str, str_to_float, markup_generate, entities_to_html
 
 
 class CurrChangeTitleCommand(NextCallbackMessageCommand):
@@ -1425,7 +1425,7 @@ class AdminCreateNote(NextCallbackMessageCommand):
             (user_pid, title, text, type, parent_id)
             VALUES
             ($1, $2, $3, 'note', $4);
-        """, self.db_user['id'], self.text[:17] + '...', self.text, kwargs['folder_id'])
+        """, self.db_user['id'], self.text[:17] + '...', entities_to_html(self.text, self.message.entities), kwargs['folder_id'])
 
 
         message_obj = await self.generate_send_message(stage=1, **kwargs)

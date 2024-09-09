@@ -1149,6 +1149,7 @@ class AdminChangeNote(MessageCommand):
             WHERE id = $2;
         """, new_text, res['id'])
 
+        await self.bot.delete_message(self.chat.id, self.message.message_id)
         message_obj = await self.generate_edit_message(res=res)
         await self.bot.edit_text(message_obj)
 
@@ -1175,18 +1176,19 @@ class AdminChangeNote(MessageCommand):
 
 class FindCommand(MessageCommand):
     async def define(self):
-        if self.access_level == 'admin':
-            from main import check_define
-            cls_list = []
-            self_module = sys.modules[__name__]
-            for name, obj in inspect.getmembers(self_module, inspect.isclass):
-                if obj.__dict__['__module__'] == self_module.__dict__['__name__']:
-                    if obj != FindCommand:
-                        cls_list.append(obj)
+        if self.chat.type == 'private':
+            if self.access_level == 'admin':
+                from main import check_define
+                cls_list = []
+                self_module = sys.modules[__name__]
+                for name, obj in inspect.getmembers(self_module, inspect.isclass):
+                    if obj.__dict__['__module__'] == self_module.__dict__['__name__']:
+                        if obj != FindCommand:
+                            cls_list.append(obj)
 
-            if await check_define(cls_list, MessageCommand, self.message) is None:
-                await self.process()
-                return True
+                if await check_define(cls_list, MessageCommand, self.message) is None:
+                    await self.process()
+                    return True
 
     async def process(self, *args, **kwargs) -> None:
         res1 = await self.db.fetch("""
