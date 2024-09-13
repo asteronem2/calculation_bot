@@ -119,14 +119,18 @@ class BotInter:
         print(f'\033[1;36mEDIT BOT: \033[1;32m{rres}\033[0;0m')
         if message_obj.markup == (None,):
             message_obj.markup = None
-        await self.bot.edit_message_text(
-            chat_id=message_obj.chat_id,
-            text=message_obj.text,
-            message_id=message_obj.message_id,
-            reply_markup=message_obj.markup,
-            parse_mode=self._parse_mode,
-            disable_web_page_preview=self.disable_web_page_preview
-        )
+        try:
+            await self.bot.edit_message_text(
+                chat_id=message_obj.chat_id,
+                text=message_obj.text,
+                message_id=message_obj.message_id,
+                reply_markup=message_obj.markup,
+                parse_mode=self._parse_mode,
+                disable_web_page_preview=self.disable_web_page_preview
+            )
+        except Exception as err:
+            print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+
         if message_obj.button_destroy != 0:
             asyncio.create_task(self._destroy_buttons(
                 chat_id=message_obj.chat_id,

@@ -4,8 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.48 unstable version&#10;1. После создания заметки/категории отображается корректное меню&#10;2. Изменена история">
+      <change beforePath="$PROJECT_DIR$/.idea/calculation_bot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/calculation_bot.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,8 +37,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/asteronem2/calculation_bot.git&quot;,
-    &quot;accountId&quot;: &quot;6f38d043-7951-4995-b432-217c0c5544fd&quot;
+    &quot;url&quot;: &quot;https://github.com/asteronem2/calculation_bot&quot;,
+    &quot;accountId&quot;: &quot;fbfb4a4a-f8fb-424d-a3b8-1620358941e2&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -51,8 +58,8 @@
     "Python.utils.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/ded/bots/konstantin/calculation_bot",
-    "settings.editor.selected.configurable": "proofread"
+    "last_opened_file_path": "/Users/ded/Programming/calculation_bot",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -346,6 +353,9 @@
     <option name="localTasksCounter" value="31" />
     <servers />
   </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
+  </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -370,7 +380,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.92 version&#10;Added:&#10;1. В настройках чата в меню админа есть возможность посмотреть балансы чата" />
     <MESSAGE value="0.92 version&#10;Added:&#10;1. Данные для подключения к БД теперь в .env" />
     <MESSAGE value="0.93 version&#10;Added:&#10;1. Inline калькуляция" />
     <MESSAGE value="0.94 version&#10;Added:&#10;1. Помимо чатов в админ меню добавлены &quot;Валюты&quot;&#10;2. Добавлены заметки в админ меню, в бд добавлена таблица с заметками&#10;3. В историю и детализацию добавлены ссылки на сообщения" />
@@ -395,6 +404,7 @@
     <MESSAGE value="0.9.46 unstable version&#10;1. Форматирование балансов" />
     <MESSAGE value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками" />
     <MESSAGE value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска" />
+    <MESSAGE value="0.9.48 unstable version&#10;1. После создания заметки/категории отображается корректное меню&#10;2. Изменена история" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.48 unstable version&#10;1. После создания заметки/категории отображается корректное меню&#10;2. Изменена история" />
   </component>
 </project>

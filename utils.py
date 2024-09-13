@@ -357,16 +357,18 @@ def calculate(expression: str):
         return False
 
 
-def story_generate(story_items: List[Record], chat_id: int, days: int = 1) -> str:
-    today = datetime.datetime.today().strftime('%Y.%m.%d')
+def story_generate(story_items: List[Record], chat_id: int, start_date: str= None, end_date: str=None) -> str:
+    if not start_date or not end_date:
+        start_date = datetime.datetime.today().strftime('%Y-%m-%d')
+        end_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
     link_pattern = Template(f'$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a>')
 
     current_story_items = []
 
     for i in story_items:
-        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
-        if story_datetime == today:
+        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
+        if start_date <= story_datetime <= end_date:
             if i['status'] is True:
                 expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group[1] else '.', i['expression']) if i['expression'] else None
                 current_story_items.append({
@@ -430,11 +432,8 @@ def story_generate(story_items: List[Record], chat_id: int, days: int = 1) -> st
 
     string = str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + ' --> ' + string
 
-    string += link_pattern.substitute(
-        expression=current_story_items[-1]['after_value'],
-        message_id=current_story_items[-1]['message_id'],
-        sign=' = '
-    )
+
+    string += ' = ' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0')
 
     string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
                     lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
@@ -552,6 +551,43 @@ def entities_to_html(text: str, entities: List[aiogram.types.MessageEntity]) -> 
         plus_len += 5 + pll1 + pll2
 
     return text
+
+
+def calendar(weeks: int = 4):
+    today = datetime.datetime.today()
+    today_weekday = today.weekday()
+
+    def day_delta(delta: int, date: datetime.datetime = today):
+        return date + datetime.timedelta(days=delta)
+
+    dates_list = []
+
+    start_week_date = day_delta(-today_weekday)
+    end_date = day_delta(6-today_weekday)
+    start_date = day_delta(-7*(weeks-1), start_week_date)
+
+
+    cycle_date = start_date
+    while True:
+        text = str(cycle_date.day)
+        use = True
+        if cycle_date > today:
+            use = False
+            text = ''.join([i + '\u0336' for i in text]) + '\u0336'
+
+        dates_list.append({
+            'date': str(cycle_date.strftime('%Y-%m-%d')),
+            'use': use,
+            'text': text
+        })
+
+        if cycle_date == end_date:
+            break
+
+        cycle_date = day_delta(1, cycle_date)
+
+    return dates_list
+
 
 class Tracking:
     address_list = [str]
