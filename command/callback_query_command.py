@@ -3109,7 +3109,7 @@ class AdminFolder(CallbackQueryCommand):
         if res1['id'] == res1['parent_id']:
             if res1['tag'] == 'admin':
                 variable.append('back_to_menu')
-            elif res1['tag']:
+            else:
                 variable.append('back_to_tag')
         else:
             variable.append('back_to_parent_folder')
