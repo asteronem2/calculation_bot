@@ -10,6 +10,7 @@ import BotInteraction
 from command.command_interface import MessageCommand
 
 from BotInteraction import TextMessage, EditMessage
+from command.inline_query_command import mega_eval
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
     story_generate
 
@@ -680,13 +681,17 @@ class StoryCommand(CurrencyStoryCommand):
                     return True
 
     async def process(self, *args, **kwargs) -> None:
+        chat_id = kwargs.get('chat_id')
+
+        if not chat_id:
+            chat_id = self.chat.id
 
         res = await self.db.fetch("""
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
             WHERE type = 'chat' AND chat_table.chat_id = $1; 
-        """, self.chat.id)
+        """, chat_id)
 
         if len(res) == 1:
             await super().process(
@@ -697,7 +702,7 @@ class StoryCommand(CurrencyStoryCommand):
             )
         elif len(res) == 0:
             message_obj = await self.generate_error_message()
-            self.bot.send_text(message_obj)
+            await self.bot.send_text(message_obj)
         else:
             destroy_timeout = 10
             message_obj = await self.generate_send_message(res=res, destroy_timeout=destroy_timeout, **kwargs)
@@ -714,7 +719,146 @@ class StoryCommand(CurrencyStoryCommand):
                 cycle=story_list
             )
 
-            text = Template(self.texts['StoryCommand']).substitute()
+            text = Template(self.global_texts['message_command']['StoryCommand']).substitute()
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup,
+                destroy_timeout=kwargs['destroy_timeout']
+            )
+
+    async def generate_error_message(self, *args, **kwargs):
+        text = Template(self.global_texts['error']['ZeroCurrencies']).substitute()
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+
+class CurrencyVolumeCommand(MessageCommand):
+    async def define(self):
+        if self.db_chat and self.db_chat['locked'] is False:
+            if self.access_level in ('admin', 'employee'):
+                rres = re.fullmatch(rf'(.+) +{self.keywords["VolumeCommand"]}', self.text_low.replace('е', 'ё'))
+                if rres:
+                    curr = rres.group(1)
+                    res = await self.db.fetch("""
+                        SELECT currency_table.*
+                        FROM currency_table
+                        JOIN chat_table ON chat_table.id = currency_table.chat_pid
+                        WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                    """, self.chat.id)
+
+                    for i in res:
+                        if curr == i['title']:
+                            await self.process(curr_id=i['id'], title=i['title'])
+                            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj1 = await CurrencyStoryCommand.generate_send_message(self, **kwargs)
+        await self.bot.send_text(message_obj1)
+
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND status = TRUE;
+        """, kwargs['curr_id'])
+
+        today_story = ''
+
+        today = datetime.datetime.today().strftime('%Y.%m.%d')
+
+        for i in res:
+            story_dt = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
+            if story_dt == today:
+                today_story += '+' + i['expression']
+
+        today_story = today_story.replace('++', '+').replace('+(+', '+(')
+
+        solution = mega_eval(today_story)
+
+        if not solution:
+            return await self.generate_error_message(**kwargs)
+
+        volume = solution['solution']
+
+        text = Template(self.texts['CurrencyVolumeCommand']).substitute(
+            title=kwargs['title'].upper(),
+            volume=volume
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['NoCurrencyVolumeToday']).substitute(
+            title=kwargs['title'].upper()
+        )
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+
+class VolumeCommand(CurrencyVolumeCommand):
+    async def define(self):
+        if self.db_chat and self.db_chat['locked'] is False:
+            if self.access_level in ('admin', 'employee'):
+                rres = re.fullmatch(rf'{self.keywords["VolumeCommand"]}', self.text_low.replace('е', 'ё'))
+                if rres:
+                    await self.process()
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        chat_id = kwargs.get('chat_id')
+
+        if not chat_id:
+            chat_id = self.chat.id
+
+        res = await self.db.fetch("""
+            SELECT currency_table.*
+            FROM currency_table
+            JOIN chat_table ON chat_table.id = currency_table.chat_pid
+            WHERE type = 'chat' AND chat_table.chat_id = $1; 
+        """, chat_id)
+
+        if len(res) == 1:
+            await super().process(
+                title=res[0]['title'],
+                curr_id=res[0]['id'],
+                res=res,
+                **kwargs
+            )
+        elif len(res) == 0:
+            message_obj = await self.generate_error_message()
+            await self.bot.send_text(message_obj)
+        else:
+            destroy_timeout = 10
+            message_obj = await self.generate_send_message(res=res, destroy_timeout=destroy_timeout, **kwargs)
+            await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs.get('res') and len(kwargs['res']) == 1:
+            return await super().generate_send_message(**kwargs)
+        else:
+            story_list = [{'title': i['title'], 'curr_id': i['id']} for i in kwargs['res']]
+
+            markup = markup_generate(
+                buttons=self.global_texts['buttons']['VolumeCommand'],
+                cycle=story_list
+            )
+
+            text = Template(self.global_texts['message_command']['VolumeCommand']).substitute()
 
             return TextMessage(
                 chat_id=self.chat.id,

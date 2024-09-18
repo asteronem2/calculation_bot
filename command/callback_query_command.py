@@ -7,6 +7,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import CallbackQueryCommand
+from command.inline_query_command import mega_eval
+from command.message_command import StoryCommand
 from utils import float_to_str, markup_generate, story_generate, detail_generate, calculate, calendar
 
 
@@ -1211,6 +1213,80 @@ class CurrCancelCommand(CallbackQueryCommand):
         )
 
 
+class CurrVolumeCommand(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level in ['admin', 'employee']:
+            rres = re.fullmatch(r'(?:curr|curr/ready)/volume/([0-9]+)/', self.cdata)
+            if rres:
+                curr_id = int(rres.group(1))
+                await self.process(curr_id=curr_id)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj1 = await CurrStoryCommand.generate_send_message(self, **kwargs)
+        await self.bot.send_text(message_obj1)
+
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.sent_message_id
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND status = TRUE;
+        """, kwargs['curr_id'])
+
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        today_story = ''
+
+        today = datetime.datetime.today().strftime('%Y.%m.%d')
+
+        for i in res:
+            story_dt = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
+            if story_dt == today:
+                today_story += '+' + i['expression']
+
+        today_story = today_story.replace('++', '+').replace('+(+', '+(')
+
+        solution = mega_eval(today_story)
+
+        if not solution:
+            return await self.generate_error_message(**kwargs)
+
+        volume = solution['solution']
+
+        text = Template(self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
+            title=res2['title'].upper(),
+            volume=volume
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.global_texts['error']['NoCurrencyVolumeToday']).substitute(
+            title=kwargs['title'].upper()
+        )
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+
 class CurrStoryCommand(CallbackQueryCommand):
     async def define(self):
         if self.access_level in ['admin', 'employee']:
@@ -1306,13 +1382,13 @@ class CurrStoryMenu(CallbackQueryCommand):
         start_res = await self.db.fetchrow("""
             SELECT * FROM callback_addition_table
             WHERE sent_message_id = $1
-                AND type = 'start_period';
+                AND type = 'start_story_period';
         """, self.sent_message_id)
 
         end_res = await self.db.fetchrow("""
             SELECT * FROM callback_addition_table
             WHERE sent_message_id = $1
-                AND type = 'end_period';
+                AND type = 'end_story_period';
         """, self.sent_message_id)
 
         start_date = start_res['addition_info'] if start_res else None
@@ -1390,7 +1466,7 @@ class CurrStoryPeriod(CurrStoryMenu):
         """, self.sent_message_id)
 
         if len(res) < 2:
-            type_ = kwargs['type_'] + '_period'
+            type_ = kwargs['type_'] + '_story_period'
 
             await self.db.execute("""
                 INSERT INTO callback_addition_table
@@ -1405,7 +1481,7 @@ class CurrStoryPeriod(CurrStoryMenu):
             await self.db.execute("""
                 INSERT INTO callback_addition_table
                 (chat_pid, user_pid, got_message_id, sent_message_id, type, addition_info)
-                VALUES ($1, $2, $3, $3, 'start_period', $4);
+                VALUES ($1, $2, $3, $3, 'start_story_period', $4);
             """, self.db_chat['id'], self.db_user['id'], self.sent_message_id, kwargs['date'])
 
         message_obj = await CurrStoryMenu.generate_edit_message(self, start_buttons=False, curr_id=kwargs['curr_id'])
@@ -1469,6 +1545,274 @@ class CurrGetStory(CallbackQueryCommand):
         """, kwargs['curr_id'])
 
         text = Template(self.global_texts['error']['NoCurrencyStoryToday']).substitute(
+            title=res['title'].upper()
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+
+class CurrDetailCommand(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level in ['admin', 'employee']:
+            rres = re.fullmatch(r'(?:curr|curr/ready)/detail/([0-9]+)/', self.cdata)
+            if rres:
+                curr_id = int(rres.group(1))
+                await self.process(curr_id=curr_id)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.sent_message_id
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND status = TRUE;
+        """, kwargs['curr_id'])
+
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        detail = detail_generate(story_items=res, chat_id=self.chat.id)
+
+        if detail is False:
+            return await self.generate_error_message(**kwargs)
+
+        text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
+            title=res2['title'].upper(),
+            detail=detail
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        text = Template(self.global_texts['error']['NoCurrencyDetailToday']).substitute(
+            title=res['title'].upper()
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+
+class CurrDetailMenu(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level in ['employee', 'admin']:
+            rres = re.fullmatch(r'curr/detail_menu/([0-9]+)/', self.cdata)
+            if rres:
+                curr_id = int(rres.group(1))
+                await self.process(curr_id=curr_id)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(start_buttons=True, **kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, start_buttons: bool, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        text = Template(self.edit_texts['CurrDetailMenu']).substitute(
+            title=res['title'].upper()
+        )
+
+        variable = []
+        butt_args = {}
+
+        type_ = 'start'
+
+        start_res = await self.db.fetchrow("""
+            SELECT * FROM callback_addition_table
+            WHERE sent_message_id = $1
+                AND type = 'start_detail_period';
+        """, self.sent_message_id)
+
+        end_res = await self.db.fetchrow("""
+            SELECT * FROM callback_addition_table
+            WHERE sent_message_id = $1
+                AND type = 'end_detail_period';
+        """, self.sent_message_id)
+
+        start_date = start_res['addition_info'] if start_res else None
+        end_date = end_res['addition_info'] if end_res else start_date
+
+        if start_buttons is False:
+            type_ = 'end'
+
+        if start_res:
+            variable.append('get_detail')
+            butt_args['start'] = start_date
+            butt_args['end'] = end_date
+
+        weekdays = [{
+            'weekday': i
+        } for i in ("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС")]
+
+        cycle = []
+
+        under_text = False
+        use = True if not start_date else False
+        for i in calendar():
+            i_text = i['text']
+
+            if i['date'] == start_date:
+                under_text = True
+                use = True
+
+            if under_text is True:
+                i_text = ''.join([i + '\u0331' for i in i_text])
+
+            if i['date'] == end_date:
+                under_text = False
+            if not end_res:
+                i['use'] = use if i['use'] != False else i['use']
+
+            cycle.append({
+                'text': i_text,
+                'callback' : f'curr/detail_menu/{kwargs["curr_id"]}/set/{type_}/{i["date"]}/' if i['use'] is True else
+                'None'
+            })
+
+        markup = markup_generate(
+            buttons=self.buttons['CurrDetailMenu'],
+            weekdays=weekdays,
+            cycle=cycle,
+            curr_id=kwargs['curr_id'],
+            variable=variable,
+            **butt_args
+        )
+
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class CurrDetailPeriod(CurrDetailMenu):
+    async def define(self):
+        rres = re.fullmatch(r'curr/detail_menu/([0-9]+)/set/(start|end)/([^/]+)/', self.cdata)
+        if rres:
+            curr_id = int(rres.group(1))
+            type_ = rres.group(2)
+            date = rres.group(3)
+            await self.process(curr_id=curr_id, type_=type_, date=date)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res = await self.db.fetch("""
+            SELECT * FROM callback_addition_table
+            WHERE sent_message_id = $1;
+        """, self.sent_message_id)
+
+        if len(res) < 2:
+            type_ = kwargs['type_'] + '_detail_period'
+
+            await self.db.execute("""
+                INSERT INTO callback_addition_table
+                (chat_pid, user_pid, got_message_id, sent_message_id, type, addition_info)
+                VALUES ($1, $2, $3, $3, $4, $5);
+            """, self.db_chat['id'], self.db_user['id'], self.sent_message_id, type_, kwargs['date'])
+        else:
+            await self.db.execute("""
+                DELETE FROM callback_addition_table
+                WHERE sent_message_id = $1;
+            """, self.sent_message_id)
+            await self.db.execute("""
+                INSERT INTO callback_addition_table
+                (chat_pid, user_pid, got_message_id, sent_message_id, type, addition_info)
+                VALUES ($1, $2, $3, $3, 'start_detail_period', $4);
+            """, self.db_chat['id'], self.db_user['id'], self.sent_message_id, kwargs['date'])
+
+        message_obj = await CurrDetailMenu.generate_edit_message(self, start_buttons=False, curr_id=kwargs['curr_id'])
+        await self.bot.edit_text(message_obj)
+
+
+class CurrGetDetail(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'curr/get_detail/([0-9]+)/([0-9-]+)/([0-9-]+)/', self.cdata)
+        if rres:
+            curr_id = int(rres.group(1))
+            start_date = rres.group(2)
+            end_date = rres.group(3)
+            await self.process(start_date=start_date, end_date=end_date, curr_id=curr_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM callback_addition_table
+            WHERE sent_message_id = $1;
+        """, self.sent_message_id)
+
+        await self.bot.delete_message(chat_id=self.chat.id, message_id=self.sent_message_id)
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND status = TRUE;
+        """, kwargs['curr_id'])
+
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        detail = detail_generate(story_items=res, chat_id=self.chat.id, start_date=kwargs['start_date'], end_date=kwargs['end_date'])
+
+        if detail is False:
+            return await self.generate_error_message(**kwargs)
+
+        text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
+            title=res2['title'].upper(),
+            detail=detail
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        text = Template(self.global_texts['error']['NoCurrencyDetailToday']).substitute(
             title=res['title'].upper()
         )
 

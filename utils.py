@@ -441,16 +441,18 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
     return string
 
 
-def detail_generate(story_items: List[Record], chat_id: int, days: int = 1) -> str:
-    today = datetime.datetime.today().strftime('%Y.%m.%d')
+def detail_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None) -> str:
+    if not start_date or not end_date:
+        start_date = datetime.datetime.today().strftime('%Y-%m-%d')
+        end_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
     link_pattern = Template(f'\n$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a> = $value')
 
     current_story_items = []
 
     for i in story_items:
-        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
-        if story_datetime == today:
+        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
+        if start_date <= story_datetime <= end_date:
             if i['status'] is True:
                 expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group[1] else '.', i['expression']) if i['expression'] else None
                 current_story_items.append({

@@ -4,6 +4,7 @@
       "UnknownError": "<b>Неизвестная ошибка</b>",
       "ZeroCurrencies": "<i>В данном чате отсутствуют валюты</i>",
       "NoCurrencyStoryToday": "<i>У валюты $title отсутствует история за сегодня</i>",
+      "NoCurrencyVolumeToday": "<i>У валюты $title отсутствует объём за сегодня</i>",
       "NoCurrencyDetailToday": "<i>У валюты $title отсутствует детализация за сегодня</i>",
       "AddAddressCommandNotFound": "<b>Некорректный криптоадрес</b>",
       "ZeroStory": "<i>В данном чате не было операций</i>",
@@ -33,7 +34,9 @@
       "CurrencyCalculationCommand": "CurrencyBalance",
       "CalculationCommand": "<b>Выберите валюту, с которой желаете произвести калькуляцию</b>\n<i>$expression</i>",
       "StoryCommand": "<b>Выберите валюту, у которой желаете посмотреть историю</b>",
+      "VolumeCommand": "<b>Выберите валюту, у которой желаете посмотреть объём</b>",
       "CurrencyStoryCommand": "🗄 История валюты <b>$title</b>:\n$story",
+      "CurrencyVolumeCommand": "🗄 Объём валюты <b>$title</b>:\n$volume",
       "DetailCommand": "<b>Выберите валюту, у которой желаете посмотреть детализацию</b>",
       "CurrencyDetailCommand": "🧾 Детализация валюты <b>$title</b>:\n$detail",
       "CancelCommand": "Последняя операция <i><a href='$expr_link'>$expression</a></i> отменена, значение <b>$title</b> = <i>$value $postfix</i>",
@@ -56,6 +59,7 @@
       "EditChatThemeCommand": "\\*тема",
       "BalanceListCommand": "баланс",
       "StoryCommand": "история",
+      "VolumeCommand": "объём",
       "DetailCommand": "детали",
       "CancelCommand": "отмена",
       "NullCommand": "\\*0",
@@ -86,7 +90,9 @@
         "9": "2",
         "CurrCalculationCommand": "Напишите число или выражение, которое будет добавлено к валюте <b>$title</b>",
         "CurrStoryCommand": "CurrencyStoryCommand",
+        "CurrStoryMenu": "<b>Выберите период или дату для истории валюты $title</b>",
         "CurrDetailCommand": "CurrencyDetailCommand",
+        "CurrDetailMenu": "<b>Выберите период или дату для детализации валюты $title</b>",
         "CalculationCommand": "CurrencyBalance",
         "CurrReadyStoryCommand": "CurrencyStoryCommand",
         "CurrReadyDetailCommand": "CurrencyDetailCommand",
@@ -394,11 +400,11 @@
         [
           {
             "text": "🗄 История",
-            "callback_data": "curr/story/$curr_id/"
+            "callback_data": "curr/story_menu/$curr_id/"
           },
           {
             "text": "🧾 Детализация",
-            "callback_data": "curr/detailing/$curr_id/"
+            "callback_data": "curr/detail_menu/$curr_id/"
           }
         ],
         [
@@ -429,15 +435,37 @@
           }
         ]
       ],
-      "DetailCommand": [
+      "VolumeCommand": [
         [
           {
             "text": "$title",
-            "callback_data": "curr/ready/detailing/$curr_id/",
+            "callback_data": "curr/ready/volume/$curr_id/",
             "cycle": "cycle",
             "row_width": 2
           }
         ]
+      ],
+      "CurrStoryMenu": [
+        [{"text": "Получить историю", "callback_data": "curr/get_story/$curr_id/$start/$end/", "variable": "get_story"}],
+        [{"text": "$weekday", "callback_data": "None", "cycle": "weekdays", "row_width": 7}],
+        [{"text": "$text", "callback_data": "$callback", "cycle": "cycle", "row_width": 7}],
+        [{"text": "Назад 🔙", "callback_data": "curr/balance/$curr_id/"}]
+      ],
+      "DetailCommand": [
+        [
+          {
+            "text": "$title",
+            "callback_data": "curr/ready/detail/$curr_id/",
+            "cycle": "cycle",
+            "row_width": 2
+          }
+        ]
+      ],
+      "CurrDetailMenu": [
+        [{"text": "Получить детализацию", "callback_data": "curr/get_detail/$curr_id/$start/$end/", "variable": "get_detail"}],
+        [{"text": "$weekday", "callback_data": "None", "cycle": "weekdays", "row_width": 7}],
+        [{"text": "$text", "callback_data": "$callback", "cycle": "cycle", "row_width": 7}],
+        [{"text": "Назад 🔙", "callback_data": "curr/balance/$curr_id/"}]
       ],
       "NullCommand": [
         [
@@ -666,7 +694,7 @@
           },
           {
             "text": "📊 Объём",
-            "callback_data": "admin/balance/$chat_pk/volume/"
+            "callback_data": "admin/chat/$chat_pk/volume/"
           }
         ],
         [
@@ -737,6 +765,9 @@
         ],
         [
           {"text": "Поменять тег ($tag)", "callback_data": "admin/chat/$chat_pk/change_tag/"}
+        ],
+        [
+          {"text": "Объём", "callback_data": "admin/chat/$chat_pk/volume/"}
         ],
         [
           {
