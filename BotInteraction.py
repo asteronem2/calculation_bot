@@ -5,7 +5,7 @@ import traceback
 from dataclasses import dataclass
 
 import aiogram
-from aiogram.types import Message
+from aiogram.types.reaction_type_emoji import ReactionTypeEmoji
 
 
 @dataclass
@@ -160,6 +160,17 @@ class BotInter:
             results=results,
             cache_time=1
         )
+
+    async def set_emoji(self, chat_id: int, message_id: int, emoji: str):
+        try:
+            await self.bot.set_message_reaction(
+                chat_id=chat_id,
+                message_id=message_id,
+                reaction=[ReactionTypeEmoji(emoji=emoji)]
+            )
+        except Exception as err:
+            traceback.print_exc()
+            print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
     async def _destroy_message(self, message: aiogram.types.Message, destroy_timeout: int):
         await asyncio.sleep(destroy_timeout)

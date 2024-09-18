@@ -1648,6 +1648,37 @@ class OffTrackingCommand(MessageCommand):
         pass
 
 
+class QuoteReplied(MessageCommand):
+    async def define(self):
+        if self.message.quote:
+            res = await self.db.fetchrow("""
+                SELECT * FROM message_table
+                WHERE message_id = $1
+                    AND type = 'reply1';
+            """, self.message.reply_to_message.message_id)
+            if res:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res = await self.db.fetchrow("""
+            SELECT * FROM message_table
+            WHERE message_id = $1;
+        """, self.message.reply_to_message.message_id)
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'reply2', $4);
+        """, self.db_user['id'], self.db_chat['id'], self.message.message_id, str(res['id']))
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+
 class Pass(MessageCommand):
     async def define(self):
         pass

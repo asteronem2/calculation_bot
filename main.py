@@ -127,6 +127,7 @@ async def telegram_callback_query_update(callback: CallbackQuery):
         traceback.print_exc()
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
+
 @dispatcher.message_reaction()
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
     try:

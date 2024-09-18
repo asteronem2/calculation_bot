@@ -9,6 +9,7 @@ from BotInteraction import EditMessage, TextMessage
 from command.command_interface import CallbackQueryCommand
 from command.inline_query_command import mega_eval
 from command.message_command import StoryCommand
+from main import message_command_cls
 from utils import float_to_str, markup_generate, story_generate, detail_generate, calculate, calendar
 
 
@@ -2732,7 +2733,8 @@ class AdminChats(CallbackQueryCommand):
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
             SELECT * FROM chat_table
-            WHERE type = 'chat';
+            WHERE type = 'chat'
+            ORDER BY title ASC;
         """)
 
         chat_balance_list = ''
@@ -3247,6 +3249,114 @@ class AdminChatBalance(CallbackQueryCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
+
+class AdminChatBindList(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/bind/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+        res2 = await self.db.fetch("""
+            SELECT * FROM chat_table
+            WHERE type = 'chat'
+                AND id <> $1;
+        """, kwargs['chat_pk'])
+
+        text = Template(self.edit_texts['AdminChatBindList']).substitute(
+            title=res1['title'],
+            code_name=res1['code_name']
+        )
+
+        cycle = []
+
+        for i in res2:
+            status = '⏺'
+
+            if res1['bind_chat'] == i['id']:
+                status = '✅'
+
+            cycle.append({
+                'status': status,
+                'title': i['title'],
+                'code_name': i['code_name'],
+                'chat_pk': kwargs['chat_pk'],
+                'second_chat_pk': i['id']
+            })
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminChatBindList'],
+            cycle=cycle,
+            **kwargs
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+class AdminChatBinding(AdminChatBindList):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/chat/([0-9]+)/bind/([0-9]+)/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                second_chat_pk = int(rres.group(2))
+                await self.process(chat_pk=chat_pk, second_chat_pk=second_chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_pk'])
+
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['second_chat_pk'])
+
+        first_bind = None
+        second_bind = None
+
+        if res1['bind_chat'] != res2['id'] and res2['bind_chat'] != res1['id']:
+            first_bind = res2['id']
+            second_bind = res1['id']
+
+        await self.db.execute("""
+            UPDATE chat_table
+            SET bind_chat = NULL
+            WHERE bind_chat = $1 OR bind_chat = $2;
+        """, res1['id'], res2['id'])
+
+        await self.db.execute("""
+            UPDATE chat_table
+            SET bind_chat = $1
+            WHERE id = $2;
+        """, first_bind, res1['id'])
+        await self.db.execute("""
+            UPDATE chat_table
+            SET bind_chat = $1
+            WHERE id = $2;
+        """, second_bind, res2['id'])
+
+        message_obj = await AdminChatBindList.generate_edit_message(self, **kwargs)
+        await self.bot.edit_text(message_obj)
+
 
 
 # Рассылки

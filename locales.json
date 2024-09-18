@@ -1,5 +1,10 @@
 {
   "ru": {
+    "reactions": {
+      "CancelReaction": "\uD83D\uDC4E",
+      "DeleteNote": "\uD83D\uDC94",
+      "ReplyReaction": "\uD83D\uDD4A"
+    },
     "error": {
       "UnknownError": "<b>Неизвестная ошибка</b>",
       "ZeroCurrencies": "<i>В данном чате отсутствуют валюты</i>",
@@ -118,6 +123,7 @@
         "AdminChatSetTag": "Напишите тег для чата <b>$title</b> ($code_name):",
         "AdminChatChangeTag": "Выберите новый тег для чата <b>$title</b> ($code_name):",
         "AdminChatBalance": "<b>💰 Балансы всех валют чата:</b>\n<blockquote>$balances</blockquote>",
+        "AdminChatBindList": "<b>Выберите чат, с которым желаете связать данный - $title ($code_name)</b>",
         "AdminEmployees": "<b>Список сотрудников:</b>\n<blockquote expandable>$employees</blockquote>\n<b>Список сотрудников для парсинга:</b>\n<blockquote expandable>$employees_parsing</blockquote>\n<b>Список контрагентов:</b>\n<blockquote expandable>$clients</blockquote>",
         "AdminEmployeesAdd": "<b>Укажите username с \"@\" или без, для добавления нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
@@ -770,6 +776,9 @@
           {"text": "Объём", "callback_data": "admin/chat/$chat_pk/volume/"}
         ],
         [
+          {"text": "Связать чат", "callback_data": "admin/chat/$chat_pk/bind/"}
+        ],
+        [
           {
             "text": "Назад 🔙",
             "callback_data": "admin/chats/"
@@ -831,6 +840,10 @@
             "callback_data": "admin/chat/$chat_pk/"
           }
         ]
+      ],
+      "AdminChatBindList": [
+        [{"text": "$status $title($code_name)", "callback_data": "admin/chat/$chat_pk/bind/$second_chat_pk/", "cycle": "cycle", "row_width": 1}],
+        [{"text": "Назад \uD83D\uDD19", "callback_data": "admin/chat/$chat_pk/"}]
       ],
       "AdminDistribution": [
         [

@@ -8,7 +8,7 @@ from aiogram.types.inline_query import InlineQuery
 
 import BotInteraction
 import utils
-from BotInteraction import EditMessage
+from BotInteraction import EditMessage, TextMessage
 
 
 class MessageCommand:
@@ -300,6 +300,7 @@ class MessageReactionCommand:
         self.data_locales = utils.GetLocales('reaction_command')
         self.global_texts = self.data_locales.global_texts
         self.texts = self.data_locales.texts
+        self.reactions_text = self.global_texts['reactions']
         self.buttons = self.data_locales.buttons
         self.bot = BotInteraction.BotInter()
 
@@ -314,6 +315,9 @@ class MessageReactionCommand:
 
     @abstractmethod
     async def process(self, *args, **kwargs) -> None:
+        pass
+
+    async def generate_send_message(self, *args, **kwargs) -> TextMessage:
         pass
 
     async def _get_addition_from_db(self):
