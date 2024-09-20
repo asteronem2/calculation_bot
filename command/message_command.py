@@ -11,6 +11,7 @@ from command.command_interface import MessageCommand
 
 from BotInteraction import TextMessage, EditMessage
 from command.inline_query_command import mega_eval
+from main import message_command_cls
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
     story_generate
 
@@ -75,11 +76,13 @@ class UnlockChatCommand(MessageCommand):
 
         if res['count'] != 0 and self.db_chat:
             if self.db_chat['topic'] == self.db_chat['main_topic']:
+                link = await self.bot.get_link(self.chat.id)
+                print(link)
                 await self.db.execute("""
                     UPDATE chat_table
-                    SET locked = FALSE
-                    WHERE chat_id = $1;
-                """, self.chat.id)
+                    SET locked = FALSE, link = $1
+                    WHERE chat_id = $2;
+                """, link, self.chat.id)
             else:
                 await self.db.execute("""
                     UPDATE chat_table
@@ -348,7 +351,7 @@ class BalanceListCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(rf'{self.keywords["BalanceListCommand"]}', self.text_low)
+                rres = re.fullmatch(rf'{self.keywords["BalanceListCommand"]}|{self.keywords["BalanceListCommand"]}ы', self.text_low)
                 if rres:
                     await self.process()
                     return True
@@ -530,7 +533,8 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 SELECT currency_table.*
                                 FROM currency_table
                                 JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                                WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                                WHERE type = 'chat' AND chat_table.chat_id = $1
+                                ORDER BY currency_table.title; 
                             """, self.chat.id)
                         if res:
                             answer_mode_list = re.findall(r'([^/]+?)\|', self.db_chat['answer_mode'])
@@ -579,7 +583,6 @@ class CalculationCommand(CurrencyCalculationCommand):
                                   table_name='callback_addition_table')
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-
         if kwargs.get('res') and len(kwargs['res']) == 1:
             return await super().generate_send_message(**kwargs)
         else:
@@ -690,7 +693,8 @@ class StoryCommand(CurrencyStoryCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1; 
+            WHERE type = 'chat' AND chat_table.chat_id = $1
+            ORDER BY currency_table.title; 
         """, chat_id)
 
         if len(res) == 1:
@@ -829,7 +833,8 @@ class VolumeCommand(CurrencyVolumeCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1; 
+            WHERE type = 'chat' AND chat_table.chat_id = $1
+            ORDER BY currency_table.title; 
         """, chat_id)
 
         if len(res) == 1:
@@ -957,7 +962,8 @@ class DetailCommand(CurrencyDetailCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1; 
+            WHERE type = 'chat' AND chat_table.chat_id = $1
+            ORDER BY currency_table.title; 
         """, self.chat.id)
 
         if len(res) == 1:
@@ -969,7 +975,7 @@ class DetailCommand(CurrencyDetailCommand):
             )
         elif len(res) == 0:
             message_obj = await self.generate_error_message()
-            self.bot.send_text(message_obj)
+            await self.bot.send_text(message_obj)
         else:
             destroy_timeout = 10
             message_obj = await self.generate_send_message(res=res, destroy_timeout=destroy_timeout, **kwargs)
@@ -1181,7 +1187,8 @@ class NullCommand(CurrencyNullCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1; 
+            WHERE type = 'chat' AND chat_table.chat_id = $1
+            ORDER BY currency_table.title; 
         """, self.chat.id)
 
         if len(res) == 1:
@@ -1391,6 +1398,38 @@ class FindCommand(MessageCommand):
         )
 
 
+class DistributionCommand(MessageCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            if self.chat.type == 'private':
+                rres = re.fullmatch(rf'{self.keywords["DistributionCommand"]}', self.text_low)
+                if rres:
+                    await self.process()
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_send_message()
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT DISTINCT tag FROM chat_table;
+        """)
+        text = Template(self.global_texts['callback_command']['edit']['AdminDistribution']).substitute()
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminDistribution'],
+            cycle=[{'tag': i['tag']} for i in res if i['tag']],
+            variable=['close']
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=markup
+        )
+
+
 # Команды для сотрудников в приватном чате
 class EmployeeMenuCommand(MessageCommand):
     async def define(self):
@@ -1563,17 +1602,6 @@ class AddAddressCommand(MessageCommand):
             chat_id=self.chat.id,
             text=text
         )
-
-
-# class ChangeAddressCommand(MessageCommand):
-#     async def define(self):
-#         pass
-#
-#     async def process(self, *args, **kwargs) -> None:
-#         pass
-#
-#     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-#         pass
 
 
 class TrackingCommand(MessageCommand):

@@ -3,6 +3,7 @@ import re
 from string import Template
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pydantic.v1.class_validators import all_kwargs
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
@@ -2754,6 +2755,17 @@ class AdminChats(CallbackQueryCommand):
                     postfix=ii['postfix'] if ii['postfix'] else ''
                 )
 
+            link = i['link']
+
+            if not link:
+                link = await self.bot.get_link(i['chat_id'])
+                await self.db.execute("""
+                    UPDATE chat_table
+                    SET link = $1
+                    WHERE id = $2;
+                """, link, i['id'])
+
+
             chat_balance_list += Template(self.global_texts['addition']['chat_balance']).substitute(
                 title=i['title'],
                 code_name=i['code_name'],
@@ -2837,10 +2849,25 @@ class AdminChat(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['chat_pk'])
 
+        res2 = await self.db.fetch("""
+            SELECT * FROM currency_table
+            WHERE chat_pid = $1;
+        """, kwargs['chat_pk'])
+
+        curr_info_list = ''
+
+        for i in res2:
+            curr_info_list += Template(self.global_texts['addition']['little_balance']).substitute(
+                title=i['title'].upper(),
+                value=float_to_str(i['value'], i['rounding']),
+                postfix=i['postfix'] if i['postfix'] else ''
+            )
+
         text = Template(self.edit_texts['AdminChat']).substitute(
             title=res['title'],
             link=res['link'],
-            code_name=res['code_name']
+            code_name=res['code_name'],
+            curr_info_list=curr_info_list
         )
 
         variable_list = []
@@ -3309,6 +3336,7 @@ class AdminChatBindList(CallbackQueryCommand):
             markup=markup
         )
 
+
 class AdminChatBinding(AdminChatBindList):
     async def define(self):
         if self.access_level == 'admin':
@@ -3383,7 +3411,8 @@ class AdminDistribution(CallbackQueryCommand):
 
         markup = markup_generate(
             buttons=self.buttons['AdminDistribution'],
-            cycle=[{'tag': i['tag']} for i in res if i['tag']]
+            cycle=[{'tag': i['tag']} for i in res if i['tag']],
+            variable=['back']
         )
 
         return EditMessage(
@@ -4706,36 +4735,43 @@ class AdminCommandsList(CallbackQueryCommand):
 
         if chat_type == 'private':
             if user_type == 'admin':
-                command_list = ['AdminMenuCommand']
+                command_list = [
+                    ('AdminMenuCommand', 'Меню админа')
+                ]
             elif user_type == 'employee':
                 command_list = [
-                    'AddressListCommand',
-                    'TrackingCommand',
-                    'OffTrackingCommand'
+                    ('AddressListCommand', 'Список адресов'),
+                    ('TrackingCommand', 'Вкл отслеживания'),
+                    ('OffTrackingCommand', 'Выкл отслеживания')
                 ]
         elif chat_type == 'group':
             if user_type == 'admin':
                 command_list = [
-                    'UnlockChatCommand',
-                    'LockChatCommand',
-                    'EditChatThemeCommand'
+                    ('UnlockChatCommand', 'Разблокировать чат'),
+                    ('LockChatCommand', 'Заблокировать чат'),
+                    ('EditChatThemeCommand', 'Меню настроек темы')
                 ]
             elif user_type == 'employee':
                 command_list = [
-                    'BalanceListCommand',
-                    'StoryCommand',
-                    'DetailCommand',
-                    'CancelCommand',
-                    'NullCommand'
+                    ('BalanceListCommand', 'Балансы валют чата'),
+                    ('StoryCommand', 'История валюты'),
+                    ('VolumeCommand', 'Объём валюты'),
+                    ('DetailCommand', 'Детализация валюты'),
+                    ('CancelCommand', 'Отмена последней операции'),
+                    ('NullCommand', 'Обнуление валюты')
                 ]
 
         text = Template(self.edit_texts['AdminCommandsList']).substitute()
 
         cycle = []
 
-        for key, item in self.global_texts['keywords'].items():
-            if key in command_list:
-                cycle.append({'text': item.replace('\\', ''), "title": key})
+        for i in command_list:
+            kw = self.global_texts['keywords'].get(i[0])
+            cycle.append({
+                'keyword': kw.replace('\\', ''),
+                'description': i[1],
+                'title': i[0]
+            })
 
         markup = markup_generate(
             self.buttons['AdminCommandsList'],
@@ -4784,6 +4820,7 @@ class AdminChangeCommand(CallbackQueryCommand):
         )
 
 
+# Прочее
 class AdminInstruction(CallbackQueryCommand):
     async def define(self):
         rres = re.fullmatch(r'admin/instruction/', self.cdata)

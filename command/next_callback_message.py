@@ -1760,7 +1760,6 @@ class AdminChangeCommand(NextCallbackMessageCommand):
         message_obj2 = await self.generate_send_message(stage=2, before=before)
         await self.bot.send_text(message_obj2)
 
-
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
             text = Template(self.send_texts['AdminChangeCommand']).substitute(
