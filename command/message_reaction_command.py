@@ -1,5 +1,9 @@
+import json
+from string import Template
+
 from BotInteraction import TextMessage
 from command.command_interface import MessageReactionCommand
+from utils import markup_generate
 
 
 class CancelReaction(MessageReactionCommand):
@@ -141,3 +145,75 @@ class ReplyReaction1(MessageReactionCommand):
                 WHERE id = $1
                     OR addition = $2;
             """, int(kwargs['res2']['addition']), kwargs['res2']['addition'])
+
+
+class AdminChangeEmoji(MessageReactionCommand):
+    async def define(self):
+        if self.db_user['access_level'] == 'admin':
+            res = await self.db.fetchrow("""
+                SELECT * FROM message_table
+                WHERE message_id = $1 AND type = 'change_emoji';
+            """, self.message_id)
+            if res:
+                command = res['addition']
+                await self.process(command=command)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        with open('locales.json', 'r') as read_file:
+            data = json.load(read_file)
+
+        before = data['ru']['reactions'][kwargs['command']]
+
+        data['ru']['reactions'][kwargs['command']] = self.emoji
+
+        with open('locales.json', 'w') as write_file:
+            json.dump(data, write_file, ensure_ascii=False)
+
+        await self.bot.delete_message(self.chat.id, self.message_id)
+
+        message_obj = await self.generate_send_message(stage=1, before=before, **kwargs)
+        await self.bot.send_text(message_obj)
+
+        message_obj2 = await self.generate_send_message(stage=2, **kwargs)
+        await self.bot.send_text(message_obj2)
+
+    async def generate_send_message(self, *args, **kwargs) -> TextMessage:
+        if kwargs['stage'] == 1:
+            text = Template(self.texts['AdminChangeEmoji']).substitute(
+                before=kwargs['before'],
+                after=self.emoji
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            text = Template(self.global_texts['callback_command']['edit']['AdminEmojiSettings']).substitute()
+
+            cycle = []
+
+            command_texts = {
+                'CancelReaction': 'Отмена операции',
+                'DeleteNote': 'Удаление заметки',
+                'ReplyReaction': 'Пересыл сообщений'
+            }
+
+            for key, value in self.global_texts['reactions'].items():
+                cycle.append({
+                    'text': command_texts[key],
+                    'emoji': value,
+                    'command': key
+                })
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminEmojiSettings'],
+                cycle=cycle
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )

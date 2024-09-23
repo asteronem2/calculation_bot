@@ -5,6 +5,8 @@ import traceback
 from typing import Type
 
 import aiogram
+from aiogram.enums import ReactionTypeType
+from aiogram.types import ReactionTypeEmoji
 from aiogram.types.message import Message
 from aiogram.types.callback_query import CallbackQuery
 from aiogram.types.message_reaction_updated import MessageReactionUpdated
@@ -132,6 +134,8 @@ async def telegram_callback_query_update(callback: CallbackQuery):
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
     try:
         if reaction.new_reaction:
+            if reaction.new_reaction[0].type == ReactionTypeType.CUSTOM_EMOJI:
+                return
             t1 = time.time()
             print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{reaction.new_reaction[-1].emoji}\033[0;0m')
             result: Type[MessageReactionCommand] = await check_define(reaction_command_cls, MessageReactionCommand, reaction)

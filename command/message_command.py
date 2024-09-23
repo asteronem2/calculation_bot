@@ -625,7 +625,7 @@ class CurrencyStoryCommand(MessageCommand):
 
                     for i in res:
                         if curr == i['title']:
-                            await self.process(curr_id=i['id'], title=i['title'])
+                            await self.process(curr_id=i['id'], title=i['title'], postfix=i['postfix'])
                             return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -654,7 +654,8 @@ class CurrencyStoryCommand(MessageCommand):
 
         text = Template(self.texts['CurrencyStoryCommand']).substitute(
             title=kwargs['title'].upper(),
-            story=story
+            story=story,
+            postfix=kwargs['postfix']
         )
 
         return TextMessage(

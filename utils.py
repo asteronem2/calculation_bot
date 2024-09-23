@@ -430,13 +430,15 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
                 sign=it[2]
             )
 
-    string = str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + ' --> ' + string
+    string = '<b>' + str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + '</b> --> ' + string
 
 
-    string += ' = ' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0')
+    string += ' = <b>' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0') + '</b>'
 
     string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
                     lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
+
+    string = string.replace('+', ' + ').replace('-', ' - ').replace('  ', ' ')
 
     return string
 
