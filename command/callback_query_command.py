@@ -9,7 +9,7 @@ import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import CallbackQueryCommand
 from command.inline_query_command import mega_eval
-from command.message_command import StoryCommand
+from command.message_command import StoryCommand, DistributionCommand
 from main import message_command_cls
 from utils import float_to_str, markup_generate, story_generate, detail_generate, calculate, calendar
 
@@ -3113,8 +3113,10 @@ class AdminChatSetSuper(AdminChat):
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
             UPDATE chat_table
-            SET super = TRUE
-            WHERE id = $1;
+            SET super = CASE
+                    WHEN id = $1 THEN TRUE
+                    ELSE FALSE
+                END;
         """, kwargs['chat_pk'])
 
         await self.bot.answer_clb_query(self.callback.id, 'Чат теперь супер')
@@ -3430,7 +3432,6 @@ class AdminChatBinding(AdminChatBindList):
         await self.bot.edit_text(message_obj)
 
 
-
 # Рассылки
 class AdminDistribution(CallbackQueryCommand):
     async def define(self):
@@ -3646,6 +3647,22 @@ class AdminFolder(CallbackQueryCommand):
 
         if send_notes is True:
             variable.append('collapse')
+            message_obj = TextMessage(
+                chat_id=self.chat.id,
+                text='⬇️Заметки⬇️'
+            )
+            sent_message = await self.bot.send_text(message_obj)
+            await self.db.execute("""
+                INSERT INTO message_table
+                (user_pid, message_id, text, type, is_bot_message)
+                VALUES ($1, $2, $3, $4, TRUE)
+            """,
+                                  self.db_user['id'],
+                                  sent_message.message_id,
+                                  sent_message.text,
+                                  'notes_message'
+                                  )
+
             for i in cycle_note:
                 message_obj = TextMessage(
                     chat_id=self.chat.id,
@@ -4780,7 +4797,8 @@ class AdminCommandsList(CallbackQueryCommand):
         if chat_type == 'private':
             if user_type == 'admin':
                 command_list = [
-                    ('AdminMenuCommand', 'Меню админа')
+                    ('AdminMenuCommand', 'Меню админа'),
+                    ('DistributionCommand', 'Рассылка')
                 ]
             elif user_type == 'employee':
                 command_list = [
@@ -4888,7 +4906,8 @@ class AdminEmojiSettings(CallbackQueryCommand):
         command_texts = {
             'CancelReaction': 'Отмена операции',
             'DeleteNote': 'Удаление заметки',
-            'ReplyReaction': 'Пересыл сообщений'
+            'ReplyReaction': 'Пересыл сообщений',
+            'ReplyReaction2': 'Реакция бота на пересыл'
         }
 
         for key, value in self.global_texts['reactions'].items():
@@ -4970,9 +4989,10 @@ class AdminInstruction(CallbackQueryCommand):
         markup = markup_generate(
             buttons=self.buttons['AdminInstruction']
         )
+
         return EditMessage(
             chat_id=self.chat.id,
-            text=text,
+            text=text.replace('\\', ''),
             message_id=self.sent_message_id,
             markup=markup
         )

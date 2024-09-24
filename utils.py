@@ -370,7 +370,7 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
         story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
         if start_date <= story_datetime <= end_date:
             if i['status'] is True:
-                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group[1] else '.', i['expression']) if i['expression'] else None
+                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group(1) else '.', i['expression']) if i['expression'] else None
                 current_story_items.append({
                     'type': i['expr_type'],
                     'expr': expr,
@@ -456,7 +456,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
         story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
         if start_date <= story_datetime <= end_date:
             if i['status'] is True:
-                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group[1] else '.', i['expression']) if i['expression'] else None
+                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group(1) else '.', i['expression']) if i['expression'] else None
                 current_story_items.append({
                     'type': i['expr_type'],
                     'expr': expr,

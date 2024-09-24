@@ -23,6 +23,8 @@ class TextMessage(Message):
     destroy_timeout: int = 0
     button_destroy: int = 0
     pin: bool = False
+    photo: int = None
+    reply_to_message_id: int = None
 
 
 @dataclass
@@ -64,46 +66,60 @@ class BotInter:
             """
             if TextMessage:
                 try:
-                    sent_message = await self.bot.send_message(
-                        chat_id=message_obj.chat_id,
-                        text=message_obj.text,
-                        message_thread_id=message_obj.message_thread_id,
-                        reply_markup=message_obj.markup,
-                        parse_mode=self._parse_mode,
-                        disable_notification=self.disable_notifications,
-                        disable_web_page_preview=self.disable_web_page_preview
-                    )
-                    rres = re.sub(r'<.+?>|/n', '', sent_message.text)
-                    print(f'\033[1;36mSEND BOT: \033[1;32m{rres}\033[0;0m')
-
-                    if message_obj.pin is True:
-                        await self.bot.pin_chat_message(
+                    if message_obj.photo:
+                        sent_message = await self.bot.send_photo(
                             chat_id=message_obj.chat_id,
-                            message_id=sent_message.message_id,
-                            disable_notification=True
+                            photo=message_obj.photo,
+                            caption=message_obj.text,
+                            message_thread_id=message_obj.message_thread_id,
+                            reply_markup=message_obj.markup,
+                            parse_mode=self._parse_mode,
+                            disable_notification=self.disable_notifications,
+                            reply_to_message_id=message_obj.reply_to_message_id
                         )
 
-                        try:
-                            await self.bot.delete_message(
+                    else:
+                        sent_message = await self.bot.send_message(
+                            chat_id=message_obj.chat_id,
+                            text=message_obj.text,
+                            message_thread_id=message_obj.message_thread_id,
+                            reply_markup=message_obj.markup,
+                            parse_mode=self._parse_mode,
+                            disable_notification=self.disable_notifications,
+                            disable_web_page_preview=self.disable_web_page_preview,
+                            reply_to_message_id=message_obj.reply_to_message_id
+                        )
+                        rres = re.sub(r'<.+?>|/n', '', sent_message.text)
+                        print(f'\033[1;36mSEND BOT: \033[1;32m{rres}\033[0;0m')
+
+                        if message_obj.pin is True:
+                            await self.bot.pin_chat_message(
                                 chat_id=message_obj.chat_id,
-                                message_id=sent_message.message_id + 1,
+                                message_id=sent_message.message_id,
+                                disable_notification=True
                             )
-                        except:
-                            pass
 
-                    if message_obj.destroy_timeout != 0:
-                        asyncio.create_task(self._destroy_message(
-                            message=sent_message,
-                            destroy_timeout=message_obj.destroy_timeout
-                        ))
+                            try:
+                                await self.bot.delete_message(
+                                    chat_id=message_obj.chat_id,
+                                    message_id=sent_message.message_id + 1,
+                                )
+                            except:
+                                pass
 
-                    if message_obj.button_destroy != 0:
-                        asyncio.create_task(self._destroy_buttons(
-                            chat_id=sent_message.chat.id,
-                            message_id=sent_message.message_id,
-                            destroy_timeout=message_obj.button_destroy,
-                            message_obj=message_obj
-                        ))
+                        if message_obj.destroy_timeout != 0:
+                            asyncio.create_task(self._destroy_message(
+                                message=sent_message,
+                                destroy_timeout=message_obj.destroy_timeout
+                            ))
+
+                        if message_obj.button_destroy != 0:
+                            asyncio.create_task(self._destroy_buttons(
+                                chat_id=sent_message.chat.id,
+                                message_id=sent_message.message_id,
+                                destroy_timeout=message_obj.button_destroy,
+                                message_obj=message_obj
+                            ))
 
                     return sent_message
 

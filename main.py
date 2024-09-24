@@ -12,6 +12,7 @@ from aiogram.types.callback_query import CallbackQuery
 from aiogram.types.message_reaction_updated import MessageReactionUpdated
 from aiogram.types.inline_query import InlineQuery
 
+import command.message_command
 import utils
 from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand, MessageReactionCommand
 from utils import DotEnvData, db, Tracking, GetLocales
@@ -179,6 +180,8 @@ async def main():
     while True:
         try:
             await add_all_cls()
+            message_command_cls.remove(command.message_command.QuoteReplied)
+            message_command_cls.insert(0, command.message_command.QuoteReplied)
 
             global db
             await db.connect()

@@ -1,9 +1,11 @@
 import json
+from cmath import phase
 from string import Template
 
 from BotInteraction import TextMessage
 from command.command_interface import MessageReactionCommand
-from utils import markup_generate
+from command.message_command import CurrencyCalculationCommand, CalculationCommand
+from utils import markup_generate, calculate
 
 
 class CancelReaction(MessageReactionCommand):
@@ -84,39 +86,40 @@ class DeleteNote(MessageReactionCommand):
         )
 
 
-class ReplyReaction1(MessageReactionCommand):
+class ReplyReaction(MessageReactionCommand):
     async def define(self):
         if self.chat.type == 'supergroup':
-            if self.db_user['access_level'] in ['admin', 'employee']:
-                if self.emoji == self.reactions_text['ReplyReaction']:
-                    res = await self.db.fetchrow("""
-                        SELECT * FROM chat_table
-                        WHERE id = $1;
-                    """, self.db_chat['id'])
+            super_chat = await self.db.fetchrow("""
+                SELECT * FROM chat_table
+                WHERE super = TRUE;
+            """)
+            if super_chat:
+                if self.db_user['access_level'] in ['admin', 'employee']:
+                    if self.emoji == self.reactions_text['ReplyReaction']:
+                        res = await self.db.fetchrow("""
+                            SELECT * FROM chat_table
+                            WHERE id = $1;
+                        """, self.db_chat['id'])
 
-                    if res['bind_chat']:
-                        res2 = await self.db.fetchrow("""
-                            SELECT * FROM message_table
-                            WHERE message_id = $1
-                                AND type = 'reply2';
-                        """, self.message_id)
-                        if res2:
-                            # noinspection PyTypeChecker
-                            await self.process(stage=2, res=res, res2=res2)
+                        if res['super'] is False:
+                            await self.process(stage=1, res=res, super_chat=super_chat)
                             return True
                         else:
-                            await self.process(stage=1, res=res)
-                            return True
+                            res2 = await self.db.fetchrow("""
+                                SELECT * FROM message_table
+                                WHERE message_id = $1
+                                    AND type = 'reply2';
+                            """, self.message_id)
+                            if res2:
+                                # noinspection PyTypeChecker
+                                await self.process(stage=2, res=res, res2=res2, super_chat=super_chat)
+                                return True
 
     async def process(self, *args, **kwargs) -> None:
+        super_chat = kwargs['super_chat']
         if kwargs['stage'] == 1:
-            res = await self.db.fetchrow("""
-                SELECT * FROM chat_table
-                WHERE id = $1;
-            """, kwargs['res']['bind_chat'])
+            sent_message = await self.bot.bot.copy_message(super_chat['chat_id'], self.chat.id, self.message_id)
 
-            sent_message = await self.bot.bot.copy_message(res['chat_id'], self.chat.id, self.message_id)
-            await self.bot.set_emoji(self.chat.id, self.message_id, self.reactions_text['ReplyReaction'])
             await self.db.execute("""
                 INSERT INTO message_table
                 (user_pid, chat_pid, message_id, type, addition)
@@ -124,27 +127,43 @@ class ReplyReaction1(MessageReactionCommand):
             """, self.db_user['id'], self.db_chat['id'], sent_message.message_id, 'reply1', str(self.message_id))
         else:
             res = await self.db.fetchrow("""
-                SELECT * FROM chat_table
-                WHERE id = $1;
-            """, kwargs['res']['bind_chat'])
-
-            res2 = await self.db.fetchrow("""
                 SELECT * FROM message_table
                 WHERE id = $1;
             """, int(kwargs['res2']['addition']))
 
-            await self.bot.bot.copy_message(
-                res['chat_id'],
-                self.chat.id,
-                self.message_id,
-                reply_to_message_id=int(res2['addition'])
+            res2 = await self.db.fetchrow("""
+                SELECT * FROM chat_table
+                WHERE id = $1;
+            """, int(res['chat_pid']))
+
+            sent = await self.bot.bot.forward_message(self.chat.id, self.chat.id, self.message_id)
+
+            await self.bot.delete_message(self.chat.id, sent.message_id)
+
+            text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
+            photo = sent.photo[-1].file_id if sent.photo else None
+
+            message_obj = TextMessage(
+                chat_id=int(res2['chat_id']),
+                text='\n'.join(text.split('\n', 1)[:-1]),
+                photo=photo,
+                reply_to_message_id=int(res['addition'])
             )
+
+            sent_msg = await self.bot.send_text(message_obj)
+
+            await self.bot.set_emoji(res2['chat_id'], int(res['addition']), self.reactions_text['ReplyReaction2'])
 
             await self.db.execute("""
                 DELETE FROM message_table
                 WHERE id = $1
                     OR addition = $2;
             """, int(kwargs['res2']['addition']), kwargs['res2']['addition'])
+
+            class_ = CalculationCommand(sent_msg)
+
+            await class_.define()
+
 
 
 class AdminChangeEmoji(MessageReactionCommand):
@@ -197,7 +216,8 @@ class AdminChangeEmoji(MessageReactionCommand):
             command_texts = {
                 'CancelReaction': 'Отмена операции',
                 'DeleteNote': 'Удаление заметки',
-                'ReplyReaction': 'Пересыл сообщений'
+                'ReplyReaction': 'Пересыл сообщений',
+                'ReplyReaction2': 'Реакция бота на пересыл'
             }
 
             for key, value in self.global_texts['reactions'].items():

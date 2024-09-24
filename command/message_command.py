@@ -1430,6 +1430,9 @@ class DistributionCommand(MessageCommand):
             markup=markup
         )
 
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
 
 # Команды для сотрудников в приватном чате
 class EmployeeMenuCommand(MessageCommand):
@@ -1679,15 +1682,14 @@ class OffTrackingCommand(MessageCommand):
 
 class QuoteReplied(MessageCommand):
     async def define(self):
-        if self.message.quote:
+        if self.message.quote or self.message.reply_to_message:
             res = await self.db.fetchrow("""
                 SELECT * FROM message_table
                 WHERE message_id = $1
                     AND type = 'reply1';
             """, self.message.reply_to_message.message_id)
             if res:
-                await self.process()
-                return True
+                await QuoteReplied.process(self)
 
     async def process(self, *args, **kwargs) -> None:
         res = await self.db.fetchrow("""

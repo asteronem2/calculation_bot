@@ -90,7 +90,7 @@ class MessageCommand:
         """, self.chat.id, self.topic)
 
         self.access_level = self.db_user['access_level']
-
+         
 
 class CallbackQueryCommand:
     db_user: asyncpg.Record
