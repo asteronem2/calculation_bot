@@ -702,6 +702,7 @@ class StoryCommand(CurrencyStoryCommand):
             await super().process(
                 title=res[0]['title'],
                 curr_id=res[0]['id'],
+                postfix=res[0]['postfix'],
                 res=res,
                 **kwargs
             )
@@ -715,7 +716,7 @@ class StoryCommand(CurrencyStoryCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs.get('res') and len(kwargs['res']) == 1:
-            return await super().generate_send_message(**kwargs)
+            return await super().generate_send_message(postfix=kwargs['res'][0]['postfix'], **kwargs)
         else:
             story_list = [{'title': i['title'], 'curr_id': i['id']} for i in kwargs['res']]
 
