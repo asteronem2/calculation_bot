@@ -7,6 +7,8 @@ from dataclasses import dataclass
 import aiogram
 from aiogram.types.reaction_type_emoji import ReactionTypeEmoji
 
+from utils import log
+
 
 @dataclass
 class Message:
@@ -56,8 +58,10 @@ class BotInter:
             )
             return res.invite_link
         except Exception as err:
-            traceback.print_exc()
+            err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+            print(err_str)
+            await log(err_str)
 
     async def send_text(self, message_obj: TextMessage) -> aiogram.types.Message:
             """
@@ -124,8 +128,10 @@ class BotInter:
                     return sent_message
 
                 except Exception as err:
-                    traceback.print_exc()
+                    err_str = traceback.format_exc()
                     print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+                    print(err_str)
+                    await log(err_str)
 
             else:
                 raise Exception('При отправке сообщения необходимо передать TextMessage объект')
@@ -145,7 +151,10 @@ class BotInter:
                 disable_web_page_preview=self.disable_web_page_preview
             )
         except Exception as err:
+            err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+            print(err_str)
+            await log(err_str)
 
         if message_obj.button_destroy != 0:
             asyncio.create_task(self._destroy_buttons(
@@ -162,7 +171,10 @@ class BotInter:
                 message_id=message_id
             )
         except Exception as err:
-            print(err)
+            err_str = traceback.format_exc()
+            print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+            print(err_str)
+            await log(err_str)
 
     async def answer_clb_query(self, callback_id, text: str):
         await self.bot.answer_callback_query(
@@ -185,8 +197,10 @@ class BotInter:
                 reaction=[ReactionTypeEmoji(emoji=emoji)]
             )
         except Exception as err:
-            traceback.print_exc()
+            err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+            print(err_str)
+            await log(err_str)
 
     async def _destroy_message(self, message: aiogram.types.Message, destroy_timeout: int):
         await asyncio.sleep(destroy_timeout)
@@ -201,8 +215,10 @@ class BotInter:
             if err.__str__() not in [
                 'Telegram server says - Bad Request: message to delete not found',
             ]:
-                traceback.print_exc()
+                err_str = traceback.format_exc()
                 print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+                print(err_str)
+                await log(err_str)
 
     async def _destroy_buttons(self, chat_id: int, message_id: int, destroy_timeout: int, message_obj: Message):
         await asyncio.sleep(destroy_timeout)
@@ -217,5 +233,7 @@ class BotInter:
             if err.__str__() not in [
                 'Telegram server says - Bad Request: message to edit not found',
             ]:
-                traceback.print_exc()
+                err_str = traceback.format_exc()
                 print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+                print(err_str)
+                await log(err_str)

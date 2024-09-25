@@ -1,21 +1,21 @@
 import asyncio
 import inspect
+import logging
 import time
 import traceback
 from typing import Type
 
 import aiogram
 from aiogram.enums import ReactionTypeType
-from aiogram.types import ReactionTypeEmoji
+from aiogram.types import ReactionTypeEmoji, InputFile, FSInputFile
 from aiogram.types.message import Message
 from aiogram.types.callback_query import CallbackQuery
 from aiogram.types.message_reaction_updated import MessageReactionUpdated
 from aiogram.types.inline_query import InlineQuery
 
 import command.message_command
-import utils
 from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand, MessageReactionCommand
-from utils import DotEnvData, db, Tracking, GetLocales
+from utils import DotEnvData, db, Tracking, GetLocales, log
 
 EnvData = DotEnvData()
 
@@ -104,8 +104,10 @@ async def telegram_message_update(message: Message):
             t2 = time.time()
             print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
     except Exception as err:
-        traceback.print_exc()
+        err_str = traceback.format_exc()
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+        print(err_str)
+        await log(err_str)
 
 
 @dispatcher.callback_query()
@@ -127,8 +129,10 @@ async def telegram_callback_query_update(callback: CallbackQuery):
         t2 = time.time()
         print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
     except Exception as err:
-        traceback.print_exc()
+        err_str = traceback.format_exc()
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+        print(err_str)
+        await log(err_str)
 
 
 @dispatcher.message_reaction()
@@ -153,8 +157,10 @@ async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
             t2 = time.time()
             print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
     except Exception as err:
-        traceback.print_exc()
+        err_str = traceback.format_exc()
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+        print(err_str)
+        await log(err_str)
 
 
 @dispatcher.inline_query()
@@ -168,8 +174,10 @@ async def telegram_inline_query_update(inline: InlineQuery):
         await command_obj.async_init()
         define = await command_obj.define()
     except Exception as err:
-        traceback.print_exc()
+        err_str = traceback.format_exc()
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+        print(err_str)
+        await log(err_str)
 
 
 allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_query']
@@ -177,6 +185,13 @@ allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_quer
 
 # noinspection PyAsyncCall
 async def main():
+    try:
+        await bot.send_document(EnvData.DEBUG_CHAT_ID, FSInputFile('logs.log'), disable_notification=True)
+    except Exception as err:
+        print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+
+    logging.basicConfig(level=logging.INFO, filename='logs.log', filemode='w', format='')
+
     while True:
         try:
             await add_all_cls()
@@ -192,12 +207,15 @@ async def main():
 
             print("\033[1;32mSUCCESS:\033[37m bot started\033[0m")
 
-            await dispatcher.start_polling(bot, polling_timeout=300, allowed_updates=allowed_updates)
+            await log('SUCCESS: bot started', 'info')
 
+            await dispatcher.start_polling(bot, polling_timeout=300, allowed_updates=allowed_updates)
         except Exception as err:
-            traceback.print_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
-            time.sleep(1)
+            error = traceback.format_exc()
+            print(error)
+            await log(error)
+            time.sleep(3)
 
 
 if __name__ == '__main__':

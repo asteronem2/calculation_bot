@@ -4,22 +4,25 @@ import os
 import datetime
 import time
 import traceback
+from logging import DEBUG
 from string import Template
 from typing import List, Any
 import re
+import logging
 
 import aiogram
 import asyncpg
 import httpx
+from aiogram.types import FSInputFile
 from asyncpg import Record
 from dotenv import load_dotenv
 
 import BotInteraction
 
-
 class DotEnvData:
     BOT_TOKEN: str
     ADMIN_LIST: list
+    DEBUG_CHAT_ID: int
     HOST: str
     PORT: str
     USER: str
@@ -32,6 +35,7 @@ class DotEnvData:
             load_dotenv('.env')
         self.BOT_TOKEN = environ.get('BOT_TOKEN')
         self.ADMIN_LIST = environ.get('ADMIN_LIST').split(' ')
+        self.DEBUG_CHAT_ID = int(environ.get('DEBUG_CHAT_ID'))
         self.HOST = environ.get('HOST')
         self.PORT = environ.get('PORT')
         self.USER = environ.get('USER')
@@ -152,8 +156,10 @@ class DataDB:
             if err.__str__() == 'cannot perform operation: another operation is in progress':
                 pass
             else:
-                traceback.print_exc()
+                err_str = traceback.format_exc()
                 print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+                print(err_str)
+                await log(err_str)
 
     async def execute(self, query, *args) -> str:
         if self.conn is None:
@@ -192,9 +198,26 @@ class DataDB:
     def __del__(self):
         asyncio.create_task(self._async_del())
 
-
 db = DataDB()
+DEBUG_CHAT_ID = DotEnvData().DEBUG_CHAT_ID
 
+async def log(message: str, level: str = 'error'):
+    if level == 'error':
+        logging.error(message)
+        try:
+            import main
+            await main.bot.send_document(DEBUG_CHAT_ID, FSInputFile('logs.log'), disable_notification=True)
+            await main.bot.send_message(DEBUG_CHAT_ID, message, disable_notification=True)
+        except Exception as err:
+            err_str = traceback.format_exc()
+            print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+            print(err_str)
+        return True
+    elif level == 'info':
+        logging.info(message)
+        return True
+    else:
+        return False
 
 def str_to_float(value: str):
     try:

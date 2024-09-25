@@ -4,9 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.54 unstable version&#10;1. Фикс &quot;история&quot;">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -400,7 +403,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727203237821</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;">
+      <option name="closed" value="true" />
+      <created>1727204010320</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1727204010320</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -430,7 +441,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.97 version&#10;Added:&#10;1. Отмена посредством реакции " />
     <MESSAGE value="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений" />
     <MESSAGE value="0.9.2 version&#10;Added:&#10;1. Сверка чисел" />
     <MESSAGE value="0.9.3 version&#10;Added:&#10;1. Новый тип пользователей - сотрудник для парсинга" />
@@ -455,6 +465,7 @@
     <MESSAGE value="0.9.52 unstable version&#10;1. Всякие штучки" />
     <MESSAGE value="0.9.53 unstable version&#10;1. Всякие штучки 2" />
     <MESSAGE value="0.9.54 unstable version&#10;1. Фикс &quot;история&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.54 unstable version&#10;1. Фикс &quot;история&quot;" />
+    <MESSAGE value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
   </component>
 </project>
