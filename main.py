@@ -63,6 +63,7 @@ async def telegram_message_update(message: Message):
         if message.content_type in ['text', 'photo']:
             t1 = time.time()
             print(f'\n\n\033[1;36mMESSAGE {message.from_user.username}: \033[1;32m{message.text}\033[0;0m')
+            await log(f'MESSAGE: {message.from_user.username or message.from_user.id}: {message.text or message.caption}', 'info')
 
             if message.text == '/fix':
                 await db.execute("""
@@ -115,6 +116,8 @@ async def telegram_callback_query_update(callback: CallbackQuery):
     try:
         t1 = time.time()
         print(f'\n\n\033[1;36mCALLBACK {callback.from_user.username}: \033[1;32m{callback.data}\033[0;0m')
+        await log(f'CALLBACK: {callback.from_user.username or callback.from_user.id}: {callback.data}',
+                  'info')
         result: Type[CallbackQueryCommand] = await check_define(callback_command_cls, CallbackQueryCommand, callback)
         if result is None:
             return None
@@ -143,6 +146,7 @@ async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
                 return
             t1 = time.time()
             print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{reaction.new_reaction[-1].emoji}\033[0;0m')
+            await log(f'REACTION: {reaction.from_user.username or reaction.from_user.id}: {reaction.new_reaction[-1].emoji}', 'info')
             result: Type[MessageReactionCommand] = await check_define(reaction_command_cls, MessageReactionCommand, reaction)
             if result is None:
                 return None

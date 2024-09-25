@@ -1362,6 +1362,7 @@ class FindCommand(MessageCommand):
 
         for i in res1:
             string = i['title'].lower().strip()
+            string.replace('\\', '/')
             find = False
             for patt in patterns_list:
                 if re.search(patt, string):

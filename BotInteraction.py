@@ -5,6 +5,7 @@ import traceback
 from dataclasses import dataclass
 
 import aiogram
+from aiogram.exceptions import AiogramError
 from aiogram.types.reaction_type_emoji import ReactionTypeEmoji
 
 from utils import log
@@ -127,6 +128,8 @@ class BotInter:
 
                     return sent_message
 
+                except aiogram.exceptions.TelegramRetryAfter:
+                    await asyncio.sleep(3)
                 except Exception as err:
                     err_str = traceback.format_exc()
                     print(f"\033[1;31mERROR:\033[37m {err}\033[0m")

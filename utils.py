@@ -13,7 +13,7 @@ import aiogram
 import asyncpg
 import httpx
 from aiogram.types import FSInputFile
-from asyncpg import Record
+from asyncpg import Record, Pool
 from dotenv import load_dotenv
 
 import BotInteraction
@@ -106,7 +106,7 @@ class UserError:
 
 # noinspection PyAsyncCall
 class DataDB:
-    conn: asyncpg.connection.Connection
+    pool: Pool
 
     def __init__(self):
         """
@@ -115,21 +115,21 @@ class DataDB:
 
     async def connect(self):
         data = DotEnvData()
-        self.conn = await asyncpg.connect(
-            host=data.HOST,
-            port=data.PORT,
-            user=data.USER,
-            password=data.PASSWORD,
-            database=data.DATABASE,
+
+        self.pool = await asyncpg.create_pool(
+            dsn=f'postgres://{data.USER}:{data.PASSWORD}@{data.HOST}:{data.PORT}/{data.DATABASE}?',
+            min_size=1,
+            max_size=200
         )
 
     async def fetch(self, query, *args) -> List[Record]:
-        if self.conn is None:
+        if self.pool is None:
             raise Exception('Необходимо сначала подключиться к базе данных')
-        async with self.conn.transaction():
-            result = await self.conn.fetch(query, *args)
+        async with self.pool.acquire() as conn:
+            async with conn.transaction():
+                result = await conn.fetch(query, *args)
 
-        return result
+            return result
 
     async def fetchrow(self, query, *args, destroy_timeout: int = 0, table_name: str = None) -> Record:
         """
@@ -140,17 +140,18 @@ class DataDB:
         :return:
         """
         try:
-            if self.conn is None:
+            if self.pool is None:
                 raise Exception('Необходимо сначала подключиться к базе данных')
-            async with self.conn.transaction():
-                result = await self.conn.fetchrow(query, *args)
-                if destroy_timeout != 0:
-                    asyncio.create_task(self._destroy(
-                        table_name=table_name,
-                        id_=result['id'],
-                        destroy_timeout=destroy_timeout
-                    ))
-            return result
+            async with self.pool.acquire() as conn:
+                async with conn.transaction():
+                    result = await conn.fetchrow(query, *args)
+                    if destroy_timeout != 0:
+                        asyncio.create_task(self._destroy(
+                            table_name=table_name,
+                            id_=result['id'],
+                            destroy_timeout=destroy_timeout
+                        ))
+                return result
         except Exception as err:
             if err.__str__() == 'cannot perform operation: another operation is in progress':
                 pass
@@ -161,17 +162,19 @@ class DataDB:
                 await log(err_str)
 
     async def execute(self, query, *args) -> str:
-        if self.conn is None:
+        if self.pool is None:
             raise Exception('Необходимо сначала подключиться к базе данных')
-        async with self.conn.transaction():
-            result = await self.conn.execute(query, *args)
-        return result
+        async with self.pool.acquire() as conn:
+            async with conn.transaction():
+                result = await conn.execute(query, *args)
+            return result
 
     async def reg_tables(self):
-        async with self.conn.transaction():
-            with open('schema.sql', 'r') as read_file:
-                schema = read_file.read()
-            await self.execute(schema)
+        async with self.pool.acquire() as conn:
+            async with conn.transaction():
+                with open('schema.sql', 'r') as read_file:
+                    schema = read_file.read()
+                await self.execute(schema)
 
             from main import bot
             me = await bot.get_me()
@@ -185,7 +188,7 @@ class DataDB:
             """, me.id, me.first_name, me.username)
 
     async def _async_del(self):
-        await self.conn.close()
+        await self.pool.close()
 
     async def add_story(self,
                         curr_id: int, user_id: int,
