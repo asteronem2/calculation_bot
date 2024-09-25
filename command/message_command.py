@@ -526,7 +526,9 @@ class CalculationCommand(CurrencyCalculationCommand):
                 if rres:
                     expr = rres.group()
                     if self.photo is True and self.db_chat['sign'] is False:
-                        expr = f'-({expr})'
+                        expr = re.sub(r'^-([0-9., ]+)$', lambda x: x.group(1), expr)
+                        expr = re.sub(r'^\+([0-9., ]+)$', lambda x: f'-{x.group(1)}', expr)
+                        expr = re.sub(r'^-([0-9., ]+)[*+%/-].*$', lambda x: f'-({x.group()})', expr)
                     calc_res = calculate(expr)
                     if calc_res is not False:
                         res = await self.db.fetch("""
@@ -655,7 +657,7 @@ class CurrencyStoryCommand(MessageCommand):
         text = Template(self.texts['CurrencyStoryCommand']).substitute(
             title=kwargs['title'].upper(),
             story=story,
-            postfix=kwargs['postfix']
+            postfix=kwargs['postfix'] if kwargs['postfix'] else ''
         )
 
         return TextMessage(
@@ -716,7 +718,7 @@ class StoryCommand(CurrencyStoryCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs.get('res') and len(kwargs['res']) == 1:
-            return await super().generate_send_message(postfix=kwargs['res'][0]['postfix'], **kwargs)
+            return await super().generate_send_message(**kwargs)
         else:
             story_list = [{'title': i['title'], 'curr_id': i['id']} for i in kwargs['res']]
 

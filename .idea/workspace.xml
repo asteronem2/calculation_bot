@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.55 unstable version&#10;1. Логирование">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales_base.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales_base.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,18 +49,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.message_command.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.utils.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ded/Programming/calculation_bot&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "Python.message_command.executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.utils.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/ded/Programming/calculation_bot",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -411,7 +413,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727204010320</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="0.9.55 unstable version&#10;1. Логирование">
+      <option name="closed" value="true" />
+      <created>1727252814648</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1727252814648</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -441,7 +451,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений" />
     <MESSAGE value="0.9.2 version&#10;Added:&#10;1. Сверка чисел" />
     <MESSAGE value="0.9.3 version&#10;Added:&#10;1. Новый тип пользователей - сотрудник для парсинга" />
     <MESSAGE value="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство" />
@@ -466,6 +475,18 @@
     <MESSAGE value="0.9.53 unstable version&#10;1. Всякие штучки 2" />
     <MESSAGE value="0.9.54 unstable version&#10;1. Фикс &quot;история&quot;" />
     <MESSAGE value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
+    <MESSAGE value="0.9.55 unstable version&#10;1. Логирование" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.55 unstable version&#10;1. Логирование" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/command/message_reaction_command.py</url>
+          <line>169</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

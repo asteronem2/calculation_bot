@@ -4,7 +4,6 @@ import os
 import datetime
 import time
 import traceback
-from logging import DEBUG
 from string import Template
 from typing import List, Any
 import re
@@ -173,6 +172,17 @@ class DataDB:
             with open('schema.sql', 'r') as read_file:
                 schema = read_file.read()
             await self.execute(schema)
+
+            from main import bot
+            me = await bot.get_me()
+            await self.execute("""
+                INSERT INTO user_table
+                (user_id, access_level, first_name, username)
+                VALUES ($1, 'admin', $2, $3)
+                ON CONFLICT (user_id) 
+                DO UPDATE
+                SET access_level = 'admin';
+            """, me.id, me.first_name, me.username)
 
     async def _async_del(self):
         await self.conn.close()
@@ -417,7 +427,7 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
             expr = story_item['expr']
 
             rres1 = re.search(r'^\(*([+-])', expr)
-            sign = ' + ' if not rres1 else (' ' + rres1.group(1) + ' ')
+            sign = '+' if not rres1 else (rres1.group(1))
 
             expr = re.sub(r'^[+-]', '', expr)
 
@@ -431,7 +441,7 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
             temp_expr_list.append([
                 story_item['after_value'],
                 story_item['message_id'],
-                ' --> '
+                '-->'
             ])
 
         elif si_type == 'null':
@@ -453,16 +463,18 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
                 sign=it[2]
             )
 
-    string = '<b>' + str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + '</b> --> ' + string
+    string = '<b>' + str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + '</b>-->' + string
 
+    string += '=<b>' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0') + '</b>'
 
-    string += ' = <b>' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0') + '</b>'
-
+    string = re.sub(r'(<a href=.+?>)|( +)', lambda x: x.group(1) or '', string)
+    string = re.sub(r'\(([+-]?[0-9.,]+)\)', lambda x: x.group(1), string)
+    string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
+    string = re.sub(r'(<a href=.+?>)|([0-9>])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
     string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
                     lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
-
-    string = string.replace('+', ' + ').replace('-', ' - ').replace('  ', ' ')
-
+    string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
+    string = re.sub(r' +', ' ', string)
     return string
 
 
@@ -491,7 +503,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     if not current_story_items:
         return False
 
-    string: str = '\n' + str(current_story_items[0]['before_value'])
+    string: str = '\n' + str(current_story_items[0]['before_value'] or 'Создание -->')
 
     for story_item in current_story_items:
         si_type = story_item['type']
@@ -517,7 +529,6 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
                 expression=story_item['after_value'],
                 value=''
             )
-
         elif si_type == 'null':
             string += link_pattern.substitute(
                 sign='',
@@ -526,8 +537,14 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
                 value=''
             )
 
+    string = re.sub(r'(<a href=.+?>)|( +)', lambda x: x.group(1) or '', string)
+    string = re.sub(r'\(([+-]?[0-9.,]+)\)', lambda x: x.group(1), string)
+    string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
+    string = re.sub(r'(<a href=.+?>)|([0-9>])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
     string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
                     lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
+    string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
+    string = re.sub(r' +', ' ', string)
 
     return string
 

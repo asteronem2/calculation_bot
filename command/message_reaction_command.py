@@ -143,9 +143,14 @@ class ReplyReaction(MessageReactionCommand):
             text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
             photo = sent.photo[-1].file_id if sent.photo else None
 
+            text = '\n'.join(text.split('\n', 1)[:-1])
+
+            if not text:
+                text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
+
             message_obj = TextMessage(
                 chat_id=int(res2['chat_id']),
-                text='\n'.join(text.split('\n', 1)[:-1]),
+                text=text,
                 photo=photo,
                 reply_to_message_id=int(res['addition'])
             )
@@ -161,9 +166,8 @@ class ReplyReaction(MessageReactionCommand):
             """, int(kwargs['res2']['addition']), kwargs['res2']['addition'])
 
             class_ = CalculationCommand(sent_msg)
-
+            await class_.async_init()
             await class_.define()
-
 
 
 class AdminChangeEmoji(MessageReactionCommand):

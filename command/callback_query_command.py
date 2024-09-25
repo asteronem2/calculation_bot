@@ -281,7 +281,7 @@ class CurrChangePostfixCommand(CallbackQueryCommand):
         """, int(kwargs['curr_id']))
         text = Template(self.edit_texts['CurrChangePostfixCommand']).substitute(
             title=res['title'].upper(),
-            postfix=res['postfix']
+            postfix=res['postfix'] if res['postfix'] else ''
         )
 
         return EditMessage(
@@ -1325,7 +1325,7 @@ class CurrStoryCommand(CallbackQueryCommand):
         text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
             title=res2['title'].upper(),
             story=story,
-            postfix=res2['postfix']
+            postfix=res2['postfix'] if res2['postfix'] else ''
         )
 
         return TextMessage(
@@ -1533,7 +1533,7 @@ class CurrGetStory(CallbackQueryCommand):
         text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
             title=res2['title'].upper(),
             story=story,
-            postfix=res2['postfix']
+            postfix=res2['postfix'] if res2['postfix'] else ''
         )
 
         return TextMessage(
@@ -2553,7 +2553,7 @@ class AdminBalanceStory(CallbackQueryCommand):
 
             curr_story_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
                 title=item['title'],
-                postfix=item['postfix'],
+                postfix=item['postfix'] or '',
                 story=story_generate(res3, self.chat.id) or ''
             ) + '</blockquote>' + '\n'
 

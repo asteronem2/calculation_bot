@@ -139,7 +139,7 @@ async def telegram_callback_query_update(callback: CallbackQuery):
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
     try:
         if reaction.new_reaction:
-            if reaction.new_reaction[0].type == ReactionTypeType.CUSTOM_EMOJI:
+            if reaction.new_reaction[-1].type == ReactionTypeType.CUSTOM_EMOJI:
                 return
             t1 = time.time()
             print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{reaction.new_reaction[-1].emoji}\033[0;0m')
@@ -190,7 +190,7 @@ async def main():
     except Exception as err:
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
 
-    logging.basicConfig(level=logging.INFO, filename='logs.log', filemode='w', format='')
+    logging.basicConfig(level=logging.INFO, filename='logs.log', filemode='w', format='%(asctime)s - [%(levelname)s] - %(message)s')
 
     while True:
         try:
