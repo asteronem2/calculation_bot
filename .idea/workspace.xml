@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.55 unstable version&#10;1. Корректное отображение истории и детализации">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -427,7 +424,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727264090213</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи">
+      <option name="closed" value="true" />
+      <created>1727269260773</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1727269260773</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -457,7 +462,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.3 version&#10;Added:&#10;1. Новый тип пользователей - сотрудник для парсинга" />
     <MESSAGE value="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство" />
     <MESSAGE value="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом" />
     <MESSAGE value="0.9.36 version&#10;Added:&#10;1. Закрепление балансов" />
@@ -482,7 +486,8 @@
     <MESSAGE value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
     <MESSAGE value="0.9.55 unstable version&#10;1. Логирование" />
     <MESSAGE value="0.9.55 unstable version&#10;1. Корректное отображение истории и детализации" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.55 unstable version&#10;1. Корректное отображение истории и детализации" />
+    <MESSAGE value="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

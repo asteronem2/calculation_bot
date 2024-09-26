@@ -146,7 +146,7 @@ async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
                 return
             t1 = time.time()
             print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{reaction.new_reaction[-1].emoji}\033[0;0m')
-            await log(f'REACTION: {reaction.from_user.username or reaction.from_user.id}: {reaction.new_reaction[-1].emoji}', 'info')
+            await log(f'REACTION: {reaction.user.username or reaction.user.id}: {reaction.new_reaction[-1].emoji}', 'info')
             result: Type[MessageReactionCommand] = await check_define(reaction_command_cls, MessageReactionCommand, reaction)
             if result is None:
                 return None
