@@ -729,7 +729,7 @@ class Tracking:
                     await self._user_addresses_parsing(user)
             except Exception as err:
                 count += 1
-                await asyncio.sleep(5)
+                await asyncio.sleep(20)
 
     async def _user_addresses_parsing(self, user: Record):
         self.res = await db.fetch("""
@@ -743,8 +743,8 @@ class Tracking:
 
         for i in self.res:
             timedelta = time.time() - self.last_parse_time
-            if timedelta < 0.35:
-                await asyncio.sleep(0.35 - timedelta)
+            if timedelta < 1:
+                await asyncio.sleep(1 - timedelta)
 
             status_code, token_transfer = await self._address_parsing(i)
 
