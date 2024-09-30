@@ -527,9 +527,7 @@ class CalculationCommand(CurrencyCalculationCommand):
                 if rres:
                     expr = rres.group()
                     if self.photo is True and self.db_chat['sign'] is False:
-                        expr = re.sub(r'^-([0-9., ]+)$', lambda x: x.group(1), expr)
-                        expr = re.sub(r'^\+([0-9., ]+)$', lambda x: f'-{x.group(1)}', expr)
-                        expr = re.sub(r'^-([0-9., ]+)[*+%/-].*$', lambda x: f'-({x.group()})', expr)
+                        expr = f'-({expr})'
                     expr = expr.split('=')[-1]
                     calc_res = calculate(expr)
                     if calc_res is not False:
