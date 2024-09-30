@@ -152,11 +152,12 @@ class CreateCurrencyCommand(MessageCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level == 'admin':
-                rres = re.fullmatch(r'([^ ]+) *= *([0-9.,-]+) *([^ ]*)', self.text)
-                if rres:
-                    title, value, postfix = rres.groups()
-                    await self.process(title=title, value=value, postfix=postfix)
-                    return True
+                if not self.text.count('\n'):
+                    rres = re.fullmatch(r'([^ ]+) *= *([0-9.,-]+) *([^ ]*)', self.text)
+                    if rres:
+                        title, value, postfix = rres.groups()
+                        await self.process(title=title, value=value, postfix=postfix)
+                        return True
 
     async def process(self, **kwargs) -> None:
         split_text = self.text_low.split(' ')
@@ -522,13 +523,14 @@ class CalculationCommand(CurrencyCalculationCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'[*+%/0-9., ()-]+', self.text_low)
+                rres = re.fullmatch(r'[*+%/0-9., ()=-]+', self.text_low)
                 if rres:
                     expr = rres.group()
                     if self.photo is True and self.db_chat['sign'] is False:
                         expr = re.sub(r'^-([0-9., ]+)$', lambda x: x.group(1), expr)
                         expr = re.sub(r'^\+([0-9., ]+)$', lambda x: f'-{x.group(1)}', expr)
                         expr = re.sub(r'^-([0-9., ]+)[*+%/-].*$', lambda x: f'-({x.group()})', expr)
+                    expr = expr.split('=')[-1]
                     calc_res = calculate(expr)
                     if calc_res is not False:
                         res = await self.db.fetch("""
@@ -589,7 +591,7 @@ class CalculationCommand(CurrencyCalculationCommand):
             return await super().generate_send_message(**kwargs)
         else:
             text = Template(self.texts['CalculationCommand']).substitute(
-                expression=self.text_low
+                expression=kwargs['expr']
             )
 
             currencies = [{'title': i['title'], 'curr_id': i['id']} for i in kwargs['res']]
@@ -608,7 +610,13 @@ class CalculationCommand(CurrencyCalculationCommand):
             )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
+        text = Template(self.global_texts['error'][kwargs['error']]).substitute()
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_thread_id=self.topic
+        )
 
 
 class CurrencyStoryCommand(MessageCommand):

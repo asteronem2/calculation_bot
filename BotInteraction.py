@@ -75,7 +75,7 @@ class BotInter:
                         sent_message = await self.bot.send_photo(
                             chat_id=message_obj.chat_id,
                             photo=message_obj.photo,
-                            caption=message_obj.text,
+                            caption=message_obj.text[:2000],
                             message_thread_id=message_obj.message_thread_id,
                             reply_markup=message_obj.markup,
                             parse_mode=self._parse_mode,
@@ -86,7 +86,7 @@ class BotInter:
                     else:
                         sent_message = await self.bot.send_message(
                             chat_id=message_obj.chat_id,
-                            text=message_obj.text,
+                            text=message_obj.text[:4000],
                             message_thread_id=message_obj.message_thread_id,
                             reply_markup=message_obj.markup,
                             parse_mode=self._parse_mode,
@@ -147,12 +147,14 @@ class BotInter:
         try:
             await self.bot.edit_message_text(
                 chat_id=message_obj.chat_id,
-                text=message_obj.text,
+                text=message_obj.text[:4000],
                 message_id=message_obj.message_id,
                 reply_markup=message_obj.markup,
                 parse_mode=self._parse_mode,
                 disable_web_page_preview=self.disable_web_page_preview
             )
+        except aiogram.exceptions.TelegramBadRequest as err:
+            print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
         except Exception as err:
             err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
@@ -173,6 +175,8 @@ class BotInter:
                 chat_id=chat_id,
                 message_id=message_id
             )
+        except aiogram.exceptions.TelegramBadRequest:
+            pass
         except Exception as err:
             err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
@@ -227,7 +231,7 @@ class BotInter:
         await asyncio.sleep(destroy_timeout)
         try:
             await self.bot.edit_message_text(
-                text=message_obj.text,
+                text=message_obj.text[:4000],
                 chat_id=chat_id,
                 message_id=message_id,
                 parse_mode=self._parse_mode

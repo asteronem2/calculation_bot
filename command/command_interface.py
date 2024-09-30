@@ -211,8 +211,8 @@ class NextCallbackMessageCommand:
         self.message = message
         self.chat = message.chat
         self.user = message.from_user
-        self.text = message.text
-        self.text_low = message.text.lower().strip()
+        self.text = message.text or message.caption or ''
+        self.text_low = self.text.lower().strip()
         self.topic = 0 if message.message_thread_id is None else message.message_thread_id
 
         self.db = utils.db

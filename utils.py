@@ -5,7 +5,7 @@ import datetime
 import time
 import traceback
 from string import Template
-from typing import List, Any
+from typing import List, Any, Union
 import re
 import logging
 
@@ -397,7 +397,7 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
     if not start_date or not end_date:
         start_date = datetime.datetime.today().strftime('%Y-%m-%d')
         end_date = datetime.datetime.today().strftime('%Y-%m-%d')
-
+    print(chat_id)
     link_pattern = Template(f'$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a>')
 
     current_story_items = []
@@ -469,15 +469,18 @@ def story_generate(story_items: List[Record], chat_id: int, start_date: str= Non
     string = '<b>' + str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + '</b>-->' + string
 
     string += '=<b>' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0') + '</b>'
-
+    print(string)
     string = re.sub(r'(<a href=.+?>)|( +)', lambda x: x.group(1) or '', string)
     string = re.sub(r'\(([+-]?[0-9.,]+)\)', lambda x: x.group(1), string)
     string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
-    string = re.sub(r'(<a href=.+?>)|([0-9>])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
+    string = re.sub(r'(<a href=.+?>|https://t.me/c/[0-9]+?/[0-9]+?/)|([0-9>])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
     string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
                     lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
     string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
     string = re.sub(r' +', ' ', string)
+
+    print(string)
+
     return string
 
 
@@ -548,6 +551,66 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
                     lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
     string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
     string = re.sub(r' +', ' ', string)
+
+    return string
+
+
+def volume_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None) -> Union[]:
+    if not start_date or not end_date:
+        start_date = datetime.datetime.today().strftime('%Y-%m-%d')
+        end_date = datetime.datetime.today().strftime('%Y-%m-%d')
+
+    current_story_items = []
+
+    for i in story_items:
+        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
+        if start_date <= story_datetime <= end_date:
+            if i['status'] is True:
+                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group(1) else '.', i['expression']) if i['expression'] else None
+                current_story_items.append({
+                    'type': i['expr_type'],
+                    'expr': expr,
+                    'after_value': i['after_value'],
+                    'before_value': i['before_value'],
+                    'message_id': i['message_id']
+                })
+
+    if not current_story_items:
+        return False
+
+    string: str = '\n' + str(current_story_items[0]['before_value'] or 'Создание -->')
+
+    for story_item in current_story_items:
+        si_type = story_item['type']
+
+        # if si_type == 'add':
+        #     expr = story_item['expr']
+        #
+        #     rres1 = re.search(r'^\(*([+-])', expr)
+        #     sign = '+ ' if not rres1 else (rres1.group(1) + ' ')
+        #
+        #     expr = re.sub(r'^[+-]', '', expr)
+        #
+        #     string += link_pattern.substitute(
+        #         sign=sign,
+        #         message_id=story_item['message_id'],
+        #         expression=expr,
+        #         value=story_item['after_value']
+        #     )
+        # elif si_type == 'update':
+        #     string += link_pattern.substitute(
+        #         sign='--> ',
+        #         message_id=story_item['message_id'],
+        #         expression=story_item['after_value'],
+        #         value=''
+        #     )
+        # elif si_type == 'null':
+        #     string += link_pattern.substitute(
+        #         sign='',
+        #         message_id=story_item['message_id'],
+        #         expression='0 ',
+        #         value=''
+        #     )
 
     return string
 

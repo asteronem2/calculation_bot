@@ -2,6 +2,7 @@ import json
 from cmath import phase
 from string import Template
 
+import utils
 from BotInteraction import TextMessage
 from command.command_interface import MessageReactionCommand
 from command.message_command import CurrencyCalculationCommand, CalculationCommand
@@ -136,17 +137,42 @@ class ReplyReaction(MessageReactionCommand):
                 WHERE id = $1;
             """, int(res['chat_pid']))
 
-            sent = await self.bot.bot.forward_message(self.chat.id, self.chat.id, self.message_id)
+            sent = await self.bot.bot.forward_message(self.chat.id, self.chat.id, self.message_id, disable_notification=True)
 
             await self.bot.delete_message(self.chat.id, sent.message_id)
 
             text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
             photo = sent.photo[-1].file_id if sent.photo else None
 
-            text = '\n'.join(text.split('\n', 1)[:-1])
+            text = text.split('\n')[0]
 
-            if not text:
-                text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
+            if text.count('='):
+                expr_list = text.split('=')
+                if len(expr_list) > 2:
+                    message_obj = await self.generate_error_message(error='CalculationIncorrect', expr=text)
+                    await self.bot.send_text(message_obj)
+                    return
+                try:
+                    ev1 = eval(expr_list[0].replace(',', '.'))
+                except:
+                    message_obj = await self.generate_error_message(error='CalculationIncorrect', expr=text)
+                    await self.bot.send_text(message_obj)
+                    return
+
+                if ev1 != float(expr_list[1].replace(',', '.').replace(' ', '')):
+                    if ev1 != float(expr_list[1].replace(',', '').replace('.', '').replace(' ', '')):
+                        message_obj = await self.generate_error_message(error='CalculationIncorrect', expr=text)
+                        await self.bot.send_text(message_obj)
+                        return
+                    else:
+                        text = expr_list[1].replace(',', '').replace('.', '').replace(' ', '')
+                else:
+                    text = expr_list[1].replace(',', '.').replace(' ', '')
+
+            # text = '\n'.join(text.split('\n', 1)[:-1])
+            #
+            # if not text:
+            #     text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
 
             message_obj = TextMessage(
                 chat_id=int(res2['chat_id']),
@@ -169,6 +195,15 @@ class ReplyReaction(MessageReactionCommand):
             await class_.async_init()
             await class_.define()
 
+    async def generate_error_message(self, *args, **kwargs):
+        text = Template(self.global_texts['error'][kwargs['error']]).substitute(
+            expression=kwargs['expr'].replace('=', '≠')
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text
+        )
 
 class AdminChangeEmoji(MessageReactionCommand):
     async def define(self):
@@ -213,7 +248,9 @@ class AdminChangeEmoji(MessageReactionCommand):
                 text=text
             )
         else:
-            text = Template(self.global_texts['callback_command']['edit']['AdminEmojiSettings']).substitute()
+            gl_text = utils.GetLocales().global_texts
+
+            text = Template(gl_text['callback_command']['edit']['AdminEmojiSettings']).substitute()
 
             cycle = []
 
@@ -224,7 +261,7 @@ class AdminChangeEmoji(MessageReactionCommand):
                 'ReplyReaction2': 'Реакция бота на пересыл'
             }
 
-            for key, value in self.global_texts['reactions'].items():
+            for key, value in gl_text['reactions'].items():
                 cycle.append({
                     'text': command_texts[key],
                     'emoji': value,

@@ -1439,6 +1439,12 @@ class AdminCreateNote(NextCallbackMessageCommand):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+        photo = None
+        entities = self.message.entities
+        if self.message.photo:
+            photo = self.message.photo[-1].file_id
+            entities = self.message.caption_entities
+
         await self.db.execute("""
             DELETE FROM pressure_button_table
             WHERE id = $1;
@@ -1446,10 +1452,10 @@ class AdminCreateNote(NextCallbackMessageCommand):
 
         await self.db.execute("""
             INSERT INTO note_table 
-            (user_pid, title, text, type, parent_id)
+            (user_pid, title, text, type, parent_id, file_id)
             VALUES
-            ($1, $2, $3, 'note', $4);
-        """, self.db_user['id'], self.text[:17] + '...', entities_to_html(self.text, self.message.entities), kwargs['folder_id'])
+            ($1, $2, $3, 'note', $4, $5);
+        """, self.db_user['id'], self.text[:17] + '...', entities_to_html(self.text, entities), kwargs['folder_id'], photo)
 
 
         message_obj = await self.generate_send_message(stage=1, **kwargs)
@@ -1504,7 +1510,8 @@ class AdminCreateNote(NextCallbackMessageCommand):
 
             cycle_note = [{
                 'text': i['text'],
-                'id': i['id']
+                'id': i['id'],
+                'photo': i['file_id']
             } for i in res2 if i['type'] == 'note']
 
             variable = []
@@ -1512,7 +1519,7 @@ class AdminCreateNote(NextCallbackMessageCommand):
             if res1['id'] == res1['parent_id']:
                 if res1['tag'] == 'admin':
                     variable.append('back_to_menu')
-                elif res1['tag']:
+                else:
                     variable.append('back_to_tag')
             else:
                 variable.append('back_to_parent_folder')
@@ -1522,10 +1529,27 @@ class AdminCreateNote(NextCallbackMessageCommand):
 
             if send_notes is True:
                 variable.append('collapse')
+                message_obj = TextMessage(
+                    chat_id=self.chat.id,
+                    text='⬇️Заметки⬇️'
+                )
+                sent_message = await self.bot.send_text(message_obj)
+                await self.db.execute("""
+                    INSERT INTO message_table
+                    (user_pid, message_id, text, type, is_bot_message)
+                    VALUES ($1, $2, $3, $4, TRUE)
+                """,
+                                      self.db_user['id'],
+                                      sent_message.message_id,
+                                      sent_message.text,
+                                      'notes_message'
+                                      )
+
                 for i in cycle_note:
                     message_obj = TextMessage(
                         chat_id=self.chat.id,
-                        text=i['text']
+                        text=i['text'],
+                        photo=i['photo']
                     )
                     sent_message = await self.bot.send_text(message_obj)
                     await self.db.execute("""
