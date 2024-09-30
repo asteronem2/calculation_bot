@@ -555,7 +555,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     return string
 
 
-def volume_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None) -> Union[]:
+def volume_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None):
     if not start_date or not end_date:
         start_date = datetime.datetime.today().strftime('%Y-%m-%d')
         end_date = datetime.datetime.today().strftime('%Y-%m-%d')
