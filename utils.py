@@ -746,9 +746,10 @@ class Tracking:
             if timedelta < 1:
                 await asyncio.sleep(1 - timedelta)
 
-            status_code, token_transfer = await self._address_parsing(i)
+            status_code, token_transfer, response = await self._address_parsing(i)
 
             if status_code == 403:
+                await log(response)
                 await asyncio.sleep(121)
 
             if token_transfer['from_address'] == i['address']:
@@ -799,7 +800,7 @@ class Tracking:
                 'relatedAddress': address_row['address']
             })
 
-        return response.status_code, response.json()['token_transfers'][0]
+        return response.status_code, response.json()['token_transfers'][0], response
 
     @staticmethod
     async def check_address(address):
