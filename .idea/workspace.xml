@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.62 unstable version&#10;1. Бот реагирует на &quot;Адрес&quot;, а не только на &quot;адрес&quot;">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
-    </list>
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -488,7 +485,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727758559081</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки">
+      <option name="closed" value="true" />
+      <created>1727765916458</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1727765916458</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -518,7 +523,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.41 unstable version&#10;1. Округление цифр (а не срезание символов, как ранее)&#10;2. Вызов меню через /menu&#10;3. Рассылка изменена" />
     <MESSAGE value="0.9.43 unstable version&#10;1. Корректно округление&#10;2. Корректная отмена" />
     <MESSAGE value="0.9.44 unstable version&#10;1. Обновлено меню" />
     <MESSAGE value="0.9.45 unstable version&#10;1. Переработано создание тегов и добавление чатов к тегу&#10;2. После отправки сообщения после нажатия кнопки возвращается меню из которого оно было нажато" />
@@ -543,6 +547,7 @@
     <MESSAGE value="0.9.60 unstable version&#10;1. Увеличено время запросов к tronscan из-за частой 403 forbidden ошибки" />
     <MESSAGE value="0.9.61 unstable version&#10;1. История работает корректно" />
     <MESSAGE value="0.9.62 unstable version&#10;1. Бот реагирует на &quot;Адрес&quot;, а не только на &quot;адрес&quot;" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.62 unstable version&#10;1. Бот реагирует на &quot;Адрес&quot;, а не только на &quot;адрес&quot;" />
+    <MESSAGE value="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
   </component>
 </project>

@@ -749,7 +749,7 @@ class Tracking:
             status_code, token_transfer, response = await self._address_parsing(i)
 
             if status_code == 403:
-                await log(response)
+                await log(str(response.json()))
                 await asyncio.sleep(121)
 
             if token_transfer['from_address'] == i['address']:
