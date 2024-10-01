@@ -1,3 +1,4 @@
+import re
 from abc import abstractmethod
 
 import asyncpg
@@ -120,21 +121,25 @@ class CallbackQueryCommand:
 
     async def async_init(self):
         await self._get_addition_from_db()
-        res = await self.db.fetch("""
-            SELECT * FROM message_table
-            WHERE user_pid = $1;
-        """, self.db_user['id'])
 
-        await self.db.execute("""
-            DELETE FROM message_table
-            WHERE user_pid = $1;
-        """, self.db_user['id'])
+        rres = re.fullmatch(r'admin/folder/[0-9]+/settings/|None', self.cdata)
+        if not rres:
+            res = await self.db.fetch("""
+                SELECT * FROM message_table
+                WHERE user_pid = $1
+                    AND type in ('note', 'notes_message');
+            """, self.db_user['id'])
 
-        for i in res:
-            await self.bot.delete_message(
-                chat_id=self.db_user['user_id'],
-                message_id=i['message_id']
-            )
+            await self.db.execute("""
+                SELECT * FROM message_table
+                WHERE user_pid = $1
+                    AND type in ('note', 'notes_message');
+            """, self.db_user['id'])
+
+            if res:
+                msg_ids = [i['message_id'] for i in res]
+                await self.bot.bot.delete_messages(self.chat.id, msg_ids)
+
 
     @abstractmethod
     async def define(self):

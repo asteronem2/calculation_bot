@@ -729,7 +729,7 @@ class Tracking:
                     await self._user_addresses_parsing(user)
             except Exception as err:
                 count += 1
-                await asyncio.sleep(20)
+                await asyncio.sleep(5)
 
     async def _user_addresses_parsing(self, user: Record):
         self.res = await db.fetch("""

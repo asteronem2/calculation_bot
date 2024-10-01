@@ -101,6 +101,16 @@ CREATE TABLE IF NOT EXISTS message_table (
     addition TEXT
 );
 
+CREATE TABLE IF NOT EXISTS callback_table (
+    id SERIAL PRIMARY KEY,
+    user_pid INTEGER REFERENCES user_table(id) DEFAULT NULL,
+    chat_pid INTEGER REFERENCES chat_table(id) DEFAULT NULL,
+    callback_data TEXT,
+    message_id INTEGER,
+    addition TEXT,
+    datetime TIMESTAMPTZ DEFAULT NOW()
+);
+
 INSERT INTO user_table
 (id, user_id, access_level)
 VALUES
@@ -114,7 +124,8 @@ ADD COLUMN IF NOT EXISTS bind_chat INTEGER REFERENCES chat_table(id) DEFAULT NUL
 
 ALTER TABLE user_table
 ADD COLUMN IF NOT EXISTS revise_expr TEXT,
-ADD COLUMN IF NOT EXISTS tag TEXT DEFAULT NULL;
+ADD COLUMN IF NOT EXISTS tag TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS folder_expand BOOLEAN DEFAULT TRUE;
 
 ALTER TABLE currency_table
 ADD COLUMN IF NOT EXISTS rounding INTEGER DEFAULT 2;

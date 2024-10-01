@@ -1027,8 +1027,9 @@ class CancelCommand(MessageCommand):
             if self.access_level in ('admin', 'employee'):
                 rres = re.fullmatch(rf'{self.keywords["CancelCommand"]}', self.text_low)
                 if rres:
-                    await self.process()
-                    return True
+                    if not self.message.reply_to_message:
+                        await self.process()
+                        return True
 
     async def process(self, *args, **kwargs) -> None:
         res = await self.db.fetch("""

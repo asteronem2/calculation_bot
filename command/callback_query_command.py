@@ -1319,7 +1319,7 @@ class CurrStoryCommand(CallbackQueryCommand):
 
         res3 = await self.db.fetchrow("""
             SELECT * FROM chat_table
-            WHERE id = $2;
+            WHERE id = $1;
         """, res2['chat_pid'])
 
         story = story_generate(story_items=res, chat_id=res3['chat_id'])
@@ -1532,7 +1532,7 @@ class CurrGetStory(CallbackQueryCommand):
 
         res3 = await self.db.fetchrow("""
             SELECT * FROM chat_table
-            WHERE id = $2;
+            WHERE id = $1;
         """, res2['chat_pid'])
 
         story = story_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'])
@@ -1599,7 +1599,7 @@ class CurrDetailCommand(CallbackQueryCommand):
 
         res3 = await self.db.fetchrow("""
             SELECT * FROM chat_table
-            WHERE id = $2;
+            WHERE id = $1;
         """, res2['chat_pid'])
 
         detail = detail_generate(story_items=res, chat_id=res3['chat_id'])
@@ -1811,7 +1811,7 @@ class CurrGetDetail(CallbackQueryCommand):
 
         res3 = await self.db.fetchrow("""
             SELECT * FROM chat_table
-            WHERE id = $2;
+            WHERE id = $1;
         """, res2['chat_pid'])
 
         detail = detail_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'])
@@ -3573,7 +3573,7 @@ class AdminFolder(CallbackQueryCommand):
     async def generate_edit_message(self, send_notes: bool = True, *args, **kwargs) -> BotInteraction.Message:
         pass
 
-    async def generate_send_message(self, send_notes: bool = True, *args, **kwargs) -> BotInteraction.Message:
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res1 = await self.db.fetchrow("""
             SELECT * FROM note_table
             WHERE id = $1;
@@ -3581,8 +3581,14 @@ class AdminFolder(CallbackQueryCommand):
 
         res2 = await self.db.fetch("""
             SELECT * FROM note_table
-            WHERE parent_id = $1;
+            WHERE parent_id = $1
+                AND id <> parent_id;
         """, kwargs['folder_id'])
+
+        db_user = await self.db.fetchrow("""
+            SELECT * FROM user_table
+            WHERE id = $1;
+        """, self.db_user['id'])
 
         notes = ''
 
@@ -3592,7 +3598,7 @@ class AdminFolder(CallbackQueryCommand):
                 notes += f'<blockquote expandable>{text}</blockquote>'
                 notes += '\n'
 
-        if send_notes is False:
+        if db_user['folder_expand'] is False:
             text = Template(self.edit_texts['AdminFolder']).substitute(
                 folder_title=res1['title'],
                 notes=notes[:3900]
@@ -3624,11 +3630,14 @@ class AdminFolder(CallbackQueryCommand):
         if not cycle_folder and not cycle_note and res1['id'] != res1['parent_id']:
             variable.append('delete')
 
-        if send_notes is True:
+        if db_user['folder_expand'] is True:
             variable.append('collapse')
             message_obj = TextMessage(
                 chat_id=self.chat.id,
-                text='⬇️Заметки⬇️'
+                text='⬇️Заметки⬇️',
+                markup=markup_generate(
+                    buttons=[[{'text': res1['title'], 'callback_data': 'None'}]]
+                )
             )
             sent_message = await self.bot.send_text(message_obj)
             await self.db.execute("""
@@ -3679,7 +3688,88 @@ class AdminFolder(CallbackQueryCommand):
         )
 
 
-class AdminFolderCollapseExpand(AdminFolder):
+class AdminFolderSettings(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/folder/([0-9]+)/settings/', self.cdata)
+        if rres:
+            folder_id = int(rres.group(1))
+            await self.process(folder_id=folder_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['folder_id'])
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE parent_id = $1
+                AND id <> parent_id;
+        """, res['id'])
+
+        res3 = await self.db.fetch("""
+            SELECT * FROM message_table
+            WHERE user_pid = $1
+                AND type in ('note', 'notes_message');
+        """, self.db_user['id'])
+
+        db_user = await self.db.fetchrow("""
+            SELECT * FROM user_table
+            WHERE id = $1;
+        """, self.db_user['id'])
+
+        if res3:
+            text = Template(self.edit_texts['AdminFolder']).substitute(folder_title=res['title'], notes='')
+        else:
+            notes = ''
+            for i in res2:
+                if i['type'] == 'note':
+                    text = i['text']
+                    notes += f'<blockquote expandable>{text}</blockquote>'
+                    notes += '\n'
+            text = Template(self.edit_texts['AdminFolder']).substitute(
+                folder_title=res['title'],
+                notes=notes[:3900],
+            )
+
+        variable = []
+
+        if res['id'] != res['parent_id']:
+            variable.append('change_title')
+            if not res2:
+                variable.append('delete')
+
+        if db_user['folder_expand'] is True:
+            variable.append('collapse')
+        else:
+            variable.append('expand')
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminFolderSettings'],
+            folder_id=kwargs['folder_id'],
+            variable=variable
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminFolderCollapseExpand(AdminFolderSettings):
     async def define(self):
         rres = re.fullmatch(r'admin/folder/([0-9]+)/(expand|collapse)/', self.cdata)
         if rres:
@@ -3690,9 +3780,84 @@ class AdminFolderCollapseExpand(AdminFolder):
 
     async def process(self, *args, **kwargs) -> None:
         type_ = kwargs['type_']
-        await self.bot.delete_message(self.chat.id, self.sent_message_id)
-        message_obj = await AdminFolder.generate_send_message(self, **kwargs, send_notes=False if type_ == 'collapse' else True)
-        await self.bot.send_text(message_obj)
+
+        await self.db.execute("""
+            UPDATE user_table
+            SET folder_expand = $1
+            WHERE id = $2;
+        """, True if type_ == 'expand' else False, self.db_user['id'])
+
+        if type_ == 'collapse':
+            res = await self.db.fetch("""
+                SELECT * FROM message_table
+                WHERE user_pid = $1
+                    AND type in ('note', 'notes_message');
+            """, self.db_user['id'])
+
+            await self.db.execute("""
+                DELETE FROM message_table
+                WHERE user_pid = $1
+                    AND type in ('note', 'notes_message');
+            """, self.db_user['id'])
+
+            msg_ids = [i['message_id'] for i in res]
+            await self.bot.bot.delete_messages(self.chat.id, msg_ids)
+
+            message_obj = await AdminFolderSettings.generate_edit_message(self, **kwargs)
+            await self.bot.edit_text(message_obj)
+        else:
+            await self.bot.delete_message(self.chat.id, self.sent_message_id)
+            message_obj = await AdminFolder.generate_send_message(self, **kwargs)
+
+            message_obj2 = await AdminFolderSettings.generate_edit_message(self, **kwargs)
+
+            message_obj.text = message_obj2.text
+            message_obj.markup = message_obj2.markup
+
+            await self.bot.send_text(message_obj)
+
+
+class AdminFolderChangeTitle(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/folder/([0-9]+)/change_title/', self.cdata)
+        if rres:
+            folder_id = int(rres.group(1))
+            await self.process(folder_id=folder_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['folder_id'])
+
+        text = Template(self.edit_texts['AdminFolderChangeTitle']).substitute(
+            title=res['title']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/folder/{kwargs["folder_id"]}/')]])
+        )
 
 
 class AdminNote(CallbackQueryCommand):

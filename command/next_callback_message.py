@@ -1430,6 +1430,178 @@ class AdminCreateFolder(NextCallbackMessageCommand):
         )
 
 
+class AdminFolderChangeTitle(NextCallbackMessageCommand):
+    async def define(self):
+        rres1 = re.fullmatch(r'admin/folder/([0-9]+)/change_title/', self.cdata)
+        if rres1:
+            folder_id = int(rres1.group(1))
+            await self.process(folder_id=folder_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM pressure_button_table
+            WHERE id = $1;
+        """, self.pressure_info['id'])
+
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['folder_id'])
+
+        await self.db.execute("""
+            UPDATE note_table
+            SET title = $1
+            WHERE id = $2;
+        """, self.text, kwargs['folder_id'])
+
+
+        message_obj = await self.generate_send_message(stage=1, res=res, **kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.press_message_id
+        )
+
+        message_obj2 = await self.generate_send_message(stage=2, res=res, **kwargs)
+        await self.bot.send_text(message_obj2)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.send_texts['AdminFolderChangeTitle']).substitute(
+                old_title=kwargs['res']['title'],
+                new_title=self.text
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res1 = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE id = $1;
+            """, kwargs['folder_id'])
+
+            res2 = await self.db.fetch("""
+                SELECT * FROM note_table
+                WHERE parent_id = $1
+                    AND id <> parent_id;
+            """, kwargs['folder_id'])
+
+            db_user = await self.db.fetchrow("""
+                SELECT * FROM user_table
+                WHERE id = $1;
+            """, self.db_user['id'])
+
+            notes = ''
+
+            for i in res2:
+                if i['type'] == 'note':
+                    text = i['text']
+                    notes += f'<blockquote expandable>{text}</blockquote>'
+                    notes += '\n'
+
+            if db_user['folder_expand'] is False:
+                text = Template(self.call_edit_texts['AdminFolder']).substitute(
+                    folder_title=res1['title'],
+                    notes=notes[:3900]
+                )
+            else:
+                text = Template(self.call_edit_texts['AdminFolder']).substitute(folder_title=res1['title'], notes='')
+
+            cycle_folder = [{
+                'child_folder_title': i['title'],
+                'child_folder_id': i['id']
+            } for i in res2 if i['type'] == 'folder' and i['id'] != i['parent_id']]
+
+            cycle_note = [{
+                'text': i['text'],
+                'id': i['id'],
+                'photo': i['file_id']
+            } for i in res2 if i['type'] == 'note']
+
+            variable = []
+
+            if res1['id'] == res1['parent_id']:
+                if res1['tag'] == 'admin':
+                    variable.append('back_to_menu')
+                else:
+                    variable.append('back_to_tag')
+            else:
+                variable.append('back_to_parent_folder')
+
+            if not cycle_folder and not cycle_note and res1['id'] != res1['parent_id']:
+                variable.append('delete')
+
+            if db_user['folder_expand'] is True:
+                variable.append('collapse')
+                message_obj = TextMessage(
+                    chat_id=self.chat.id,
+                    text='⬇️Заметки⬇️',
+                    markup=markup_generate(
+                        buttons=[[{'text': res1['title'], 'callback_data': 'None'}]]
+                    )
+                )
+                sent_message = await self.bot.send_text(message_obj)
+                await self.db.execute("""
+                    INSERT INTO message_table
+                    (user_pid, message_id, text, type, is_bot_message)
+                    VALUES ($1, $2, $3, $4, TRUE)
+                """,
+                                      self.db_user['id'],
+                                      sent_message.message_id,
+                                      sent_message.text,
+                                      'notes_message'
+                                      )
+
+                for i in cycle_note:
+                    message_obj = TextMessage(
+                        chat_id=self.chat.id,
+                        text=i['text'],
+                        photo=i['photo']
+                    )
+                    sent_message = await self.bot.send_text(message_obj)
+                    await self.db.execute("""
+                        INSERT INTO message_table
+                        (user_pid, message_id, text, type, is_bot_message, addition)
+                        VALUES ($1, $2, $3, $4, TRUE, $5)
+                    """,
+                                          self.db_user['id'],
+                                          sent_message.message_id,
+                                          sent_message.text,
+                                          'note',
+                                          str(i['id'])
+                                          )
+            else:
+                variable.append('expand')
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminFolder'],
+                folder_id=kwargs['folder_id'],
+                cycle_folder=cycle_folder,
+                parent_folder_id=res1['parent_id'],
+                variable=variable,
+                tag=res1['tag']
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text='Что-то не так'
+        )
+
+
 class AdminCreateNote(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_note/', self.cdata)

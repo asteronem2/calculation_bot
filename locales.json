@@ -137,6 +137,7 @@
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "AdminFolder": "<b>Категория заметок $folder_title</b>\n$notes",
+        "AdminFolderChangeTitle": "<b>Напишите новое название для категории $title</b>",
         "AdminNote": "$text",
         "AdminCreateFolder": "<b>Укажите название новой категории в $title</b>",
         "AdminCreateNote": "<b>Напишите текст новой заметки в $title</b>",
@@ -207,6 +208,7 @@
         "AdminDistributionPin": "Текст успешно разослан и закреплён",
         "AdminDistributionUnpin": "Текст успешно разослан",
         "AdminCreateFolder": "<b>Категория успешно создана</b>",
+        "AdminFolderChangeTitle": "<b>Название категории $old_title изменено на $new_title</b>",
         "AdminCreateNote": "<b>Заметка успешно создана</b>",
         "AdminNoteChangeTitle": "<b>Название заметки $old_title изменено на $new_title</b>",
         "AdminNoteChangeText": "<b>Текст для заметки $title изменён</b>",
@@ -993,23 +995,7 @@
           }
         ],
         [
-          {
-            "text": "Удалить категорию",
-            "callback_data": "admin/folder/$folder_id/delete/1/",
-            "variable": "delete"
-          }
-        ],
-        [
-          {
-            "text": "Свернуть заметки",
-            "callback_data": "admin/folder/$folder_id/collapse/",
-            "variable": "collapse"
-          },
-          {
-            "text": "Развернуть заметки",
-            "callback_data": "admin/folder/$folder_id/expand/",
-            "variable": "expand"
-          }
+          {"text": "Настройка категории", "callback_data": "admin/folder/$folder_id/settings/"}
         ],
         [
           {
@@ -1028,6 +1014,38 @@
             "variable": "back_to_menu"
           }
         ]
+      ],
+      "AdminFolderSettings": [
+        [
+          {
+            "text": "Свернуть заметки",
+            "callback_data": "admin/folder/$folder_id/collapse/",
+            "variable": "collapse"
+          },
+          {
+            "text": "Развернуть заметки",
+            "callback_data": "admin/folder/$folder_id/expand/",
+            "variable": "expand"
+          }
+        ],
+        [
+          {
+            "text": "Сменить название",
+            "callback_data": "admin/folder/$folder_id/change_title/",
+            "variable": "change_title"
+          }
+        ],
+        [
+          {
+            "text": "Удалить категорию",
+            "callback_data": "admin/folder/$folder_id/delete/1/",
+            "variable": "delete"
+          }
+        ],
+        [{
+          "text": "Назад \uD83D\uDD19",
+          "callback_data": "admin/folder/$folder_id/"
+        }]
       ],
       "AdminNote": [
         [
