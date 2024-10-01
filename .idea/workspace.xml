@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.60 unstable version&#10;1. Увеличено время запросов к tronscan из-за частой 403 forbidden ошибки">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.61 unstable version&#10;1. История работает корректно">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -478,7 +472,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727683843790</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="0.9.61 unstable version&#10;1. История работает корректно">
+      <option name="closed" value="true" />
+      <created>1727756910550</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1727756910550</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -508,7 +510,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.39 unstable version&#10;Added:&#10;1. Поддержка калькуляции с фото" />
     <MESSAGE value="0.9.40 unstable version" />
     <MESSAGE value="0.9.41 unstable version&#10;1. Округление цифр (а не срезание символов, как ранее)&#10;2. Вызов меню через /menu&#10;3. Рассылка изменена" />
     <MESSAGE value="0.9.43 unstable version&#10;1. Корректно округление&#10;2. Корректная отмена" />
@@ -533,6 +534,7 @@
     <MESSAGE value="0.9.58 unstable version&#10;1. Разное+" />
     <MESSAGE value="0.9.59 unstable version&#10;1. Корректна калькуляция под фото" />
     <MESSAGE value="0.9.60 unstable version&#10;1. Увеличено время запросов к tronscan из-за частой 403 forbidden ошибки" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.60 unstable version&#10;1. Увеличено время запросов к tronscan из-за частой 403 forbidden ошибки" />
+    <MESSAGE value="0.9.61 unstable version&#10;1. История работает корректно" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.61 unstable version&#10;1. История работает корректно" />
   </component>
 </project>

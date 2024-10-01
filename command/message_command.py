@@ -1543,7 +1543,7 @@ class AddAddressCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
             if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
-                rres = re.fullmatch(r'адрес +([^ ]+)(| +[0-9.,]+)', self.text.strip())
+                rres = re.fullmatch(r'адрес +([^ ]+)(| +[0-9.,]+)', self.text_low)
                 if rres:
                     address, min_value = rres.groups()
                     min_value = 0 if min_value == '' else str_to_float(min_value)
