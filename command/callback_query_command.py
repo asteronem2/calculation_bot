@@ -1142,7 +1142,6 @@ class CurrCancelCommand(CallbackQueryCommand):
         res = await self.db.fetchrow("""
             SELECT * FROM story_table
             WHERE currency_pid = $1 AND status = TRUE
-            ORDER BY title ASC
             LIMIT 1;
         """, kwargs['curr_id'])
 
@@ -2572,8 +2571,7 @@ class AdminBalanceStory(CallbackQueryCommand):
         for item in res2:
             res3 = await self.db.fetch("""
                 SELECT * FROM story_table
-                WHERE currency_pid = $1 AND status = TRUE
-                ORDER BY title ASC;
+                WHERE currency_pid = $1 AND status = TRUE;
             """, item['id'])
 
             story = story_generate(res3, res['chat_id']) or ''
@@ -4939,7 +4937,7 @@ class AdminTagChangeUsers(CallbackQueryCommand):
 
         res = await self.db.fetch("""
             SELECT * FROM user_table
-            ORDER BY title ASC;
+            ORDER BY username ASC;
         """)
 
         cycle = []

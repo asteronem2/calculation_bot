@@ -1214,7 +1214,7 @@
         ],
         [
           {
-            "text": "Эмодзи",
+            "text": "\uD83D\uDCA9\n Эмодзи",
             "callback_data": "admin/emoji_settings/"
           }
         ],

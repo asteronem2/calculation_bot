@@ -793,7 +793,7 @@ class Tracking:
             )
 
             await self.bot.send_text(message_obj)
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)
             return
 
     @staticmethod

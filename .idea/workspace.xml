@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.65 unstable version&#10;1. Bug fixing">
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,14 +104,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00004" summary="0.91 version&#10;Added:&#10;1. В настройки чата в админ панели добавлена возможность делать чат супер и не супер&#10;2. В настройках чата в админ панели добавлена возможность добавлять и изменять теги&#10;3. В рассылки добавлена возможность рассылать выборочно по тегам">
-      <option name="closed" value="true" />
-      <created>1723556041487</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1723556041487</updated>
     </task>
     <task id="LOCAL-00005" summary="0.92 version&#10;Added:&#10;1. Данные для подключения к БД теперь в .env">
       <option name="closed" value="true" />
@@ -496,7 +489,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727944634201</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="0.9.65 unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1727950105320</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1727950105320</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -526,7 +527,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.46 unstable version&#10;1. Форматирование балансов" />
     <MESSAGE value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками" />
     <MESSAGE value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска" />
     <MESSAGE value="0.9.48 unstable version&#10;1. После создания заметки/категории отображается корректное меню&#10;2. Изменена история" />
@@ -551,6 +551,7 @@
     <MESSAGE value="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <MESSAGE value="0.9.63 unstable version&#10;1. Очень много всего" />
     <MESSAGE value="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН" />
+    <MESSAGE value="0.9.65 unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.65 unstable version&#10;1. Bug fixing" />
   </component>
 </project>
