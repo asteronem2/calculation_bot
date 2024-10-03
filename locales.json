@@ -178,7 +178,7 @@
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
         "CurrCancelCommand": "CancelCommand",
-        "AdminFolderTopMessage": "\uD83D\uDDC2 <b>\uD83D\uDD3D Заметки категории \uD83D\uDD3D</b>",
+        "AdminFolderTopMessage": "<b>\uD83D\uDD3D Заметки категории \uD83D\uDD3D</b>",
         "5": "2",
         "6": "2",
         "7": "2",
