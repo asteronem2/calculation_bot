@@ -1526,7 +1526,7 @@
       ]
     },
     "addition": {
-      "curr_info_list": "💰 Баланс <u>$title:</u> <b>$value $postfix</b>\n",
+      "curr_info_list": "Баланс <u>$title:</u> <b>$value $postfix</b>\n",
       "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
       "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime",
       "chat_balance": "<blockquote expandable>💰 Баланс чата <a href='$link'><b>$title</b></a> ($code_name):\n$curr_info_list</blockquote>",
