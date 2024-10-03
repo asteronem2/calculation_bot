@@ -1,4 +1,5 @@
 import re
+import traceback
 
 from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
 
@@ -35,8 +36,8 @@ def mega_eval(expression: str):
         def mul_div_calc(expr: str) -> tuple:
             reply = [None, expr]
 
-            pattern1 = r'([0-9.]+[*/0-9.]+[*/][0-9.]+)'
-            split_expr = [[i, None, None, None] for i in re.findall(pattern1, expr)]
+            pattern1 = r'([0-9.%]+[*/0-9.%]+[*/%][0-9.%]+)'
+            split_expr = [[i, None, None, None] for i in re.findall(pattern1, expr) if not i.count('%')]
 
             for i in split_expr:
                 pattern2 = r'[^*/][0-9.]+|[*/][0-9.]+|[0-9.]+'
@@ -68,12 +69,13 @@ def mega_eval(expression: str):
 
             var_list = []
 
-            pattern1 = r'[^+-][0-9.]+|[+-][0-9%.]+'
+            pattern1 = r'[^*+/-][0-9.]+|[*+/-][0-9%.]+'
 
             split_expr = re.findall(pattern1, expr)
 
             var_value = None
             item_amt = -1
+
             for i in split_expr:
                 item_amt += 1
                 if item_amt == 0:
@@ -83,8 +85,11 @@ def mega_eval(expression: str):
                     var_list.append(i)
 
                     if '%' in i:
+                        znak = re.search(r'([*/+-])', i).group(1)
+                        i = i.replace(znak, '')
+                        var_value = var_value.replace(znak, '')
                         calc = str(abs(float(var_value) * 0.01 * float(i.replace("%", ""))))
-                        var_value = f'{eval(var_value + "+" + str(float(var_value) * 0.01 * float(i.replace("%", ""))))}'
+                        var_value = f'{eval(var_value + znak + str(float(var_value) * 0.01 * float(i.replace("%", ""))))}'
                         if len(split_expr) == (item_amt + 1):
                             var_list.append(f'(<i>{calc}</i>) = {var_value}')
                         else:

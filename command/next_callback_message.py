@@ -1478,90 +1478,86 @@ class AdminFolderChangeTitle(NextCallbackMessageCommand):
                 text=text
             )
         else:
-            res1 = await self.db.fetchrow("""
+            res = await self.db.fetchrow("""
                 SELECT * FROM note_table
                 WHERE id = $1;
             """, kwargs['folder_id'])
 
-            res2 = await self.db.fetch("""
+            child_notes = await self.db.fetch("""
                 SELECT * FROM note_table
                 WHERE parent_id = $1
-                    AND id <> parent_id;
+                    AND id <> parent_id
+                    AND type = 'note';
             """, kwargs['folder_id'])
 
-            db_user = await self.db.fetchrow("""
-                SELECT * FROM user_table
-                WHERE id = $1;
-            """, self.db_user['id'])
+            child_folders = await self.db.fetch("""
+                SELECT * FROM note_table
+                WHERE parent_id = $1
+                    AND id <> parent_id
+                    AND type = 'folder';
+            """, kwargs['folder_id'])
 
             notes = ''
 
-            for i in res2:
-                if i['type'] == 'note':
+            if not res['expand']:
+                for i in child_notes:
                     text = i['text']
                     notes += f'<blockquote expandable>{text}</blockquote>'
                     notes += '\n'
 
-            if db_user['folder_expand'] is False:
-                text = Template(self.call_edit_texts['AdminFolder']).substitute(
-                    folder_title=res1['title'],
-                    notes=notes[:3900]
-                )
-            else:
-                text = Template(self.call_edit_texts['AdminFolder']).substitute(folder_title=res1['title'], notes='')
-
-            cycle_folder = [{
-                'child_folder_title': i['title'],
-                'child_folder_id': i['id']
-            } for i in res2 if i['type'] == 'folder' and i['id'] != i['parent_id']]
-
-            cycle_note = [{
-                'text': i['text'],
-                'id': i['id'],
-                'photo': i['file_id']
-            } for i in res2 if i['type'] == 'note']
+            text = Template(self.call_edit_texts['AdminFolder']).substitute(
+                folder_title=res['title'],
+                notes=notes
+            )
 
             variable = []
 
-            if res1['id'] == res1['parent_id']:
-                if res1['tag'] == 'admin':
+            if res['id'] == res['parent_id']:
+                if res['id'] == 0:
                     variable.append('back_to_menu')
                 else:
                     variable.append('back_to_tag')
             else:
                 variable.append('back_to_parent_folder')
 
-            if not cycle_folder and not cycle_note and res1['id'] != res1['parent_id']:
+            if not child_notes and not child_folders and res['id'] != 0:
                 variable.append('delete')
 
-            if db_user['folder_expand'] is True:
-                variable.append('collapse')
-                message_obj = TextMessage(
-                    chat_id=self.chat.id,
-                    text='⬇️Заметки⬇️',
-                    markup=markup_generate(
-                        buttons=[[{'text': res1['title'], 'callback_data': 'None'}]]
-                    )
+            message_obj_1 = TextMessage(
+                chat_id=self.chat.id,
+                text=Template(self.call_send_texts['AdminFolderTopMessage']).substitute(title=res['title']),
+                markup=markup_generate(
+                    buttons=self.buttons['AdminFolderTopMessage'],
+                    folder_id=res['id']
                 )
-                sent_message = await self.bot.send_text(message_obj)
-                await self.db.execute("""
-                    INSERT INTO message_table
-                    (user_pid, message_id, text, type, is_bot_message)
-                    VALUES ($1, $2, $3, $4, TRUE)
-                """,
-                                      self.db_user['id'],
-                                      sent_message.message_id,
-                                      sent_message.text,
-                                      'notes_message'
-                                      )
+            )
+            sent_message = await self.bot.send_text(message_obj_1)
+            await self.db.execute("""
+                INSERT INTO message_table
+                (user_pid, message_id, text, type, is_bot_message)
+                VALUES ($1, $2, $3, $4, TRUE)
+            """,
+                                  self.db_user['id'],
+                                  sent_message.message_id,
+                                  sent_message.text,
+                                  'settings_folder'
+                                  )
 
-                for i in cycle_note:
+            if res['expand'] is True:
+                variable.append('collapse')
+                for i in child_notes:
                     message_obj = TextMessage(
                         chat_id=self.chat.id,
                         text=i['text'],
-                        photo=i['photo']
+                        photo=i['file_id']
                     )
                     sent_message = await self.bot.send_text(message_obj)
+                    if i['add_info']:
+                        await self.bot.set_emoji(
+                            chat_id=sent_message.chat.id,
+                            message_id=sent_message.message_id,
+                            emoji=self.global_texts['reactions']['HiddenInfo']
+                        )
                     await self.db.execute("""
                         INSERT INTO message_table
                         (user_pid, message_id, text, type, is_bot_message, addition)
@@ -1576,13 +1572,18 @@ class AdminFolderChangeTitle(NextCallbackMessageCommand):
             else:
                 variable.append('expand')
 
+            cycle_folder = [{
+                'child_title': i['title'],
+                'child_id': i['id']
+            } for i in child_folders]
+
             markup = markup_generate(
                 buttons=self.buttons['AdminFolder'],
                 folder_id=kwargs['folder_id'],
                 cycle_folder=cycle_folder,
-                parent_folder_id=res1['parent_id'],
+                parent_folder_id=res['parent_id'],
                 variable=variable,
-                tag=res1['tag']
+                tag=res['tag']
             )
 
             return TextMessage(
@@ -1714,7 +1715,7 @@ class AdminCreateNote(NextCallbackMessageCommand):
                                       self.db_user['id'],
                                       sent_message.message_id,
                                       sent_message.text,
-                                      'notes_message'
+                                      'settings_folder'
                                       )
 
                 for i in cycle_note:

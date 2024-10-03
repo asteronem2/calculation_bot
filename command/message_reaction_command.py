@@ -3,7 +3,7 @@ from cmath import phase
 from string import Template
 
 import utils
-from BotInteraction import TextMessage
+from BotInteraction import TextMessage, Message
 from command.command_interface import MessageReactionCommand
 from command.message_command import CurrencyCalculationCommand, CalculationCommand
 from utils import markup_generate, calculate
@@ -69,17 +69,24 @@ class DeleteNote(MessageReactionCommand):
             if self.emoji == self.reactions_text['DeleteNote']:
                 res = await self.db.fetchrow("""
                     SELECT * FROM message_table
-                    WHERE type = 'note' AND message_id = $1;
+                    WHERE type in ('note', 'hidden_note') AND message_id = $1;
                 """, self.message_id)
                 if res:
                     await self.process(res=res)
                     return True
 
     async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            DELETE FROM note_table
-            WHERE id = $1;
-        """, int(kwargs['res']['addition']))
+        if kwargs['res']['type'] == 'note':
+            await self.db.execute("""
+                DELETE FROM note_table
+                WHERE id = $1;
+            """, int(kwargs['res']['addition']))
+        else:
+            await self.db.execute("""
+                UPDATE note_table
+                SET add_info = NULL
+                WHERE id = $1;
+            """, int(kwargs['res']['addition']))
 
         await self.bot.delete_message(
             chat_id=self.chat.id,
@@ -205,6 +212,7 @@ class ReplyReaction(MessageReactionCommand):
             text=text
         )
 
+
 class AdminChangeEmoji(MessageReactionCommand):
     async def define(self):
         if self.db_user['access_level'] == 'admin':
@@ -258,7 +266,8 @@ class AdminChangeEmoji(MessageReactionCommand):
                 'CancelReaction': 'Отмена операции',
                 'DeleteNote': 'Удаление заметки',
                 'ReplyReaction': 'Пересыл сообщений',
-                'ReplyReaction2': 'Реакция бота на пересыл'
+                'ReplyReaction2': 'Реакция бота на пересыл',
+                'HiddenInfo': 'Скрытая информация заметок'
             }
 
             for key, value in gl_text['reactions'].items():
@@ -278,3 +287,41 @@ class AdminChangeEmoji(MessageReactionCommand):
                 text=text,
                 markup=markup
             )
+
+
+class AdminHiddenInfo(MessageReactionCommand):
+    async def define(self):
+        if self.db_user['access_level'] == 'admin':
+            if self.emoji == self.reactions_text['HiddenInfo']:
+                res1 = await self.db.fetchrow("""
+                    SELECT * FROM message_table
+                    WHERE message_id = $1
+                        AND type = 'note';
+                """, self.message_id)
+                if res1:
+                    await self.process(res1=res1)
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, int(kwargs['res1']['addition']))
+
+        message_obj = await self.generate_send_message(res2=res2, **kwargs)
+        sent_message = await self.bot.send_text(message_obj)
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, message_id, text, type, is_bot_message, addition)
+            VALUES ($1, $2, $3, $4, TRUE, $5)
+        """, self.db_user['id'], sent_message.message_id, sent_message.text, 'hidden_note', str(res2['id']))
+
+    async def generate_send_message(self, *args, **kwargs) -> TextMessage:
+        text = kwargs['res2']['add_info']
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            reply_to_message_id=self.message_id
+        )

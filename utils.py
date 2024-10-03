@@ -509,9 +509,14 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     if not current_story_items:
         return False
 
-    string: str = '\n' + str(current_story_items[0]['before_value'] or 'Создание -->')
+    string: str = '\n' + '<b>' +str(current_story_items[0]['before_value'] or 'Создание -->') + '</b>'
 
     for story_item in current_story_items:
+        if current_story_items.index(story_item) == len(current_story_items)-1:
+            last = True
+        else:
+            last = False
+
         si_type = story_item['type']
 
         if si_type == 'add':
@@ -526,20 +531,20 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
                 sign=sign,
                 message_id=story_item['message_id'],
                 expression=expr,
-                value=story_item['after_value']
+                value=story_item['after_value'] if not last else f'<b>{story_item["after_value"]}</b>'
             )
         elif si_type == 'update':
             string += link_pattern.substitute(
                 sign='--> ',
                 message_id=story_item['message_id'],
-                expression=story_item['after_value'],
+                expression=story_item['after_value'] if not last else f'<b>{story_item["after_value"]}</b>',
                 value=''
             )
         elif si_type == 'null':
             string += link_pattern.substitute(
                 sign='',
                 message_id=story_item['message_id'],
-                expression='0 ',
+                expression='0 ' if not last else f'<b>0</b>',
                 value=''
             )
 

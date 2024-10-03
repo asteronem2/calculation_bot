@@ -122,18 +122,33 @@ class CallbackQueryCommand:
     async def async_init(self):
         await self._get_addition_from_db()
 
-        rres = re.fullmatch(r'admin/folder/[0-9]+/settings/|None', self.cdata)
+        rres = re.fullmatch(r'admin/folder/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None', self.cdata)
         if not rres:
-            res = await self.db.fetch("""
-                SELECT * FROM message_table
-                WHERE user_pid = $1
-                    AND type in ('note', 'notes_message');
-            """, self.db_user['id'])
+            rres2 = re.fullmatch(r'admin/folder/[0-9]+/(change_title|change_parent|delete)/(|1/)', self.cdata)
+
+            if self.cdata == 'admin/menu/':
+                res = await self.db.fetch("""
+                    SELECT * FROM message_table
+                    WHERE user_pid = $1
+                        AND type in ('note', 'settings_folder', 'hidden_note');
+                """, self.db_user['id'])
+            elif rres2:
+                res = await self.db.fetch("""
+                    SELECT * FROM message_table
+                    WHERE user_pid = $1
+                        AND type in ('note', 'hidden_note', 'menu_folder');
+                """, self.db_user['id'])
+            else:
+                res = await self.db.fetch("""
+                    SELECT * FROM message_table
+                    WHERE user_pid = $1
+                        AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder');
+                """, self.db_user['id'])
 
             await self.db.execute("""
-                SELECT * FROM message_table
+                DELETE FROM message_table
                 WHERE user_pid = $1
-                    AND type in ('note', 'notes_message');
+                    AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder');
             """, self.db_user['id'])
 
             if res:
@@ -227,6 +242,7 @@ class NextCallbackMessageCommand:
         self.texts = self.data_locales.texts
         self.send_texts = self.texts['send']
         self.call_edit_texts = self.global_texts['callback_command']['edit']
+        self.call_send_texts = self.global_texts['callback_command']['send']
         self.buttons = self.data_locales.buttons
         self.bot = BotInteraction.BotInter()
 

@@ -13,7 +13,7 @@ from BotInteraction import TextMessage, EditMessage
 from command.inline_query_command import mega_eval
 from main import message_command_cls
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
-    story_generate
+    story_generate, entities_to_html
 
 
 class StartCommand(MessageCommand):
@@ -221,7 +221,8 @@ class EditCurrencyCommand(MessageCommand):
                         SELECT currency_table.title 
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
                     curr_list = [i['title'] for i in res]
@@ -362,7 +363,8 @@ class BalanceListCommand(MessageCommand):
             SELECT currency_table.* 
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1;
+            WHERE type = 'chat' AND chat_table.chat_id = $1
+            ORDER BY currency_table.title ASC;
         """, self.chat.id)
         if res:
             message_obj = await self.generate_send_message(res)
@@ -408,7 +410,8 @@ class CurrencyCommand(MessageCommand):
                     SELECT currency_table.*
                     FROM currency_table
                     JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                    WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                    WHERE type = 'chat' AND chat_table.chat_id = $1
+                    ORDER BY currency_table.title ASC; 
                 """, self.chat.id)
                 for i in res:
                     if self.text_low == i['title']:
@@ -460,7 +463,8 @@ class CurrencyCalculationCommand(MessageCommand):
                             SELECT currency_table.*
                             FROM currency_table
                             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                            WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                            WHERE type = 'chat' AND chat_table.chat_id = $1
+                            ORDER BY currency_table.title ASC; 
                         """, self.chat.id)
 
                         for i in res:
@@ -536,7 +540,7 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 FROM currency_table
                                 JOIN chat_table ON chat_table.id = currency_table.chat_pid
                                 WHERE type = 'chat' AND chat_table.chat_id = $1
-                                ORDER BY currency_table.title; 
+                                ORDER BY currency_table.title ASC; 
                             """, self.chat.id)
                         if res:
                             answer_mode_list = re.findall(r'([^/]+?)\|', self.db_chat['answer_mode'])
@@ -628,7 +632,8 @@ class CurrencyStoryCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
                     for i in res:
@@ -703,7 +708,7 @@ class StoryCommand(CurrencyStoryCommand):
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
             WHERE type = 'chat' AND chat_table.chat_id = $1
-            ORDER BY currency_table.title; 
+            ORDER BY currency_table.title ASC; 
         """, chat_id)
 
         if len(res) == 1:
@@ -763,7 +768,8 @@ class CurrencyVolumeCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
                     for i in res:
@@ -844,7 +850,7 @@ class VolumeCommand(CurrencyVolumeCommand):
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
             WHERE type = 'chat' AND chat_table.chat_id = $1
-            ORDER BY currency_table.title; 
+            ORDER BY currency_table.title ASC; 
         """, chat_id)
 
         if len(res) == 1:
@@ -903,7 +909,8 @@ class CurrencyDetailCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
                     for i in res:
@@ -973,7 +980,7 @@ class DetailCommand(CurrencyDetailCommand):
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
             WHERE type = 'chat' AND chat_table.chat_id = $1
-            ORDER BY currency_table.title; 
+            ORDER BY currency_table.title ASC; 
         """, self.chat.id)
 
         if len(res) == 1:
@@ -1127,7 +1134,8 @@ class CurrencyNullCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1; 
+                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
                     for i in res:
@@ -1199,7 +1207,7 @@ class NullCommand(CurrencyNullCommand):
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
             WHERE type = 'chat' AND chat_table.chat_id = $1
-            ORDER BY currency_table.title; 
+            ORDER BY currency_table.title ASC; 
         """, self.chat.id)
 
         if len(res) == 1:
@@ -1336,6 +1344,53 @@ class AdminChangeNote(MessageCommand):
         )
 
 
+class AdminAddInfoNote(MessageCommand):
+    async def define(self):
+        if self.chat.type == 'private':
+            if self.db_user['access_level'] == 'admin':
+                if not self.message.quote and self.message.reply_to_message:
+                    res = await self.db.fetchrow("""
+                        SELECT * FROM message_table
+                        WHERE type = 'note'
+                            AND is_bot_message = TRUE
+                            AND message_id = $1;
+                    """, self.message.reply_to_message.message_id)
+                    if res:
+                        await self.process(res=res)
+                        return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, int(kwargs['res']['addition']))
+
+        hidden_text = entities_to_html(self.text, self.message.entities)
+
+        await self.db.execute("""
+            UPDATE note_table
+            SET add_info = $1
+            WHERE id = $2;
+        """, hidden_text, res['id'])
+
+        await self.bot.set_emoji(
+            chat_id=self.chat.id,
+            message_id=self.message.message_id if res['add_info'] else self.message.reply_to_message.message_id,
+            emoji=self.global_texts['reactions']['HiddenInfo']
+        )
+
+        await self.bot.delete_message(self.chat.id, self.message.message_id)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> EditMessage:
+        pass
+
+
 class FindCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
@@ -1355,7 +1410,8 @@ class FindCommand(MessageCommand):
     async def process(self, *args, **kwargs) -> None:
         res1 = await self.db.fetch("""
             SELECT * FROM note_table
-            WHERE id <> parent_id;
+            WHERE id <> parent_id
+            ORDER BY title ASC;
         """)
 
         markup = []
@@ -1425,7 +1481,8 @@ class DistributionCommand(MessageCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
-            SELECT DISTINCT tag FROM chat_table;
+            SELECT DISTINCT tag FROM chat_table
+            ORDER BY title ASC;
         """)
         text = Template(self.global_texts['callback_command']['edit']['AdminDistribution']).substitute()
 

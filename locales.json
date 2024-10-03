@@ -4,7 +4,8 @@
       "CancelReaction": "👎",
       "DeleteNote": "💔",
       "ReplyReaction": "⚡",
-      "ReplyReaction2": "🖕"
+      "ReplyReaction2": "🖕",
+      "HiddenInfo": "🙈"
     },
     "error": {
       "UnknownError": "<b>Неизвестная ошибка</b>",
@@ -147,6 +148,7 @@
         "AdminNoteChangeText": "<b>Напишите новый текст для заметки $title</b>",
         "AdminFolderDelete1": "<b>Вы уверены?</b>",
         "AdminFolderDelete2": "<b>Категория $title удалена</b>",
+        "AdminFolderChangeParent": "<b>Выберите новый родительский чат для категории $title</b>",
         "AdminBotSettings": "<b>Данное меню позволяет управлять ботом</b>",
         "AdminSettingsSuper": "<b>Здесь вы можете выбрать какой чат будет иметь статус \"супер\":</b>",
         "AdminCommands": "<b>Выберите категорию для изменения</b>",
@@ -176,7 +178,7 @@
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
         "CurrCancelCommand": "CancelCommand",
-        "4": "2",
+        "AdminFolderTopMessage": "\uD83D\uDDC2 <b>\uD83D\uDD3D Заметки категории \uD83D\uDD3D</b>",
         "5": "2",
         "6": "2",
         "7": "2",
@@ -777,7 +779,7 @@
         [
           {
             "text": "Назад 🔙",
-            "callback_data": "admin/$call_type/$chat_pk/"
+            "callback_data": "admin/balance/$chat_pk/"
           }
         ]
       ],
@@ -785,7 +787,7 @@
         [
           {
             "text": "Назад 🔙",
-            "callback_data": "admin/$call_type/$chat_pk/"
+            "callback_data": "admin/balance/$chat_pk/"
           }
         ]
       ],
@@ -938,7 +940,7 @@
         ],
         [
           {
-            "text": "$tag",
+            "text": "#\uFE0F⃣ $tag",
             "callback_data": "admin/distribution/choice/$tag/",
             "cycle": "cycle",
             "row_width": 2
@@ -988,14 +990,18 @@
         ],
         [
           {
-            "text": "$child_folder_title",
-            "callback_data": "admin/folder/$child_folder_id/",
+            "text": "\uD83D\uDDC2 $child_title",
+            "callback_data": "admin/folder/$child_id/",
             "cycle": "cycle_folder",
             "row_width": 2
           }
         ],
         [
-          {"text": "Настройка категории", "callback_data": "admin/folder/$folder_id/settings/"}
+          {
+            "text": "Настройка категории",
+            "callback_data": "admin/folder/$folder_id/settings/",
+            "variable": "_"
+          }
         ],
         [
           {
@@ -1015,37 +1021,77 @@
           }
         ]
       ],
+      "AdminFolderTopMessage": [
+        [{"text": "Настройка категории", "callback_data": "admin/folder/$folder_id/settings/"}]
+      ],
       "AdminFolderSettings": [
         [
           {
-            "text": "Свернуть заметки",
+            "text": "➿ Свернуть заметки",
             "callback_data": "admin/folder/$folder_id/collapse/",
             "variable": "collapse"
           },
           {
-            "text": "Развернуть заметки",
+            "text": "〰\uFE0F Развернуть заметки",
             "callback_data": "admin/folder/$folder_id/expand/",
             "variable": "expand"
           }
         ],
         [
           {
-            "text": "Сменить название",
+            "text": "\uD83D\uDE49 Показать скрытые",
+            "callback_data": "admin/folder/$folder_id/show_hidden/",
+            "variable": "show_hidden"
+          },
+          {
+            "text": "\uD83D\uDE48 Скрыть скрытые",
+            "callback_data": "admin/folder/$folder_id/hide_hidden/",
+            "variable": "hide_hidden"
+          }
+        ],
+        [
+          {
+            "text": "\uD83D\uDD04 Сменить название",
             "callback_data": "admin/folder/$folder_id/change_title/",
             "variable": "change_title"
           }
         ],
         [
           {
-            "text": "Удалить категорию",
+            "text": "\uD83D\uDD02 Сменить родительскую папку",
+            "callback_data": "admin/folder/$folder_id/change_parent/",
+            "variable": "change_parent"
+          }
+        ],
+        [
+          {
+            "text": "❌ Удалить категорию",
             "callback_data": "admin/folder/$folder_id/delete/1/",
             "variable": "delete"
           }
         ],
-        [{
-          "text": "Назад \uD83D\uDD19",
-          "callback_data": "admin/folder/$folder_id/"
-        }]
+        [
+          {
+            "text": "Назад 🔙",
+            "callback_data": "admin/folder/$folder_id/top_message/"
+          }
+        ]
+      ],
+      "AdminFolderChangeParent": [
+        [
+          {
+            "text": "$status $title",
+            "callback_data": "$callback",
+            "cycle": "cycle",
+            "row_width": 1
+          }
+        ],
+        [
+          {
+            "text": "Назад 🔙",
+            "callback_data": "admin/folder/$folder_id/"
+          }
+        ]
       ],
       "AdminNote": [
         [
