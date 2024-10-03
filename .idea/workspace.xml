@@ -4,17 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.63 unstable version&#10;1. Очень много всего">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/inline_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/inline_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales_base.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales_base.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -112,14 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Stable 0.9 version">
-      <option name="closed" value="true" />
-      <created>1723472506356</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1723472506356</updated>
     </task>
     <task id="LOCAL-00003" summary="0.91 version&#10;Added:&#10;1. В настройки чата в админ панели добавлена возможность делать чат супер и не супер&#10;2. В настройках чата в админ панели добавлена возможность добавлять и изменять теги&#10;3. В рассылки добавлена возможность рассылать выборочно по тегам">
       <option name="closed" value="true" />
@@ -505,7 +488,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727767634776</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="0.9.63 unstable version&#10;1. Очень много всего">
+      <option name="closed" value="true" />
+      <created>1727941270474</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1727941270474</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -535,7 +526,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.44 unstable version&#10;1. Обновлено меню" />
     <MESSAGE value="0.9.45 unstable version&#10;1. Переработано создание тегов и добавление чатов к тегу&#10;2. После отправки сообщения после нажатия кнопки возвращается меню из которого оно было нажато" />
     <MESSAGE value="0.9.46 unstable version&#10;1. Форматирование балансов" />
     <MESSAGE value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками" />
@@ -560,6 +550,7 @@
     <MESSAGE value="0.9.62 unstable version&#10;1. Бот реагирует на &quot;Адрес&quot;, а не только на &quot;адрес&quot;" />
     <MESSAGE value="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <MESSAGE value="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
+    <MESSAGE value="0.9.63 unstable version&#10;1. Очень много всего" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.63 unstable version&#10;1. Очень много всего" />
   </component>
 </project>

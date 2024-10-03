@@ -27,7 +27,7 @@ class DotEnvData:
     USER: str
     PASSWORD: str
     DATABASE: str
-
+    TRONSCAN_API_KEY: str
     def __init__(self):
         environ = os.environ
         if environ.get('BOT_TOKEN') is None and environ.get('ADMIN_LIST') is None:
@@ -40,6 +40,7 @@ class DotEnvData:
         self.USER = environ.get('USER')
         self.PASSWORD = environ.get('PASSWORD')
         self.DATABASE = environ.get('DATABASE')
+        self.TRONSCAN_API_KEY = environ.get('TRONSCAN_API_KEY')
 
 
 class GetLocales:
@@ -212,15 +213,15 @@ class DataDB:
         asyncio.create_task(self._async_del())
 
 db = DataDB()
-DEBUG_CHAT_ID = DotEnvData().DEBUG_CHAT_ID
+DED = DotEnvData()
 
 async def log(message: str, level: str = 'error'):
     if level == 'error':
         logging.error(message)
         try:
             import main
-            await main.bot.send_document(DEBUG_CHAT_ID, FSInputFile('logs.log'), disable_notification=True)
-            await main.bot.send_message(DEBUG_CHAT_ID, message, disable_notification=True)
+            await main.bot.send_document(DED.DEBUG_CHAT_ID, FSInputFile('logs.log'), disable_notification=True)
+            await main.bot.send_message(DED.DEBUG_CHAT_ID, message, disable_notification=True)
         except Exception as err:
             err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
@@ -231,6 +232,7 @@ async def log(message: str, level: str = 'error'):
         return True
     else:
         return False
+
 
 def str_to_float(value: str):
     try:
@@ -797,27 +799,34 @@ class Tracking:
     @staticmethod
     async def _address_parsing(address_row: Record) -> (int, dict):
         async with httpx.AsyncClient() as client:
-            response = await client.get('https://apilist.tronscanapi.com/api/filter/trc20/transfers', params={
+            response = await client.get('https://apilist.tronscanapi.com/api/filter/trc20/transfers',
+                                        params={
                 'limit': '1',
                 'sort': '-timestamp',
                 'count': 'true',
                 'filterTokenValue': '0',
                 'relatedAddress': address_row['address']
-            })
+            },
+                                        headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
 
         return response.status_code, response.json()['token_transfers'][0], response
 
     @staticmethod
     async def check_address(address):
         async with httpx.AsyncClient() as client:
-            response = await client.get('https://apilist.tronscanapi.com/api/filter/trc20/transfers', params={
-                'limit': '1',
-                'sort': '-timestamp',
-                'count': 'true',
-                'filterTokenValue': '0',
-                'relatedAddress': address
-            })
-
+            print('sadasdasdsadasdasd')
+            response = await client.get('https://apilist.tronscanapi.com/api/filter/trc20/transfers',
+                                        params={
+                                            'limit': '1',
+                                            'sort': '-timestamp',
+                                            'count': 'true',
+                                            'filterTokenValue': '0',
+                                            'relatedAddress': address
+                                        },
+                                        headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
+            print(response)
+            print(response.json())
+            print(DED.TRONSCAN_API_KEY)
             if response.json().get('message') == 'some parameters are invalid or out of range':
                 return False
             else:
