@@ -833,7 +833,7 @@ class Tracking:
             },
                                         headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
 
-        token_transfers = response.json()['token_transfers']
+        token_transfers = response.json().get('token_transfers')
         if token_transfers:
             return response.status_code, token_transfers[0], response
         else:
