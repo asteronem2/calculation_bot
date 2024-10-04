@@ -739,6 +739,10 @@ class Tracking:
                 for user in self.user_list:
                     await self._user_addresses_parsing(user)
             except Exception as err:
+                err_str = traceback.format_exc()
+                print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+                print(err_str)
+                await log(err_str)
                 count += 1
                 await asyncio.sleep(5)
 

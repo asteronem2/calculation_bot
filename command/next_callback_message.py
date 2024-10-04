@@ -1210,6 +1210,22 @@ class AdminDistributionPin(NextCallbackMessageCommand):
                               None
                               )
 
+        res3 = await self.db.fetch("""
+            SELECT * FROM message_table
+            WHERE user_pid = $1
+                AND type in ('distribution_last');
+        """, self.db_user['id'])
+
+        await self.db.execute("""
+            SELECT * FROM message_table
+            WHERE user_pid = $1
+                AND type in ('distribution_last');
+        """, self.db_user['id'])
+
+        if res3:
+            msg_ids = [i['message_id'] for i in res3]
+            await self.bot.bot.delete_messages(self.chat.id, msg_ids)
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
             text = Template(self.send_texts[f'AdminDistribution{"Pin" if kwargs["pin"] else "Unpin"}']).substitute()

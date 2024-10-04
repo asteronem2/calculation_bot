@@ -134,7 +134,7 @@
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesParsing": "<b>Список сотрудников для отслеживания адресов:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminDistribution": "<b>Можете выбрать кому разослать массовое сообщение</b>",
-        "AdminDistributionChoice": "<b>Выберите с закреплением или без?</b>\n\n$story_distribution",
+        "AdminDistributionChoice": "<b>Выберите с закреплением или без?</b>",
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "AdminFolder": "<b>Категория заметок $folder_title</b>\n$notes",
@@ -984,14 +984,6 @@
         ],
         [
           {
-            "text": "$number",
-            "callback_data": "admin/ready_distribution/$dist_id/",
-            "cycle": "cycle",
-            "row_width": 2
-          }
-        ],
-        [
-          {
             "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
@@ -1504,21 +1496,21 @@
           {
             "text": "Информация",
             "callback_data": "employee/menu/info/",
-            "variable": "client"
+            "variable": "info"
           }
         ],
         [
           {
             "text": "Парсинг",
             "callback_data": "employee/menu/parsing/",
-            "variable": "employee_parsing"
+            "variable": "parsing"
           }
         ],
         [
           {
             "text": "Команды",
             "callback_data": "employee/menu/commands/",
-            "variable": "employee"
+            "variable": "commands"
           }
         ]
       ],

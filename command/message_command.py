@@ -1529,13 +1529,14 @@ class EmployeeMenuCommand(MessageCommand):
         variable = []
 
         if self.db_user['access_level'] == 'employee':
-            variable.append('employee')
-            variable.append('client')
-            variable.append('employee_parsing')
+            variable.append('info')
+            variable.append('parsing')
+            variable.append('commands')
         elif self.db_user['access_level'] == 'client':
-            variable.append('client')
+            variable.append('info')
         elif self.db_user['access_level'] == 'employee_parsing':
-            variable.append('employee_parsing')
+            variable.append('info')
+            variable.append('parsing')
 
         markup = markup_generate(
             self.global_texts['buttons']['EmployeeMenuCommand'],

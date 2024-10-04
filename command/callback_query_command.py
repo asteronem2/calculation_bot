@@ -2,6 +2,7 @@ import datetime
 import re
 from string import Template
 
+from aiogram.methods import SendMessage
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 import BotInteraction
@@ -2095,13 +2096,14 @@ class EmployeeMenu(CallbackQueryCommand):
         variable = []
 
         if self.db_user['access_level'] == 'employee':
-            variable.append('employee')
-            variable.append('client')
-            variable.append('employee_parsing')
+            variable.append('info')
+            variable.append('parsing')
+            variable.append('commands')
         elif self.db_user['access_level'] == 'client':
-            variable.append('client')
+            variable.append('info')
         elif self.db_user['access_level'] == 'employee_parsing':
-            variable.append('employee_parsing')
+            variable.append('parsing')
+            variable.append('info')
 
         markup = markup_generate(
             self.buttons['EmployeeMenuCommand'],
@@ -2140,8 +2142,8 @@ class EmployeeMenuFolder(CallbackQueryCommand):
 
         res2 = await self.db.fetch("""
             SELECT * FROM note_table
-            WHERE parent_id = $1;
-            ORDER BY title ASC
+            WHERE parent_id = $1
+            ORDER BY title ASC;
         """, kwargs['folder_id'])
 
         notes = ''
@@ -3404,6 +3406,52 @@ class AdminDistributionChoice(CallbackQueryCommand):
                 return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['AdminDistributionChoice']).substitute()
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminDistributionChoice'],
+            tag=kwargs['tag']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminDistributionPinUnpin(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/distribution/(pin|unpin)/([^/]+)/', self.cdata)
+            if rres:
+                pin = True if rres.group(1) == 'pin' else False
+                tag = rres.group(2)
+                await self.process(tag=tag, pin=pin)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            INSERT INTO pressure_button_table
+            (chat_pid, user_pid, message_id, callback_data)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
+        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
+
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -3418,185 +3466,50 @@ class AdminDistributionChoice(CallbackQueryCommand):
             LIMIT 2;
         """, kwargs['tag'])
 
-        cycle = []
-        story_distribution = ''
-
-        number = 1
+        message_obj = TextMessage(
+            chat_id=self.chat.id,
+            text='<b>Два последних этого тега:</b>'
+        )
+        sent_message = await self.bot.send_text(message_obj)
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, message_id, text, type, is_bot_message)
+            VALUES ($1, $2, $3, $4, TRUE);
+        """,
+                              self.db_user['id'],
+                              sent_message.message_id,
+                              'text',
+                              'distribution_last')
 
         for i in res:
-            cycle.append({
-                "number": number,
-                "dist_id": i['id']
-            })
-            txt_pin = 'Закреплённое' if i['pin'] else 'Не закреплённое'
-            story_distribution += f'<blockquote expandable>{number}. <u>{txt_pin}</u>\n{i["text"]}</blockquote>\n\n'
-            number += 1
+            text = i['text']
 
-        text = Template(self.edit_texts['AdminDistributionChoice']).substitute(
-            story_distribution=story_distribution
-        )
-
-        markup = markup_generate(
-            buttons=self.buttons['AdminDistributionChoice'],
-            tag=kwargs['tag'],
-            cycle=cycle
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
-
-
-class AdminDistributionPin(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/distribution/pin/([^/]+)/', self.cdata)
-            if rres:
-                tag = rres.group(1)
-                await self.process(tag=tag)
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            INSERT INTO pressure_button_table
-            (chat_pid, user_pid, message_id, callback_data)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
-        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
-
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminDistributionPin']).substitute(
-            tag=kwargs['tag'] if kwargs['tag'] != 'to_all' else 'всем'
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
-        )
-
-
-class AdminDistributionUnpin(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/distribution/unpin/([^/]+)/', self.cdata)
-            if rres:
-                tag = rres.group(1)
-                await self.process(tag=tag)
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            INSERT INTO pressure_button_table
-            (chat_pid, user_pid, message_id, callback_data)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
-        """, None, self.db_user['id'], self.sent_message_id, self.cdata)
-
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminDistributionUnpin']).substitute(
-            tag=kwargs['tag'] if kwargs['tag'] != 'to_all' else 'всем'
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
-        )
-
-
-class AdminReadyDistribution(CallbackQueryCommand):
-    async def define(self):
-        rres = re.fullmatch(r'admin/ready_distribution/([0-9]+)/', self.cdata)
-        if rres:
-            dist_id = int(rres.group(1))
-            await self.process(dist_id=dist_id)
-            return True
-
-    async def process(self, *args, **kwargs) -> None:
-        res1 = await self.db.fetchrow("""
-            SELECT * FROM distribution_table
-            WHERE id = $1;
-        """, kwargs['dist_id'])
-
-        if res1['tag'] != 'to_all':
-            res2 = await self.db.fetch("""
-                SELECT * FROM chat_table
-                WHERE type = 'chat' 
-                    AND super = FALSE
-                    AND COALESCE(tag, '1') = COALESCE($1, '1');
-            """, res1['tag'] if res1['tag'] != 'to_all' else None)
-        else:
-            res2 = await self.db.fetch("""
-                SELECT * FROM chat_table
-                WHERE super = FALSE;
-            """)
-
-        for i in res2:
-            message_obj = TextMessage(chat_id=i['chat_id'], text=res1['text'], pin=res1['pin'])
-            await self.bot.send_text(message_obj)
-
-        message_obj = await self.generate_send_message(stage=1, pin=res1['pin'], **kwargs)
-        await self.bot.send_text(message_obj)
-        await self.bot.delete_message(
-            chat_id=self.chat.id,
-            message_id=self.sent_message_id
-        )
-
-        message_obj2 = await self.generate_send_message(stage=2, pin=res1['pin'], **kwargs)
-        await self.bot.send_text(message_obj2)
-
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        if kwargs['stage'] == 1:
-            text = Template(self.global_texts['next_callback_message_command']['send'][f'AdminDistribution{"Pin" if kwargs["pin"] else "Unpin"}']).substitute()
-
-            return TextMessage(
+            message_obj = TextMessage(
                 chat_id=self.chat.id,
                 text=text
             )
-        else:
-            res = await self.db.fetch("""
-                SELECT DISTINCT tag FROM 
-                    (
-                    SELECT * FROM chat_table
-                    ORDER BY title ASC
-                    )
-                AS subquery;
-            """)
-            text = Template(self.edit_texts['AdminDistribution']).substitute()
+            sent_message = await self.bot.send_text(message_obj)
+            await self.db.execute("""
+                INSERT INTO message_table
+                (user_pid, message_id, text, type, is_bot_message)
+                VALUES ($1, $2, $3, $4, TRUE);
+            """,
+                                  self.db_user['id'],
+                                  sent_message.message_id,
+                                  text,
+                                  'distribution_last')
 
-            markup = markup_generate(
-                buttons=self.buttons['AdminDistribution'],
-                cycle=[{'tag': i['tag']} for i in res if i['tag']]
-            )
+        text = Template(self.edit_texts[f'AdminDistribution{"Pin" if kwargs["pin"] else "Unpin"}']).substitute(
+            tag=kwargs['tag'] if kwargs['tag'] != 'to_all' else 'всем'
+        )
 
-            return TextMessage(
-                chat_id=self.chat.id,
-                text=text,
-                message_thread_id=self.topic,
-                markup=markup
-            )
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
+        )
+
 
 # Заметки
 class AdminFolder(CallbackQueryCommand):
@@ -3621,7 +3534,7 @@ class AdminFolder(CallbackQueryCommand):
         await self.db.execute("""
             INSERT INTO message_table
             (user_pid, message_id, text, type, is_bot_message)
-            VALUES ($1, $2, $3, $4, TRUE)
+            VALUES ($1, $2, $3, $4, TRUE);
         """,
                               self.db_user['id'],
                               sent_message.message_id,
@@ -3693,7 +3606,7 @@ class AdminFolder(CallbackQueryCommand):
         await self.db.execute("""
             INSERT INTO message_table
             (user_pid, message_id, text, type, is_bot_message)
-            VALUES ($1, $2, $3, $4, TRUE)
+            VALUES ($1, $2, $3, $4, TRUE);
         """,
                               self.db_user['id'],
                               sent_message.message_id,
@@ -3719,7 +3632,7 @@ class AdminFolder(CallbackQueryCommand):
                 await self.db.execute("""
                     INSERT INTO message_table
                     (user_pid, message_id, text, type, is_bot_message, addition)
-                    VALUES ($1, $2, $3, $4, TRUE, $5)
+                    VALUES ($1, $2, $3, $4, TRUE, $5);
                 """,
                                        self.db_user['id'],
                                        sent_message.message_id,
@@ -3890,7 +3803,7 @@ class AdminFolderCollapseExpand(AdminFolder):
         await self.db.execute("""
             INSERT INTO message_table
             (user_pid, message_id, text, type, is_bot_message)
-            VALUES ($1, $2, $3, $4, TRUE)
+            VALUES ($1, $2, $3, $4, TRUE);
         """,
                               self.db_user['id'],
                               sent_message.message_id,
@@ -3950,7 +3863,7 @@ class AdminFolderShowHidden(AdminFolderSettings):
                     await self.db.execute("""
                         INSERT INTO message_table
                         (user_pid, message_id, text, type, is_bot_message, addition)
-                        VALUES ($1, $2, $3, $4, TRUE, $5)
+                        VALUES ($1, $2, $3, $4, TRUE, $5);
                     """, self.db_user['id'], sent_message.message_id, sent_message.text, 'hidden_note', str(ires['id']))
 
         main_message_obj = await AdminFolderSettings.generate_edit_message(self, **kwargs)
@@ -4707,7 +4620,7 @@ class AdminChangeEmoji(CallbackQueryCommand):
         await self.db.execute("""
             INSERT INTO message_table
             (user_pid, message_id, type, addition)
-            VALUES ($1, $2, $3, $4)
+            VALUES ($1, $2, $3, $4);
         """, self.db_user['id'], self.sent_message_id, 'change_emoji', kwargs['command'])
 
         message_obj = await self.generate_edit_message(**kwargs)
@@ -4989,7 +4902,9 @@ class AdminTagChangeUsers(CallbackQueryCommand):
                 access_level = 'сотрудник'
             elif i['access_level'] == 'client':
                 access_level = 'контрагент'
-            elif i['access_level'] in ['admin', 'zero', 'employee_parsing']:
+            elif i['access_level'] == 'employee_parsing':
+                access_level = 'сотрудник для парсинга'
+            elif i['access_level'] in ['admin', 'zero']:
                 continue
 
             status = '⏺'

@@ -142,13 +142,13 @@ class CallbackQueryCommand:
                 res = await self.db.fetch("""
                     SELECT * FROM message_table
                     WHERE user_pid = $1
-                        AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder');
+                        AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
                 """, self.db_user['id'])
 
             await self.db.execute("""
                 DELETE FROM message_table
                 WHERE user_pid = $1
-                    AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder');
+                    AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
             """, self.db_user['id'])
 
             if res:
