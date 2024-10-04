@@ -764,7 +764,11 @@ class Tracking:
             if timedelta < 1:
                 await asyncio.sleep(1 - timedelta)
 
-            status_code, token_transfer, response = await self._address_parsing(i)
+            result = await self._address_parsing(i)
+            if result:
+                status_code, token_transfer, response = result
+            else:
+                continue
 
             outgoing = token_transfer['from_address'] == i['address']
             transaction_id = token_transfer['transaction_id']
@@ -829,7 +833,11 @@ class Tracking:
             },
                                         headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
 
-        return response.status_code, response.json()['token_transfers'][0], response
+        token_transfers = response.json()['token_transfers']
+        if token_transfers:
+            return response.status_code, token_transfers[0], response
+        else:
+            return
 
     @staticmethod
     async def check_address(address):
