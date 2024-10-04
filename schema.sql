@@ -111,6 +111,17 @@ CREATE TABLE IF NOT EXISTS callback_table (
     datetime TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS distribution_table (
+    id SERIAL PRIMARY KEY,
+    user_pid INTEGER REFERENCES user_table(id) DEFAULT NULL,
+    tag TEXT,
+    text TEXT,
+    pin BOOLEAN,
+    file_id TEXT,
+    datetime TIMESTAMPTZ DEFAULT NOW()
+);
+
+
 INSERT INTO user_table
 (id, user_id, access_level)
 VALUES
@@ -124,9 +135,7 @@ ADD COLUMN IF NOT EXISTS bind_chat INTEGER REFERENCES chat_table(id) DEFAULT NUL
 
 ALTER TABLE user_table
 ADD COLUMN IF NOT EXISTS revise_expr TEXT,
-ADD COLUMN IF NOT EXISTS tag TEXT DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS folder_expand BOOLEAN DEFAULT TRUE,
-DROP COLUMN folder_expand;
+ADD COLUMN IF NOT EXISTS tag TEXT DEFAULT NULL;
 
 ALTER TABLE currency_table
 ADD COLUMN IF NOT EXISTS rounding INTEGER DEFAULT 2;
@@ -147,3 +156,4 @@ SET timezone = 'Europe/Moscow';
 
 ALTER TABLE message_table
 ALTER COLUMN text DROP NOT NULL;
+

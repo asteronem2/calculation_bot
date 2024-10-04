@@ -134,7 +134,7 @@
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesParsing": "<b>Список сотрудников для отслеживания адресов:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminDistribution": "<b>Можете выбрать кому разослать массовое сообщение</b>",
-        "AdminDistributionChoice": "<b>С закреплением или без?</b>",
+        "AdminDistributionChoice": "<b>Выберите с закреплением или без?</b>\n\n$story_distribution",
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "AdminFolder": "<b>Категория заметок $folder_title</b>\n$notes",
@@ -178,7 +178,7 @@
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
         "CurrCancelCommand": "CancelCommand",
-        "AdminFolderTopMessage": "\uD83D\uDDC2 <b>\uD83D\uDD3D Заметки категории \uD83D\uDD3D</b>",
+        "AdminFolderTopMessage": "<b>🔽 Заметки категории 🔽</b>",
         "5": "2",
         "6": "2",
         "7": "2",
@@ -731,22 +731,6 @@
           }
         ]
       ],
-      "AdminBalances": [
-        [
-          {
-            "text": "$title ($code_name)",
-            "callback_data": "admin/balance/$chat_pk/",
-            "cycle": "cycle",
-            "row_width": 1
-          }
-        ],
-        [
-          {
-            "text": "Назад 🔙",
-            "callback_data": "admin/menu/"
-          }
-        ]
-      ],
       "AdminBalance": [
         [
           {
@@ -770,6 +754,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/balances/"
           }
@@ -778,6 +766,10 @@
       "AdminBalanceStory": [
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/balance/$chat_pk/"
           }
@@ -785,6 +777,10 @@
       ],
       "AdminBalanceDetail": [
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/balance/$chat_pk/"
@@ -842,6 +838,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/chats/"
           }
@@ -857,6 +857,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/chat/$chat_pk/"
@@ -910,6 +914,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/chat/$chat_pk/"
           }
@@ -926,6 +934,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/chat/$chat_pk/"
           }
@@ -940,7 +952,7 @@
         ],
         [
           {
-            "text": "#\uFE0F⃣ $tag",
+            "text": "#️⃣ $tag",
             "callback_data": "admin/distribution/choice/$tag/",
             "cycle": "cycle",
             "row_width": 2
@@ -972,6 +984,18 @@
         ],
         [
           {
+            "text": "$number",
+            "callback_data": "admin/ready_distribution/$dist_id/",
+            "cycle": "cycle",
+            "row_width": 2
+          }
+        ],
+        [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/distribution/"
           }
@@ -990,7 +1014,7 @@
         ],
         [
           {
-            "text": "\uD83D\uDDC2 $child_title",
+            "text": "🗂 $child_title",
             "callback_data": "admin/folder/$child_id/",
             "cycle": "cycle_folder",
             "row_width": 2
@@ -1004,6 +1028,11 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/",
+            "variable": "to_menu"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/folder/$parent_folder_id/",
@@ -1022,7 +1051,12 @@
         ]
       ],
       "AdminFolderTopMessage": [
-        [{"text": "Настройка категории", "callback_data": "admin/folder/$folder_id/settings/"}]
+        [
+          {
+            "text": "Настройка категории",
+            "callback_data": "admin/folder/$folder_id/settings/"
+          }
+        ]
       ],
       "AdminFolderSettings": [
         [
@@ -1032,33 +1066,33 @@
             "variable": "collapse"
           },
           {
-            "text": "〰\uFE0F Развернуть заметки",
+            "text": "〰️ Развернуть заметки",
             "callback_data": "admin/folder/$folder_id/expand/",
             "variable": "expand"
           }
         ],
         [
           {
-            "text": "\uD83D\uDE49 Показать скрытые",
+            "text": "🙉 Показать скрытые",
             "callback_data": "admin/folder/$folder_id/show_hidden/",
             "variable": "show_hidden"
           },
           {
-            "text": "\uD83D\uDE48 Скрыть скрытые",
+            "text": "🙈 Скрыть скрытые",
             "callback_data": "admin/folder/$folder_id/hide_hidden/",
             "variable": "hide_hidden"
           }
         ],
         [
           {
-            "text": "\uD83D\uDD04 Сменить название",
+            "text": "🔄 Сменить название",
             "callback_data": "admin/folder/$folder_id/change_title/",
             "variable": "change_title"
           }
         ],
         [
           {
-            "text": "\uD83D\uDD02 Сменить родительскую папку",
+            "text": "🔂 Сменить родительскую папку",
             "callback_data": "admin/folder/$folder_id/change_parent/",
             "variable": "change_parent"
           }
@@ -1113,6 +1147,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/folder/$folder_id/"
@@ -1188,6 +1226,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
           }
@@ -1214,7 +1256,7 @@
         ],
         [
           {
-            "text": "Эмодзи",
+            "text": "💩\n Эмодзи",
             "callback_data": "admin/emoji_settings/"
           }
         ],
@@ -1236,6 +1278,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
           }
@@ -1251,6 +1297,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
@@ -1273,6 +1323,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
@@ -1312,6 +1366,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/tags/"
           }
@@ -1328,6 +1386,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/tag/$tag/"
           }
@@ -1343,6 +1405,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/tag/$tag/"
@@ -1400,6 +1466,10 @@
         ],
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/commands/"
           }
@@ -1408,6 +1478,10 @@
       "AdminInstruction": [
         [
           {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/commands/"
           }
@@ -1415,6 +1489,10 @@
       ],
       "AdminChangeEmoji": [
         [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/emoji_settings/"
@@ -1526,7 +1604,7 @@
       ]
     },
     "addition": {
-      "curr_info_list": "💰 Баланс <u>$title:</u> <b>$value $postfix</b>\n",
+      "curr_info_list": "Баланс <u>$title:</u> <b>$value $postfix</b>\n",
       "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
       "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime",
       "chat_balance": "<blockquote expandable>💰 Баланс чата <a href='$link'><b>$title</b></a> ($code_name):\n$curr_info_list</blockquote>",

@@ -134,7 +134,7 @@
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesParsing": "<b>Список сотрудников для отслеживания адресов:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminDistribution": "<b>Можете выбрать кому разослать массовое сообщение</b>",
-        "AdminDistributionChoice": "<b>С закреплением или без?</b>",
+        "AdminDistributionChoice": "<b>Выберите с закреплением или без?</b>\n\n$story_distribution",
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "AdminFolder": "<b>Категория заметок $folder_title</b>\n$notes",
@@ -178,7 +178,7 @@
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
         "CurrCancelCommand": "CancelCommand",
-        "AdminFolderTopMessage": "<b>\uD83D\uDD3D Заметки категории \uD83D\uDD3D</b>",
+        "AdminFolderTopMessage": "<b>🔽 Заметки категории 🔽</b>",
         "5": "2",
         "6": "2",
         "7": "2",
@@ -754,7 +754,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -766,7 +766,7 @@
       "AdminBalanceStory": [
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -778,7 +778,7 @@
       "AdminBalanceDetail": [
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -838,7 +838,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -858,7 +858,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -914,7 +914,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -934,7 +934,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -952,7 +952,7 @@
         ],
         [
           {
-            "text": "#\uFE0F⃣ $tag",
+            "text": "#️⃣ $tag",
             "callback_data": "admin/distribution/choice/$tag/",
             "cycle": "cycle",
             "row_width": 2
@@ -984,7 +984,15 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "$number",
+            "callback_data": "admin/ready_distribution/$dist_id/",
+            "cycle": "cycle",
+            "row_width": 2
+          }
+        ],
+        [
+          {
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1006,7 +1014,7 @@
         ],
         [
           {
-            "text": "\uD83D\uDDC2 $child_title",
+            "text": "🗂 $child_title",
             "callback_data": "admin/folder/$child_id/",
             "cycle": "cycle_folder",
             "row_width": 2
@@ -1021,7 +1029,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/",
             "variable": "to_menu"
           },
@@ -1043,7 +1051,12 @@
         ]
       ],
       "AdminFolderTopMessage": [
-        [{"text": "Настройка категории", "callback_data": "admin/folder/$folder_id/settings/"}]
+        [
+          {
+            "text": "Настройка категории",
+            "callback_data": "admin/folder/$folder_id/settings/"
+          }
+        ]
       ],
       "AdminFolderSettings": [
         [
@@ -1053,33 +1066,33 @@
             "variable": "collapse"
           },
           {
-            "text": "〰\uFE0F Развернуть заметки",
+            "text": "〰️ Развернуть заметки",
             "callback_data": "admin/folder/$folder_id/expand/",
             "variable": "expand"
           }
         ],
         [
           {
-            "text": "\uD83D\uDE49 Показать скрытые",
+            "text": "🙉 Показать скрытые",
             "callback_data": "admin/folder/$folder_id/show_hidden/",
             "variable": "show_hidden"
           },
           {
-            "text": "\uD83D\uDE48 Скрыть скрытые",
+            "text": "🙈 Скрыть скрытые",
             "callback_data": "admin/folder/$folder_id/hide_hidden/",
             "variable": "hide_hidden"
           }
         ],
         [
           {
-            "text": "\uD83D\uDD04 Сменить название",
+            "text": "🔄 Сменить название",
             "callback_data": "admin/folder/$folder_id/change_title/",
             "variable": "change_title"
           }
         ],
         [
           {
-            "text": "\uD83D\uDD02 Сменить родительскую папку",
+            "text": "🔂 Сменить родительскую папку",
             "callback_data": "admin/folder/$folder_id/change_parent/",
             "variable": "change_parent"
           }
@@ -1135,7 +1148,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1213,7 +1226,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1243,7 +1256,7 @@
         ],
         [
           {
-            "text": "\uD83D\uDCA9\n Эмодзи",
+            "text": "💩\n Эмодзи",
             "callback_data": "admin/emoji_settings/"
           }
         ],
@@ -1265,7 +1278,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1285,7 +1298,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1311,7 +1324,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1353,7 +1366,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1373,7 +1386,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1393,7 +1406,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1453,7 +1466,7 @@
         ],
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1465,7 +1478,7 @@
       "AdminInstruction": [
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {
@@ -1477,7 +1490,7 @@
       "AdminChangeEmoji": [
         [
           {
-            "text": "В меню ❇\uFE0F",
+            "text": "В меню ❇️",
             "callback_data": "admin/menu/"
           },
           {

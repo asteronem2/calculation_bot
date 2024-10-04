@@ -1156,10 +1156,11 @@ class AdminEmployeesRemove(AdminEmployeesAdd):
 
 class AdminDistributionPin(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/distribution/pin/([^/]+)/', self.cdata)
+        rres1 = re.fullmatch(r'admin/distribution/(pin|unpin)/([^/]+)/', self.cdata)
         if rres1:
-            tag = rres1.group(1)
-            await self.process(tag=tag)
+            pin = True if rres1.group(1) == 'pin' else False
+            tag = rres1.group(2)
+            await self.process(tag=tag, pin=pin)
             return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -1181,8 +1182,10 @@ class AdminDistributionPin(NextCallbackMessageCommand):
                 WHERE super = FALSE;
             """)
 
+        text = entities_to_html(self.message.text, self.message.entities)
+
         for i in res:
-            message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=True)
+            message_obj = TextMessage(chat_id=i['chat_id'], text=text, pin=kwargs['pin'])
             await self.bot.send_text(message_obj)
 
         message_obj = await self.generate_send_message(stage=1, **kwargs)
@@ -1195,9 +1198,21 @@ class AdminDistributionPin(NextCallbackMessageCommand):
         message_obj2 = await self.generate_send_message(stage=2, **kwargs)
         await self.bot.send_text(message_obj2)
 
+        await self.db.execute("""
+            INSERT INTO distribution_table
+            (user_pid, tag, text, pin, file_id)
+            VALUES ($1, $2, $3, $4, $5);
+        """,
+                              self.db_user['id'],
+                              kwargs['tag'],
+                              text,
+                              kwargs['pin'],
+                              None
+                              )
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
-            text = Template(self.send_texts['AdminDistributionPin']).substitute()
+            text = Template(self.send_texts[f'AdminDistribution{"Pin" if kwargs["pin"] else "Unpin"}']).substitute()
 
             return TextMessage(
                 chat_id=self.chat.id,
@@ -1225,66 +1240,6 @@ class AdminDistributionPin(NextCallbackMessageCommand):
                 message_thread_id=self.topic,
                 markup=markup
             )
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text='Что-то не так'
-        )
-
-
-class AdminDistributionUnpin(AdminDistributionPin):
-    async def define(self):
-        rres1 = re.fullmatch(r'admin/distribution/unpin/([^/]+)/', self.cdata)
-        if rres1:
-            tag = rres1.group(1)
-            await self.process(tag=tag)
-            return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            DELETE FROM pressure_button_table
-            WHERE id = $1;
-        """, self.pressure_info['id'])
-
-        if kwargs['tag'] != 'to_all':
-            res = await self.db.fetch("""
-                SELECT * FROM chat_table
-                WHERE type = 'chat' 
-                    AND super = FALSE
-                    AND COALESCE(tag, '1') = COALESCE($1, '1');
-            """, kwargs['tag'] if kwargs['tag'] != 'to_all' else None)
-        else:
-            res = await self.db.fetch("""
-                SELECT * FROM chat_table
-                WHERE super = FALSE;
-            """)
-
-        for i in res:
-            message_obj = TextMessage(chat_id=i['chat_id'], text=self.message.text, pin=False)
-            await self.bot.send_text(message_obj)
-
-        message_obj = await self.generate_send_message(stage=1, **kwargs)
-        await self.bot.send_text(message_obj)
-        await self.bot.delete_message(
-            chat_id=self.chat.id,
-            message_id=self.press_message_id
-        )
-
-        message_obj2 = await AdminDistributionPin.generate_send_message(self, stage=2, **kwargs)
-        await self.bot.send_text(message_obj2)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.send_texts['AdminDistributionUnpin']).substitute()
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text
-        )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass

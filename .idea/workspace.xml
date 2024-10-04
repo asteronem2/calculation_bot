@@ -4,12 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.66 unstable version&#10;1. Bug fixing">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.67 unstable version&#10;1. Кнопка &quot;в меню&quot;">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,14 +108,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00008" summary="0.94 version&#10;Added:&#10;1. Дополнительная обработка ошибок&#10;2. Возможность отменять ввод текста, если должно регистрироваться сообщение">
-      <option name="closed" value="true" />
-      <created>1724147927246</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1724147927246</updated>
     </task>
     <task id="LOCAL-00009" summary="0.95 version&#10;Added:&#10;1. Ключевые слова для вызова команд прописаны в json файле а не py&#10;2. Возможность изменять ключевые слова для вызова команд">
       <option name="closed" value="true" />
@@ -499,7 +493,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727950411948</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="0.9.67 unstable version&#10;1. Кнопка &quot;в меню&quot;">
+      <option name="closed" value="true" />
+      <created>1728029049134</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1728029049134</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -529,7 +531,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска" />
     <MESSAGE value="0.9.48 unstable version&#10;1. После создания заметки/категории отображается корректное меню&#10;2. Изменена история" />
     <MESSAGE value="0.9.49 unstable version&#10;1. Кнопка назад работает корректно в папке заметок" />
     <MESSAGE value="0.9.50 unstable version&#10;1. Объём валюты" />
@@ -554,6 +555,7 @@
     <MESSAGE value="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН" />
     <MESSAGE value="0.9.65 unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.66 unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.66 unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.9.67 unstable version&#10;1. Кнопка &quot;в меню&quot;" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.67 unstable version&#10;1. Кнопка &quot;в меню&quot;" />
   </component>
 </project>

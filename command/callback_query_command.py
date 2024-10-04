@@ -3411,11 +3411,35 @@ class AdminDistributionChoice(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['AdminDistributionChoice']).substitute()
+        res = await self.db.fetch("""
+            SELECT * FROM distribution_table
+            WHERE tag = $1
+            ORDER BY id DESC
+            LIMIT 2;
+        """, kwargs['tag'])
+
+        cycle = []
+        story_distribution = ''
+
+        number = 1
+
+        for i in res:
+            cycle.append({
+                "number": number,
+                "dist_id": i['id']
+            })
+            txt_pin = 'Закреплённое' if i['pin'] else 'Не закреплённое'
+            story_distribution += f'<blockquote expandable>{number}. <u>{txt_pin}</u>\n{i["text"]}</blockquote>\n\n'
+            number += 1
+
+        text = Template(self.edit_texts['AdminDistributionChoice']).substitute(
+            story_distribution=story_distribution
+        )
 
         markup = markup_generate(
             buttons=self.buttons['AdminDistributionChoice'],
-            tag=kwargs['tag']
+            tag=kwargs['tag'],
+            cycle=cycle
         )
 
         return EditMessage(
@@ -3497,6 +3521,82 @@ class AdminDistributionUnpin(CallbackQueryCommand):
             markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
         )
 
+
+class AdminReadyDistribution(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/ready_distribution/([0-9]+)/', self.cdata)
+        if rres:
+            dist_id = int(rres.group(1))
+            await self.process(dist_id=dist_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM distribution_table
+            WHERE id = $1;
+        """, kwargs['dist_id'])
+
+        if res1['tag'] != 'to_all':
+            res2 = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE type = 'chat' 
+                    AND super = FALSE
+                    AND COALESCE(tag, '1') = COALESCE($1, '1');
+            """, res1['tag'] if res1['tag'] != 'to_all' else None)
+        else:
+            res2 = await self.db.fetch("""
+                SELECT * FROM chat_table
+                WHERE super = FALSE;
+            """)
+
+        for i in res2:
+            message_obj = TextMessage(chat_id=i['chat_id'], text=res1['text'], pin=res1['pin'])
+            await self.bot.send_text(message_obj)
+
+        message_obj = await self.generate_send_message(stage=1, pin=res1['pin'], **kwargs)
+        await self.bot.send_text(message_obj)
+        await self.bot.delete_message(
+            chat_id=self.chat.id,
+            message_id=self.sent_message_id
+        )
+
+        message_obj2 = await self.generate_send_message(stage=2, pin=res1['pin'], **kwargs)
+        await self.bot.send_text(message_obj2)
+
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if kwargs['stage'] == 1:
+            text = Template(self.global_texts['next_callback_message_command']['send'][f'AdminDistribution{"Pin" if kwargs["pin"] else "Unpin"}']).substitute()
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text
+            )
+        else:
+            res = await self.db.fetch("""
+                SELECT DISTINCT tag FROM 
+                    (
+                    SELECT * FROM chat_table
+                    ORDER BY title ASC
+                    )
+                AS subquery;
+            """)
+            text = Template(self.edit_texts['AdminDistribution']).substitute()
+
+            markup = markup_generate(
+                buttons=self.buttons['AdminDistribution'],
+                cycle=[{'tag': i['tag']} for i in res if i['tag']]
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_thread_id=self.topic,
+                markup=markup
+            )
 
 # Заметки
 class AdminFolder(CallbackQueryCommand):

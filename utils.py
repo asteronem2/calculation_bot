@@ -716,6 +716,7 @@ class Tracking:
         self.text_pattern = GetLocales().global_texts['addition']['new_transaction']
 
     async def async_init(self):
+        await log('START TRACKING', 'info')
         self.user_list = await db.fetch("""
             SELECT * FROM user_table
             WHERE tracking = TRUE;
@@ -724,14 +725,17 @@ class Tracking:
         count = 0
 
         while True:
+            user_list_str = '\n'.join([i['username'] or i['user_id'] for i in self.user_list])
+            await log(f'WHIlE USER LIST: {user_list_str}', 'info')
             try:
                 count += 1
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
                 if count == 20:
                     self.user_list = await db.fetch("""
                         SELECT * FROM user_table
                         WHERE tracking = TRUE;
                     """)
+                    count = 0
                 for user in self.user_list:
                     await self._user_addresses_parsing(user)
             except Exception as err:
@@ -744,6 +748,9 @@ class Tracking:
             WHERE status = TRUE and user_pid = $1
         """, user['id'])
 
+        address_list_str = '\n'.join([i['address'] for i in self.res])
+        await log(f'USER {user["username"] or user["user_id"]} ADDRESS LIST: {address_list_str}', 'info')
+
 
         if not self.res:
             return
@@ -755,14 +762,24 @@ class Tracking:
 
             status_code, token_transfer, response = await self._address_parsing(i)
 
+            outgoing = token_transfer['from_address'] == i['address']
+            transaction_id = token_transfer['transaction_id']
+            transfer_value = float(token_transfer['quant']) / 1000000
+
+            await log(
+                f'STATUS CODE: {str(status_code)}\n'
+                f'OUTGOING: {str(outgoing)}\n'
+                f'TRANSACTION ID: {str(transaction_id)}\n'
+                f'TRANSFER VALUE: {str(transfer_value)}',
+                      'info')
+
             if status_code == 403:
                 await log(str(response.json()))
                 await asyncio.sleep(121)
 
-            if token_transfer['from_address'] == i['address']:
+            if outgoing:
                 continue
 
-            transaction_id = token_transfer['transaction_id']
             if transaction_id == i['last_transaction_id']:
                 continue
             else:
@@ -772,7 +789,6 @@ class Tracking:
                     WHERE address = $2 and user_pid = $3;
                 """, transaction_id, i['address'], i['user_pid'])
 
-            transfer_value = float(token_transfer['quant']) / 1000000
 
             if transfer_value < i['min_value']:
                 continue
@@ -814,7 +830,6 @@ class Tracking:
     @staticmethod
     async def check_address(address):
         async with httpx.AsyncClient() as client:
-            print('sadasdasdsadasdasd')
             response = await client.get('https://apilist.tronscanapi.com/api/filter/trc20/transfers',
                                         params={
                                             'limit': '1',
@@ -824,9 +839,6 @@ class Tracking:
                                             'relatedAddress': address
                                         },
                                         headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
-            print(response)
-            print(response.json())
-            print(DED.TRONSCAN_API_KEY)
             if response.json().get('message') == 'some parameters are invalid or out of range':
                 return False
             else:

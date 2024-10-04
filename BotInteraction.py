@@ -95,6 +95,7 @@ class BotInter:
                             reply_to_message_id=message_obj.reply_to_message_id
                         )
                         rres = re.sub(r'<.+?>|/n', '', sent_message.text)
+                        await log(f'SEND BOT: {rres}', 'info')
                         print(f'\033[1;36mSEND BOT: \033[1;32m{rres}\033[0;0m')
 
                         if message_obj.pin is True:
@@ -141,6 +142,7 @@ class BotInter:
 
     async def edit_text(self, message_obj: EditMessage):
         rres = re.sub(r'<.+?>|/n', '', message_obj.text)
+        await log(f'EDIT BOT: {rres}', 'info')
         print(f'\033[1;36mEDIT BOT: \033[1;32m{rres}\033[0;0m')
         if message_obj.markup == (None,):
             message_obj.markup = None
