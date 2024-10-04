@@ -760,10 +760,6 @@ class Tracking:
             return
 
         for i in self.res:
-            timedelta = time.time() - self.last_parse_time
-            if timedelta < 1:
-                await asyncio.sleep(1 - timedelta)
-
             result = await self._address_parsing(i)
             if result:
                 status_code, token_transfer, response = result
@@ -820,19 +816,23 @@ class Tracking:
             await asyncio.sleep(1)
             return
 
-    @staticmethod
-    async def _address_parsing(address_row: Record) -> (int, dict):
+    async def _address_parsing(self, address_row: Record) -> (int, dict):
+        timedelta = time.time() - self.last_parse_time
+        if timedelta < 1:
+            await asyncio.sleep(1 - timedelta)
+
         async with httpx.AsyncClient() as client:
             response = await client.get('https://apilist.tronscanapi.com/api/filter/trc20/transfers',
                                         params={
-                'limit': '1',
-                'sort': '-timestamp',
-                'count': 'true',
-                'filterTokenValue': '0',
-                'relatedAddress': address_row['address']
-            },
+                                            'limit': '1',
+                                            'sort': '-timestamp',
+                                            'count': 'true',
+                                            'filterTokenValue': '0',
+                                            'relatedAddress': address_row['address']
+                                        },
                                         headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
 
+        self.last_parse_time = time.time()
         token_transfers = response.json().get('token_transfers')
         if token_transfers:
             return response.status_code, token_transfers[0], response
