@@ -2413,73 +2413,6 @@ class AdminMenu(CallbackQueryCommand):
 
 
 # Балансы
-class AdminBalances(CallbackQueryCommand):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/balances/', self.cdata)
-            if rres:
-                await self.process()
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_edit_message()
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetch("""
-            SELECT * FROM chat_table
-            WHERE type = 'chat'
-            ORDER BY title ASC;
-        """)
-
-        chat_balance_list = ''
-
-        for i in res:
-            var_res2 = await self.db.fetch("""
-                SELECT * FROM currency_table
-                WHERE chat_pid = $1
-                ORDER BY title ASC;
-            """, i['id'])
-
-            curr_info_list = ''
-
-            for ii in var_res2:
-                curr_info_list += '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
-                    title=ii['title'].upper(),
-                    value=float_to_str(ii['value'], ii['rounding']),
-                    postfix=ii['postfix'] if ii['postfix'] else ''
-                )
-
-            chat_balance_list += Template(self.global_texts['addition']['chat_balance']).substitute(
-                title=i['title'],
-                code_name=i['code_name'],
-                link=i['link'],
-                curr_info_list=curr_info_list
-            )
-
-        text = Template(self.edit_texts['AdminBalances']).substitute(
-            chat_balance=chat_balance_list
-        )
-
-        markup = markup_generate(
-            buttons=self.buttons['AdminBalances'],
-            cycle=[{'title': i['title'],
-                    'code_name': i['code_name'],
-                    'chat_pk': i['id']
-                    } for i in res]
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
-
-
 class AdminBalance(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
@@ -3438,8 +3371,12 @@ class AdminDistribution(CallbackQueryCommand):
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
-            SELECT DISTINCT tag FROM chat_table
-            ORDER BY title ASC;
+            SELECT DISTINCT tag FROM 
+                (
+                SELECT * FROM chat_table
+                ORDER BY title ASC
+                )
+            AS subquery;
         """)
         text = Template(self.edit_texts['AdminDistribution']).substitute()
 
@@ -3638,6 +3575,7 @@ class AdminFolder(CallbackQueryCommand):
             else:
                 variable.append('back_to_tag')
         else:
+            variable.append('to_menu')
             variable.append('back_to_parent_folder')
 
         if not child_notes and not child_folders and res['id'] != 0:
@@ -5139,7 +5077,7 @@ class AdminEmployees(CallbackQueryCommand):
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
             SELECT * FROM user_table
-            ORDER BY title ASC;
+            ORDER BY username ASC;
         """)
 
         employees = ''

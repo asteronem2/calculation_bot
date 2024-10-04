@@ -731,22 +731,6 @@
           }
         ]
       ],
-      "AdminBalances": [
-        [
-          {
-            "text": "$title ($code_name)",
-            "callback_data": "admin/balance/$chat_pk/",
-            "cycle": "cycle",
-            "row_width": 1
-          }
-        ],
-        [
-          {
-            "text": "Назад 🔙",
-            "callback_data": "admin/menu/"
-          }
-        ]
-      ],
       "AdminBalance": [
         [
           {
@@ -770,6 +754,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/balances/"
           }
@@ -778,6 +766,10 @@
       "AdminBalanceStory": [
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/balance/$chat_pk/"
           }
@@ -785,6 +777,10 @@
       ],
       "AdminBalanceDetail": [
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/balance/$chat_pk/"
@@ -842,6 +838,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/chats/"
           }
@@ -857,6 +857,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/chat/$chat_pk/"
@@ -910,6 +914,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/chat/$chat_pk/"
           }
@@ -925,6 +933,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/chat/$chat_pk/"
@@ -972,6 +984,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/distribution/"
           }
@@ -1004,6 +1020,11 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/",
+            "variable": "to_menu"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/folder/$parent_folder_id/",
@@ -1114,6 +1135,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/folder/$folder_id/"
           }
@@ -1188,6 +1213,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
           }
@@ -1236,6 +1265,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
           }
@@ -1251,6 +1284,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
@@ -1273,6 +1310,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/bot_settings/"
@@ -1312,6 +1353,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/tags/"
           }
@@ -1328,6 +1373,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/tag/$tag/"
           }
@@ -1343,6 +1392,10 @@
           }
         ],
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/tag/$tag/"
@@ -1400,6 +1453,10 @@
         ],
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/commands/"
           }
@@ -1408,6 +1465,10 @@
       "AdminInstruction": [
         [
           {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
+          {
             "text": "Назад 🔙",
             "callback_data": "admin/commands/"
           }
@@ -1415,6 +1476,10 @@
       ],
       "AdminChangeEmoji": [
         [
+          {
+            "text": "В меню ❇\uFE0F",
+            "callback_data": "admin/menu/"
+          },
           {
             "text": "Назад 🔙",
             "callback_data": "admin/emoji_settings/"

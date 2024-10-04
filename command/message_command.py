@@ -1425,6 +1425,8 @@ class FindCommand(MessageCommand):
 
         for i in res1:
             string = i['title'].lower().strip()
+            if i['text']:
+                string = i['text'].lower().strip()
             string.replace('\\', '/')
             find = False
             for patt in patterns_list:
@@ -1444,7 +1446,6 @@ class FindCommand(MessageCommand):
             message_obj = await self.generate_send_message(markup=markup)
 
         await self.bot.send_text(message_obj)
-
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['FindCommand']).substitute()
@@ -1481,8 +1482,12 @@ class DistributionCommand(MessageCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
-            SELECT DISTINCT tag FROM chat_table
-            ORDER BY title ASC;
+            SELECT DISTINCT tag FROM 
+                (
+                SELECT * FROM chat_table
+                ORDER BY title ASC
+                )
+            AS subquery;
         """)
         text = Template(self.global_texts['callback_command']['edit']['AdminDistribution']).substitute()
 

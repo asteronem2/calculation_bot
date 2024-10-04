@@ -1205,7 +1205,12 @@ class AdminDistributionPin(NextCallbackMessageCommand):
             )
         else:
             res = await self.db.fetch("""
-                SELECT DISTINCT tag FROM chat_table;
+                SELECT DISTINCT tag FROM 
+                    (
+                    SELECT * FROM chat_table
+                    ORDER BY title ASC
+                    )
+                AS subquery;
             """)
             text = Template(self.call_edit_texts['AdminDistribution']).substitute()
 
