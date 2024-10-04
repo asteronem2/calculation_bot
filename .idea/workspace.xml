@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.69 unstable version&#10;1. Устранена ошибка с трекингом">
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,14 +102,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00012" summary="0.9.1 version&#10;Added:&#10;1. Настройка калькуляции от пересланных, отвеченных, цитируемых сообщений">
-      <option name="closed" value="true" />
-      <created>1724843048753</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1724843048753</updated>
     </task>
     <task id="LOCAL-00013" summary="0.9.2 version&#10;Added:&#10;1. Сверка чисел">
       <option name="closed" value="true" />
@@ -495,7 +487,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728049871901</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом">
+      <option name="closed" value="true" />
+      <created>1728049944558</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1728049944558</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -525,7 +525,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.51 unstable version&#10;1. Связывание чатов&#10;2. Пересыл" />
     <MESSAGE value="0.9.52 unstable version&#10;1. Всякие штучки" />
     <MESSAGE value="0.9.53 unstable version&#10;1. Всякие штучки 2" />
     <MESSAGE value="0.9.54 unstable version&#10;1. Фикс &quot;история&quot;" />
@@ -550,6 +549,7 @@
     <MESSAGE value="0.9.68 unstable version&#10;1. Больше логирования (трекинг, отправленные ботом сообщения)&#10;2. Сохранение истории рассылок" />
     <MESSAGE value="0.9.68 unstable version&#10;1. Ошибки в tracking теперь не скипаются" />
     <MESSAGE value="0.9.69 unstable version&#10;1. Устранена ошибка с трекингом" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.69 unstable version&#10;1. Устранена ошибка с трекингом" />
+    <MESSAGE value="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом" />
   </component>
 </project>

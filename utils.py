@@ -837,6 +837,8 @@ class Tracking:
         if token_transfers:
             return response.status_code, token_transfers[0], response
         else:
+            if response.status_code == 403:
+                await log(str(response.json()), 'info')
             return
 
     @staticmethod
