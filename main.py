@@ -141,25 +141,30 @@ async def telegram_callback_query_update(callback: CallbackQuery):
 @dispatcher.message_reaction()
 async def telegram_message_reaction_update(reaction: MessageReactionUpdated):
     try:
-        if reaction.new_reaction:
-            if reaction.new_reaction[-1].type == ReactionTypeType.CUSTOM_EMOJI:
-                return
-            t1 = time.time()
-            print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{reaction.new_reaction[-1].emoji}\033[0;0m')
-            await log(f'REACTION: {reaction.user.username or reaction.user.id}: {reaction.new_reaction[-1].emoji}', 'info')
-            result: Type[MessageReactionCommand] = await check_define(reaction_command_cls, MessageReactionCommand, reaction)
-            if result is None:
-                return None
+        new = reaction.new_reaction
+        old = reaction.old_reaction
+        if new:
+            react = new[-1]
+        else:
+            react = old[-1]
+        if react.type == ReactionTypeType.CUSTOM_EMOJI:
+            return
+        t1 = time.time()
+        print(f'\n\n\033[1;36mREACTION {reaction.user.username}: \033[1;32m{react.emoji}\033[0;0m')
+        await log(f'REACTION: {reaction.user.username or reaction.user.id}: {react}', 'info')
+        result: Type[MessageReactionCommand] = await check_define(reaction_command_cls, MessageReactionCommand, reaction)
+        if result is None:
+            return None
 
-            command_obj = result(reaction)
-            await command_obj.async_init()
-            define = await command_obj.define()
+        command_obj = result(reaction)
+        await command_obj.async_init()
+        define = await command_obj.define()
 
-            if define is None:
-                return None
+        if define is None:
+            return None
 
-            t2 = time.time()
-            print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
+        t2 = time.time()
+        print(f'\033[1;34m{round(t2 - t1, 3)}\033[0;0m')
     except Exception as err:
         err_str = traceback.format_exc()
         print(f"\033[1;31mERROR:\033[37m {err}\033[0m")

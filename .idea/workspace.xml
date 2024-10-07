@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.70 unstable version&#10;1. Лог ошибки 403">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/inline_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/inline_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,14 +109,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00014" summary="0.9.3 version&#10;Added:&#10;1. Новый тип пользователей - сотрудник для парсинга">
-      <option name="closed" value="true" />
-      <created>1724932863374</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1724932863374</updated>
     </task>
     <task id="LOCAL-00015" summary="0.9.34 version&#10;Added:&#10;1. Изменено поведение кнопок в заметках, добавлено удобство">
       <option name="closed" value="true" />
@@ -496,7 +494,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728053974520</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно">
+      <option name="closed" value="true" />
+      <created>1728054414640</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1728054414640</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -526,7 +532,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.53 unstable version&#10;1. Всякие штучки 2" />
     <MESSAGE value="0.9.54 unstable version&#10;1. Фикс &quot;история&quot;" />
     <MESSAGE value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
     <MESSAGE value="0.9.55 unstable version&#10;1. Логирование" />
@@ -551,6 +556,7 @@
     <MESSAGE value="0.9.69 unstable version&#10;1. Устранена ошибка с трекингом" />
     <MESSAGE value="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом" />
     <MESSAGE value="0.9.70 unstable version&#10;1. Лог ошибки 403" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.70 unstable version&#10;1. Лог ошибки 403" />
+    <MESSAGE value="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно" />
   </component>
 </project>

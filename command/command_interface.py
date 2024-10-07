@@ -125,8 +125,9 @@ class CallbackQueryCommand:
         rres = re.fullmatch(r'admin/folder/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None', self.cdata)
         if not rres:
             rres2 = re.fullmatch(r'admin/folder/[0-9]+/(change_title|change_parent|delete)/(|1/)', self.cdata)
+            rres3 = re.fullmatch(r'admin/(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
 
-            if self.cdata == 'admin/menu/':
+            if rres3:
                 res = await self.db.fetch("""
                     SELECT * FROM message_table
                     WHERE user_pid = $1
@@ -314,7 +315,15 @@ class MessageReactionCommand:
         self.reaction = reaction
         self.chat = reaction.chat
         self.user = reaction.user
-        self.emoji = reaction.new_reaction[-1].emoji
+        self.new = False
+        self.old = False
+
+        if reaction.new_reaction:
+            self.new = True
+        else:
+            self.old = True
+
+        self.emoji = reaction.new_reaction[-1].emoji if self.new else reaction.old_reaction[-1].emoji
 
         self.db = utils.db
 

@@ -173,6 +173,7 @@ def mega_eval(expression: str):
         solution_list[-1] = solution_list[-1][::-1]
 
         solution = '\n'.join(solution_list)
+        solution = re.sub(r' *= *', ' = ', solution)
 
         expression_and_percents = pure_expression.replace(' ', '')
 

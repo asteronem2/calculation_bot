@@ -64,13 +64,13 @@
       "StartCommand": "/start",
       "UnlockChatCommand": "разблокировать",
       "LockChatCommand": "заблокировать",
-      "EditChatThemeCommand": "\\*тема",
+      "EditChatThemeCommand": "*тема",
       "BalanceListCommand": "баланс",
       "StoryCommand": "история",
       "VolumeCommand": "объём",
       "DetailCommand": "детали",
       "CancelCommand": "отмена",
-      "NullCommand": "\\*0",
+      "NullCommand": "*0",
       "AddressListCommand": "адреса",
       "TrackingCommand": "отслеживание",
       "OffTrackingCommand": "отслеживание",
@@ -157,7 +157,7 @@
         "AdminInstruction": "<b>Список команд для админа в личном чате:</b>\n$AdminInstructionAdminPrivate\n<b>Список команд для админа в группе:</b>\n$AdminInstructionAdminChat\n<b>Список команд для сотрудника в личном чате:</b>\n$AdminInstructionEmployeePrivate\n<b>Список команд для сотрудника в группе:</b>\n$AdminInstructionEmployeeChat",
         "AdminInstructionAdminPrivate": "<blockquote expandable><b>$AdminMenuCommand</b> - открывает меню управление ботом и чатами\n<b>$DistributionCommand</b> - открывает меню массовой рассылки</blockquote>",
         "AdminInstructionAdminChat": "<blockquote expandable><b>$UnlockChatCommand</b> - разблокирует чат\n<b>$LockChatCommand</b> - блокирует чат\n<b>$EditChatThemeCommand</b> - открывает меню управления темой чата\n<b>*«валюта»</b> - открывает меню управления валютой\n<b>«название» = «значение» «постфикс»</b> - создание валюты</blockquote>",
-        "AdminInstructionEmployeePrivate": "<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>",
+        "AdminInstructionEmployeePrivate": "<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - Если адрес уже на отслеживании, открывает меню изменения минимального значения</blockquote>",
         "AdminInstructionEmployeeChat": "<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>",
         "AdminEmojiSettings": "<b>Здесь вы можете настроить различные эмодзи, на которые реагирует бот:</b>",
         "AdminChangeEmoji": "<b>Поставьте новый эмодзи на это сообщение, текущий - $emoji</b>",
@@ -1098,7 +1098,7 @@
         ],
         [
           {
-            "text": "Назад 🔙",
+            "text": "Закрыть 🔙",
             "callback_data": "admin/folder/$folder_id/top_message/"
           }
         ]
@@ -1262,7 +1262,7 @@
       "AdminEmojiSettings": [
         [
           {
-            "text": "$emoji $text",
+            "text": "$emoji$text",
             "callback_data": "admin/change_emoji/$command/",
             "cycle": "cycle",
             "row_width": 1

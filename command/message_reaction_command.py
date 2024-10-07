@@ -11,11 +11,12 @@ from utils import markup_generate, calculate
 
 class CancelReaction(MessageReactionCommand):
     async def define(self):
-        if self.chat.type == 'supergroup':
-            if self.db_user['access_level'] in ['admin', 'employee']:
-                if self.emoji == self.reactions_text['CancelReaction']:
-                    await self.process()
-                    return True
+        if self.new:
+            if self.chat.type == 'supergroup':
+                if self.db_user['access_level'] in ['admin', 'employee']:
+                    if self.emoji == self.reactions_text['CancelReaction']:
+                        await self.process()
+                        return True
 
     async def process(self, *args, **kwargs) -> None:
         res = await self.db.fetch("""
@@ -65,15 +66,16 @@ class CancelReaction(MessageReactionCommand):
 
 class DeleteNote(MessageReactionCommand):
     async def define(self):
-        if self.db_user['access_level'] == 'admin':
-            if self.emoji == self.reactions_text['DeleteNote']:
-                res = await self.db.fetchrow("""
-                    SELECT * FROM message_table
-                    WHERE type in ('note', 'hidden_note') AND message_id = $1;
-                """, self.message_id)
-                if res:
-                    await self.process(res=res)
-                    return True
+        if self.new:
+            if self.db_user['access_level'] == 'admin':
+                if self.emoji == self.reactions_text['DeleteNote']:
+                    res = await self.db.fetchrow("""
+                        SELECT * FROM message_table
+                        WHERE type in ('note', 'hidden_note') AND message_id = $1;
+                    """, self.message_id)
+                    if res:
+                        await self.process(res=res)
+                        return True
 
     async def process(self, *args, **kwargs) -> None:
         if kwargs['res']['type'] == 'note':
@@ -96,32 +98,33 @@ class DeleteNote(MessageReactionCommand):
 
 class ReplyReaction(MessageReactionCommand):
     async def define(self):
-        if self.chat.type == 'supergroup':
-            super_chat = await self.db.fetchrow("""
-                SELECT * FROM chat_table
-                WHERE super = TRUE;
-            """)
-            if super_chat:
-                if self.db_user['access_level'] in ['admin', 'employee']:
-                    if self.emoji == self.reactions_text['ReplyReaction']:
-                        res = await self.db.fetchrow("""
-                            SELECT * FROM chat_table
-                            WHERE id = $1;
-                        """, self.db_chat['id'])
+        if self.new:
+            if self.chat.type == 'supergroup':
+                super_chat = await self.db.fetchrow("""
+                    SELECT * FROM chat_table
+                    WHERE super = TRUE;
+                """)
+                if super_chat:
+                    if self.db_user['access_level'] in ['admin', 'employee']:
+                        if self.emoji == self.reactions_text['ReplyReaction']:
+                            res = await self.db.fetchrow("""
+                                SELECT * FROM chat_table
+                                WHERE id = $1;
+                            """, self.db_chat['id'])
 
-                        if res['super'] is False:
-                            await self.process(stage=1, res=res, super_chat=super_chat)
-                            return True
-                        else:
-                            res2 = await self.db.fetchrow("""
-                                SELECT * FROM message_table
-                                WHERE message_id = $1
-                                    AND type = 'reply2';
-                            """, self.message_id)
-                            if res2:
-                                # noinspection PyTypeChecker
-                                await self.process(stage=2, res=res, res2=res2, super_chat=super_chat)
+                            if res['super'] is False:
+                                await self.process(stage=1, res=res, super_chat=super_chat)
                                 return True
+                            else:
+                                res2 = await self.db.fetchrow("""
+                                    SELECT * FROM message_table
+                                    WHERE message_id = $1
+                                        AND type = 'reply2';
+                                """, self.message_id)
+                                if res2:
+                                    # noinspection PyTypeChecker
+                                    await self.process(stage=2, res=res, res2=res2, super_chat=super_chat)
+                                    return True
 
     async def process(self, *args, **kwargs) -> None:
         super_chat = kwargs['super_chat']
@@ -215,15 +218,16 @@ class ReplyReaction(MessageReactionCommand):
 
 class AdminChangeEmoji(MessageReactionCommand):
     async def define(self):
-        if self.db_user['access_level'] == 'admin':
-            res = await self.db.fetchrow("""
-                SELECT * FROM message_table
-                WHERE message_id = $1 AND type = 'change_emoji';
-            """, self.message_id)
-            if res:
-                command = res['addition']
-                await self.process(command=command)
-                return True
+        if self.new:
+            if self.db_user['access_level'] == 'admin':
+                res = await self.db.fetchrow("""
+                    SELECT * FROM message_table
+                    WHERE message_id = $1 AND type = 'change_emoji';
+                """, self.message_id)
+                if res:
+                    command = res['addition']
+                    await self.process(command=command)
+                    return True
 
     async def process(self, *args, **kwargs) -> None:
         with open('locales.json', 'r') as read_file:
@@ -291,16 +295,17 @@ class AdminChangeEmoji(MessageReactionCommand):
 
 class AdminHiddenInfo(MessageReactionCommand):
     async def define(self):
-        if self.db_user['access_level'] == 'admin':
-            if self.emoji == self.reactions_text['HiddenInfo']:
-                res1 = await self.db.fetchrow("""
-                    SELECT * FROM message_table
-                    WHERE message_id = $1
-                        AND type = 'note';
-                """, self.message_id)
-                if res1:
-                    await self.process(res1=res1)
-                    return True
+        if self.new:
+            if self.db_user['access_level'] == 'admin':
+                if self.emoji == self.reactions_text['HiddenInfo']:
+                    res1 = await self.db.fetchrow("""
+                        SELECT * FROM message_table
+                        WHERE message_id = $1
+                            AND type = 'note';
+                    """, self.message_id)
+                    if res1:
+                        await self.process(res1=res1)
+                        return True
 
     async def process(self, *args, **kwargs) -> None:
         res2 = await self.db.fetchrow("""
@@ -325,3 +330,40 @@ class AdminHiddenInfo(MessageReactionCommand):
             text=text,
             reply_to_message_id=self.message_id
         )
+
+
+class AdminHideHiddenInfo(MessageReactionCommand):
+    async def define(self):
+        if self.old:
+            if self.db_user['access_level'] == 'admin':
+                if self.emoji == self.reactions_text['HiddenInfo']:
+                    res1 = await self.db.fetchrow("""
+                        SELECT * FROM message_table
+                        WHERE type = 'note'
+                            AND message_id = $1;
+                    """, self.message_id)
+
+                    if res1:
+                        res2 = await self.db.fetchrow("""
+                            SELECT * FROM note_table
+                            WHERE id = $1;
+                        """, int(res1['addition']))
+
+                        if res2:
+                            res3 = await self.db.fetchrow("""
+                                SELECT * FROM message_table
+                                WHERE type = 'hidden_note'
+                                    AND addition = $1;
+                            """, str(res2['id']))
+
+                            if res3:
+                                await self.process(res3=res3)
+                                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            DELETE FROM message_table
+            WHERE id = $1;
+        """, kwargs['res3']['id'])
+
+        await self.bot.delete_message(self.chat.id, kwargs['res3']['message_id'])
