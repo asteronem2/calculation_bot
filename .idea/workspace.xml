@@ -4,15 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.71 unstable version&#10;1. Много мелочей">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.72 unstable version&#10;1. Много мелочей">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locales_base.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales_base.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,14 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00016" summary="0.9.35 version&#10;Added:&#10;1. Возможность менять название валюты на название с пробелом">
-      <option name="closed" value="true" />
-      <created>1724941692491</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1724941692491</updated>
     </task>
     <task id="LOCAL-00017" summary="0.9.36 version&#10;Added:&#10;1. Закрепление балансов">
       <option name="closed" value="true" />
@@ -502,7 +488,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728301434547</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="0.9.72 unstable version&#10;1. Много мелочей">
+      <option name="closed" value="true" />
+      <created>1728377836545</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1728377836545</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -532,7 +526,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;" />
     <MESSAGE value="0.9.55 unstable version&#10;1. Логирование" />
     <MESSAGE value="0.9.55 unstable version&#10;1. Корректное отображение истории и детализации" />
     <MESSAGE value="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи" />
@@ -557,6 +550,7 @@
     <MESSAGE value="0.9.70 unstable version&#10;1. Лог ошибки 403" />
     <MESSAGE value="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно" />
     <MESSAGE value="0.9.71 unstable version&#10;1. Много мелочей" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.71 unstable version&#10;1. Много мелочей" />
+    <MESSAGE value="0.9.72 unstable version&#10;1. Много мелочей" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.72 unstable version&#10;1. Много мелочей" />
   </component>
 </project>

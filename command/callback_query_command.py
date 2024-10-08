@@ -2616,7 +2616,7 @@ class AdminBalance(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
+        res1 = await self.db.fetchrow("""
             SELECT * FROM chat_table
             WHERE id = $1;
         """, kwargs['chat_pk'])
@@ -2629,22 +2629,19 @@ class AdminBalance(CallbackQueryCommand):
 
         curr_info_list = ''
 
-        for item in res2:
-            curr_info_list += '     ' + Template(self.global_texts['addition']['curr_info_list']).substitute(
-                title=item['title'].upper(),
-                value=float_to_str(item['value'], item['rounding']),
-                postfix=item['postfix'] or ''
+        for i in res2:
+            curr_info_list += Template(self.global_texts['addition']['little_balance']).substitute(
+                title=i['title'].upper(),
+                value=float_to_str(i['value'], i['rounding']),
+                postfix=i['postfix'] if i['postfix'] else ''
             )
 
-        text = Template(self.global_texts['addition']['chat_balance']).substitute(
-            title=res['title'],
-            code_name=res['code_name'],
-            link=res['link'],
-            curr_info_list=''.join(curr_info_list)
+        text = Template(self.global_texts['message_command']['BalanceListCommand']).substitute(
+            curr_info_list=curr_info_list
         )
 
         markup = markup_generate(
-            buttons=self.buttons['AdminBalance'],
+            buttons=self.buttons['AdminChatBalance'],
             chat_pk=kwargs['chat_pk']
         )
 
