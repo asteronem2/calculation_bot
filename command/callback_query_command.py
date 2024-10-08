@@ -2075,38 +2075,251 @@ class AddressDeleteSecond(CallbackQueryCommand):
         )
 
 
-class EmployeeMenu(CallbackQueryCommand):
+class Info(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee', 'employee_parsing']:
-            rres = re.fullmatch(r'employee/menu/', self.cdata)
-            if rres:
-                await self.process()
-                return True
+        rres = re.fullmatch(r'info/([0-9]+)/', self.cdata)
+        if rres:
+            folder_id = int(rres.group(1))
+            await self.process(folder_id=folder_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.bot.delete_message(self.chat.id, self.sent_message_id)
+        message_obj = await self.generate_send_message(**kwargs)
+        sent_message = await self.bot.send_text(message_obj)
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, message_id, text, type, is_bot_message)
+            VALUES ($1, $2, $3, $4, TRUE);
+        """,
+                              self.db_user['id'],
+                              sent_message.message_id,
+                              sent_message.text,
+                              'menu_folder'
+                              )
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['folder_id'])
+
+        child_notes = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE parent_id = $1
+                AND id <> parent_id
+                AND type = 'note'
+            ORDER BY title ASC;
+        """, kwargs['folder_id'])
+
+        child_folders = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE parent_id = $1
+                AND id <> parent_id
+                AND type = 'folder'
+            ORDER BY title ASC;
+        """, kwargs['folder_id'])
+
+        notes = ''
+
+        if not res['expand']:
+            for i in child_notes:
+                text = i['text']
+                notes += f'<blockquote expandable>{text}</blockquote>'
+                notes += '\n'
+
+        text = Template(self.edit_texts['Info']).substitute(
+            folder_title=res['title'],
+            notes=notes
+        )
+
+        variable = []
+
+        if res['id'] == res['parent_id']:
+            variable.append('back_to_menu')
+        else:
+            variable.append('to_menu')
+            variable.append('back_to_parent_folder')
+
+        message_obj_1 = TextMessage(
+            chat_id=self.chat.id,
+            text=Template(self.send_texts['InfoTopMessage']).substitute(title=res['title']),
+            markup=markup_generate(
+                buttons=self.buttons['InfoTopMessage'],
+                folder_id=res['id']
+            )
+        )
+
+        sent_message = await self.bot.send_text(message_obj_1)
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, message_id, text, type, is_bot_message)
+            VALUES ($1, $2, $3, $4, TRUE);
+        """,
+                              self.db_user['id'],
+                              sent_message.message_id,
+                              sent_message.text,
+                              'settings_folder'
+                              )
+
+        if res['expand'] is True:
+            variable.append('collapse')
+            for i in child_notes:
+                message_obj = TextMessage(
+                    chat_id=self.chat.id,
+                    text=i['text'],
+                    photo=i['file_id']
+                )
+                sent_message = await self.bot.send_text(message_obj)
+                if i['add_info']:
+                    await self.bot.set_emoji(
+                        chat_id=sent_message.chat.id,
+                        message_id=sent_message.message_id,
+                        emoji=self.global_texts['reactions']['HiddenInfo']
+                    )
+                await self.db.execute("""
+                    INSERT INTO message_table
+                    (user_pid, message_id, text, type, is_bot_message, addition)
+                    VALUES ($1, $2, $3, $4, TRUE, $5);
+                """,
+                                      self.db_user['id'],
+                                      sent_message.message_id,
+                                      sent_message.text,
+                                      'note',
+                                      str(i['id'])
+                                      )
+        else:
+            variable.append('expand')
+
+        cycle_folder = [{
+            'child_title': i['title'],
+            'child_id': i['id']
+        } for i in child_folders]
+
+        markup = markup_generate(
+            buttons=self.buttons['Info'],
+            folder_id=kwargs['folder_id'],
+            cycle_folder=cycle_folder,
+            parent_folder_id=res['parent_id'],
+            variable=variable,
+            tag=res['tag']
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=markup
+        )
+
+
+class InfoTopMessage(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'info/([0-9]+)/top_message/', self.cdata)
+        if rres:
+            folder_id = int(rres.group(1))
+            await self.process(folder_id=folder_id)
+            return True
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['folder_id'])
+
+        text = Template(self.send_texts['InfoTopMessage']).substitute(
+            title=res['title']
+        )
+
+        markup = markup_generate(
+            buttons=self.buttons['InfoTopMessage'],
+            folder_id=res['id']
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class InfoSettings(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'info/([0-9]+)/settings/', self.cdata)
+        if rres:
+            folder_id = int(rres.group(1))
+            await self.process(folder_id=folder_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts['EmployeeMenuCommand']).substitute()
+        res = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, kwargs['folder_id'])
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM note_table
+            WHERE parent_id = $1
+                AND id <> parent_id
+            ORDER BY title ASC;
+        """, res['id'])
+
+        text = Template(self.send_texts['InfoTopMessage']).substitute(
+            title=res['title']
+        )
 
         variable = []
 
-        if self.db_user['access_level'] == 'employee':
-            variable.append('info')
-            variable.append('parsing')
-            variable.append('commands')
-        elif self.db_user['access_level'] == 'client':
-            variable.append('info')
-        elif self.db_user['access_level'] == 'employee_parsing':
-            variable.append('parsing')
-            variable.append('info')
+        if res['expand'] is True:
+            variable.append('collapse')
+        else:
+            variable.append('expand')
+
+        if res['id'] not in (0, 1, 2):
+            variable.append('change_title')
+            variable.append('change_parent')
+
+        if not res2:
+            variable.append('delete')
+
+        hidden_var = None
+        for i in res2:
+            if i['type'] == 'note' and i['add_info']:
+                hidden_var = 'show_hidden'
+                break
+
+        hidden_res = await self.db.fetch("""
+            SELECT * FROM message_table
+            WHERE user_pid = $1
+                AND type = 'hidden_note';
+        """, self.db_user['id'])
+
+        if hidden_res:
+            hidden_var = 'hide_hidden'
+
+        variable.append(hidden_var)
 
         markup = markup_generate(
-            self.buttons['EmployeeMenuCommand'],
+            buttons=self.buttons['InfoSettings'],
+            folder_id=res['id'],
             variable=variable
         )
 
@@ -2118,169 +2331,100 @@ class EmployeeMenu(CallbackQueryCommand):
         )
 
 
-class EmployeeMenuFolder(CallbackQueryCommand):
+class InfoCollapseExpand(Info):
     async def define(self):
-        if self.access_level in ['admin', 'employee', 'employee_parsing']:
-            rres = re.fullmatch(r'employee/menu/folder/([0-9]+)/', self.cdata)
-            if rres:
-                folder_id = int(rres.group(1))
-                await self.process(folder_id=folder_id)
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM note_table
-            WHERE id = $1;
-        """, kwargs['folder_id'])
-
-        res2 = await self.db.fetch("""
-            SELECT * FROM note_table
-            WHERE parent_id = $1
-            ORDER BY title ASC;
-        """, kwargs['folder_id'])
-
-        notes = ''
-        folder_cycle = []
-        note_cycle = []
-
-        for i in res2:
-            if i['id'] == i['parent_id']:
-                continue
-            elif i['type'] == 'folder':
-                folder_cycle.append({
-                    'title': i['title'],
-                    'folder_id': i['id']
-                })
-            elif i['type'] == 'note':
-                note_cycle.append({
-                    'title': i['title'],
-                    'note_id': i['id']
-                })
-
-                title = i['title']
-                text = i['text']
-                if f'{text[:17]}...' == title:
-                    notes += f'<blockquote expandable>{text}</blockquote>'
-                else:
-                    notes += f'<blockquote expandable><b>{title}:</b>\n{text}</blockquote>'
-                notes += '\n'
-
-        text = Template(self.edit_texts['AdminFolder']).substitute(
-            folder_title=res['title'],
-            notes=notes
-        )
-
-        variable = []
-
-        kkw = {}
-
-        if res['id'] == res['parent_id']:
-            variable.append('back_to_menu')
-        else:
-            variable.append('back_to_parent_folder')
-            kkw['parent_folder_id'] = res['parent_id']
-
-        markup = markup_generate(
-            self.buttons['EmployeeMenuFolder'],
-            folder_cycle=folder_cycle,
-            note_cycle=note_cycle,
-            variable=variable,
-            **kkw
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
-
-
-class EmployeeMenuNote(CallbackQueryCommand):
-    async def define(self):
-        rres = re.fullmatch(r'employee/menu/note/([0-9]+)/', self.cdata)
+        rres = re.fullmatch(r'info/([0-9]+)/(expand|collapse)/', self.cdata)
         if rres:
-            note_id = int(rres.group(1))
-            await self.process(note_id=note_id)
+            folder_id = int(rres.group(1))
+            type_ = rres.group(2)
+            await self.process(type_=type_, folder_id=folder_id)
             return True
 
     async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
+        type_ = kwargs['type_']
 
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM note_table
-            WHERE id = $1;
-        """, kwargs['note_id'])
+        await self.db.execute("""
+            UPDATE note_table
+            SET expand = $1
+            WHERE id = $2;
+        """, True if type_ == 'expand' else False, kwargs['folder_id'])
 
-        text = Template(self.edit_texts['AdminNote']).substitute(
-            title=res['title'],
-            text=res['text']
-        )
+        message_obj = await Info.generate_send_message(self, **kwargs)
+        sent_message = await self.bot.send_text(message_obj)
 
-        markup = markup_generate(
-            buttons=self.buttons['EmployeeMenuNote'],
-            parent_folder_id=res['parent_id']
-        )
-
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, message_id, text, type, is_bot_message)
+            VALUES ($1, $2, $3, $4, TRUE);
+        """,
+                              self.db_user['id'],
+                              sent_message.message_id,
+                              sent_message.text,
+                              'menu_folder'
+                              )
 
 
-class EmployeeMenuInfo(EmployeeMenuFolder):
+class InfoShowHidden(InfoSettings):
     async def define(self):
-        rres = re.fullmatch(r'employee/menu/info/', self.cdata)
+        rres = re.fullmatch(r'info/([0-9]+)/(show|hide)_hidden/', self.cdata)
         if rres:
-            await self.process()
+            folder_id = int(rres.group(1))
+            type_ = rres.group(2)
+            await self.process(type_=type_, folder_id=folder_id)
             return True
 
     async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
+        type_ = kwargs['type_']
 
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
+        if type_ == 'hide':
+            res = await self.db.fetch("""
+                SELECT * FROM message_table
+                WHERE user_pid = $1
+                    AND type = 'hidden_note';
+            """, self.db_user['id'])
 
-    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        res = await self.db.fetchrow("""
-            SELECT * FROM note_table
-            WHERE id = parent_id
-                AND tag = $1;
-        """, self.db_user['tag'])
+            await self.db.execute("""
+                DELETE FROM message_table
+                WHERE user_pid = $1
+                    AND type = 'hidden_note';
+            """, self.db_user['id'])
 
-        if res:
-            return await EmployeeMenuFolder.generate_edit_message(self, folder_id=res['id'])
+            del_msgs = [i['message_id'] for i in res]
+            await self.bot.bot.delete_messages(self.chat.id, del_msgs)
         else:
+            res = await self.db.fetch("""
+                SELECT * FROM message_table
+                WHERE user_pid = $1
+                    AND type = 'note';
+            """, self.db_user['id'])
 
-            text = Template(self.edit_texts['EmployeeMenuInfoNull']).substitute()
+            for i in res:
+                ires = await self.db.fetchrow("""
+                    SELECT * FROM note_table
+                    WHERE id = $1;
+                """, int(i['addition']))
 
-            markup = markup_generate(
-                buttons=self.buttons['EmployeeMenuInfoNull']
-            )
+                if ires['add_info']:
+                    message_obj = TextMessage(
+                        chat_id=self.chat.id,
+                        text=ires['add_info'],
+                        reply_to_message_id=i['message_id']
+                    )
+                    sent_message = await self.bot.send_text(message_obj)
 
-            return EditMessage(
-                chat_id=self.chat.id,
-                text=text,
-                message_id=self.sent_message_id,
-                markup=markup
-            )
+                    await self.db.execute("""
+                        INSERT INTO message_table
+                        (user_pid, message_id, text, type, is_bot_message, addition)
+                        VALUES ($1, $2, $3, $4, TRUE, $5);
+                    """, self.db_user['id'], sent_message.message_id, sent_message.text, 'hidden_note', str(ires['id']))
+
+        main_message_obj = await InfoSettings.generate_edit_message(self, **kwargs)
+        await self.bot.edit_text(main_message_obj)
 
 
 class EmployeeMenuCommands(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'employee/menu/commands/', self.cdata)
+        rres = re.fullmatch(r'menu/commands/', self.cdata)
         if rres:
             await self.process()
             return True
@@ -2313,7 +2457,7 @@ class EmployeeMenuCommands(CallbackQueryCommand):
 
 class EmployeeMenuParsing(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'employee/menu/parsing/', self.cdata)
+        rres = re.fullmatch(r'menu/parsing/', self.cdata)
         if rres:
             await self.process()
             return True
@@ -2363,7 +2507,7 @@ class EmployeeMenuParsing(CallbackQueryCommand):
 
 class EmployeeMenuParsingOnOff(EmployeeMenuParsing):
     async def define(self):
-        rres = re.fullmatch(r'employee/menu/parsing/(on|off)/', self.cdata)
+        rres = re.fullmatch(r'menu/parsing/(on|off)/', self.cdata)
         if rres:
             status = rres.group(1)
             await self.process(status=status)
@@ -2383,11 +2527,11 @@ class EmployeeMenuParsingOnOff(EmployeeMenuParsing):
         await self.bot.edit_text(message_obj)
 
 
-# Команды админа в лс
-class AdminMenu(CallbackQueryCommand):
+# Команды лс
+class Menu(CallbackQueryCommand):
     async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'admin/menu/', self.cdata)
+        if self.access_level != 'zero':
+            rres = re.fullmatch(r'menu/', self.cdata)
             if rres:
                 await self.process()
                 return True
@@ -2400,19 +2544,59 @@ class AdminMenu(CallbackQueryCommand):
         pass
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.global_texts['message_command']['AdminMenuCommand']).substitute()
+        if self.access_level == 'admin':
+            text = Template(self.global_texts['message_command']['MenuCommand']).substitute()
+    
+            markup = markup_generate(
+                buttons=self.buttons['MenuCommand']
+            )
+    
+            return EditMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_id=self.sent_message_id,
+                markup=markup
+            )
+        else:
+            text = Template(self.edit_texts['EmployeeMenuCommand']).substitute()
 
-        markup = markup_generate(
-            buttons=self.buttons['AdminMenuCommand']
-        )
+            variable = []
 
-        return EditMessage(
-            chat_id=self.chat.id,
-            text=text,
-            message_id=self.sent_message_id,
-            markup=markup
-        )
+            folder_id = '_'
 
+            info_id = None
+            if self.db_user['tag']:
+                info_res = await self.db.fetchrow("""
+                    SELECT * FROM note_table
+                    WHERE id = parent_id
+                        AND tag = $1;
+                """, self.db_user['tag'])
+                info_id = info_res['id']
+                variable.append('info')
+
+            if self.access_level == 'employee':
+                variable.append('parsing')
+                variable.append('commands')
+                variable.append('notes')
+                folder_id = 1
+            elif self.access_level == 'employee_parsing':
+                variable.append('parsing')
+                variable.append('notes')
+                folder_id = 2
+
+            markup = markup_generate(
+                self.buttons['EmployeeMenuCommand'],
+                variable=variable,
+                folder_id=folder_id,
+                info_id=info_id
+            )
+
+            return EditMessage(
+                chat_id=self.chat.id,
+                text=text,
+                message_id=self.sent_message_id,
+                markup=markup
+            )
 
 # Балансы
 class AdminBalance(CallbackQueryCommand):
@@ -3512,9 +3696,9 @@ class AdminDistributionPinUnpin(CallbackQueryCommand):
 
 
 # Заметки
-class AdminFolder(CallbackQueryCommand):
+class Folder(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -3575,7 +3759,7 @@ class AdminFolder(CallbackQueryCommand):
                 notes += f'<blockquote expandable>{text}</blockquote>'
                 notes += '\n'
 
-        text = Template(self.edit_texts['AdminFolder']).substitute(
+        text = Template(self.edit_texts['Folder']).substitute(
             folder_title=res['title'],
             notes=notes
         )
@@ -3583,7 +3767,7 @@ class AdminFolder(CallbackQueryCommand):
         variable = []
 
         if res['id'] == res['parent_id']:
-            if res['id'] == 0:
+            if res['id'] in (0, 1, 2):
                 variable.append('back_to_menu')
             else:
                 variable.append('back_to_tag')
@@ -3596,12 +3780,13 @@ class AdminFolder(CallbackQueryCommand):
 
         message_obj_1 = TextMessage(
             chat_id=self.chat.id,
-            text=Template(self.send_texts['AdminFolderTopMessage']).substitute(title=res['title']),
+            text=Template(self.send_texts['FolderTopMessage']).substitute(title=res['title']),
             markup=markup_generate(
-                buttons=self.buttons['AdminFolderTopMessage'],
+                buttons=self.buttons['FolderTopMessage'],
                 folder_id=res['id']
             )
         )
+
         sent_message = await self.bot.send_text(message_obj_1)
         await self.db.execute("""
             INSERT INTO message_table
@@ -3649,7 +3834,7 @@ class AdminFolder(CallbackQueryCommand):
         } for i in child_folders]
 
         markup = markup_generate(
-            buttons=self.buttons['AdminFolder'],
+            buttons=self.buttons['Folder'],
             folder_id=kwargs['folder_id'],
             cycle_folder=cycle_folder,
             parent_folder_id=res['parent_id'],
@@ -3664,9 +3849,9 @@ class AdminFolder(CallbackQueryCommand):
         )
 
 
-class AdminFolderTopMessage(CallbackQueryCommand):
+class FolderTopMessage(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/top_message/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/top_message/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -3682,12 +3867,12 @@ class AdminFolderTopMessage(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['folder_id'])
 
-        text = Template(self.send_texts['AdminFolderTopMessage']).substitute(
+        text = Template(self.send_texts['FolderTopMessage']).substitute(
             title=res['title']
         )
 
         markup = markup_generate(
-            buttons=self.buttons['AdminFolderTopMessage'],
+            buttons=self.buttons['FolderTopMessage'],
             folder_id=res['id']
         )
 
@@ -3699,9 +3884,9 @@ class AdminFolderTopMessage(CallbackQueryCommand):
         )
 
 
-class AdminFolderSettings(CallbackQueryCommand):
+class FolderSettings(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/settings/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/settings/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -3730,7 +3915,7 @@ class AdminFolderSettings(CallbackQueryCommand):
             ORDER BY title ASC;
         """, res['id'])
 
-        text = Template(self.send_texts['AdminFolderTopMessage']).substitute(
+        text = Template(self.send_texts['FolderTopMessage']).substitute(
             title=res['title']
         )
 
@@ -3741,7 +3926,7 @@ class AdminFolderSettings(CallbackQueryCommand):
         else:
             variable.append('expand')
 
-        if res['id'] != 0:
+        if res['id'] not in (0, 1, 2):
             variable.append('change_title')
             variable.append('change_parent')
 
@@ -3766,7 +3951,7 @@ class AdminFolderSettings(CallbackQueryCommand):
         variable.append(hidden_var)
                     
         markup = markup_generate(
-            buttons=self.buttons['AdminFolderSettings'],
+            buttons=self.buttons['FolderSettings'],
             folder_id=res['id'],
             variable=variable
         )
@@ -3779,9 +3964,9 @@ class AdminFolderSettings(CallbackQueryCommand):
         )
 
 
-class AdminFolderCollapseExpand(AdminFolder):
+class FolderCollapseExpand(Folder):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/(expand|collapse)/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/(expand|collapse)/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             type_ = rres.group(2)
@@ -3797,7 +3982,7 @@ class AdminFolderCollapseExpand(AdminFolder):
             WHERE id = $2;
         """, True if type_ == 'expand' else False, kwargs['folder_id'])
 
-        message_obj = await AdminFolder.generate_send_message(self, **kwargs)
+        message_obj = await Folder.generate_send_message(self, **kwargs)
         sent_message = await self.bot.send_text(message_obj)
 
         await self.db.execute("""
@@ -3812,9 +3997,9 @@ class AdminFolderCollapseExpand(AdminFolder):
                               )
 
 
-class AdminFolderShowHidden(AdminFolderSettings):
+class FolderShowHidden(FolderSettings):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/(show|hide)_hidden/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/(show|hide)_hidden/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             type_ = rres.group(2)
@@ -3866,13 +4051,13 @@ class AdminFolderShowHidden(AdminFolderSettings):
                         VALUES ($1, $2, $3, $4, TRUE, $5);
                     """, self.db_user['id'], sent_message.message_id, sent_message.text, 'hidden_note', str(ires['id']))
 
-        main_message_obj = await AdminFolderSettings.generate_edit_message(self, **kwargs)
+        main_message_obj = await FolderSettings.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(main_message_obj)
 
 
-class AdminFolderChangeParentMenu(CallbackQueryCommand):
+class FolderChangeParentMenu(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/change_parent/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/change_parent/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -3888,39 +4073,51 @@ class AdminFolderChangeParentMenu(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['folder_id'])
 
-        res2 = await self.db.fetch("""
+        par_id = None
+        if self.access_level == 'admin':
+            par_id = 0
+        elif self.access_level == 'employee':
+            par_id = 1
+        elif self.access_level == 'employee_parsing':
+            par_id = 2
+
+        res1 = await self.db.fetch("""
             SELECT * FROM note_table
             WHERE type = 'folder'
-                AND ((type = 'folder' AND id <> parent_id) OR id = 0)
-            ORDER BY title ASC;
-        """)
+                AND parent_id = $1
+                AND id <> parent_id;
+        """, par_id)
 
-        text = Template(self.edit_texts['AdminFolderChangeParent']).substitute(
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM note_table
+            WHERE id = $1;
+        """, par_id)
+
+        parent_id = [i for i in res1]
+        folder_list = [res2]
+
+        while parent_id:
+            w_rec = parent_id[-1]
+            parent_id.pop()
+
+            if w_rec['id'] == kwargs['folder_id']:
+                continue
+            else:
+                w_res = await self.db.fetch("""
+                    SELECT * FROM note_table
+                    WHERE parent_id = $1;
+                """, w_rec['id'])
+                folder_list.append(w_rec)
+                parent_id += [i for i in w_res]
+
+        text = Template(self.edit_texts['FolderChangeParent']).substitute(
             title=res['title']
         )
 
-        child_list = [res['id']]
-        last_parent = [res['id']]
-        while last_parent:
-            wres = await self.db.fetch("""
-                SELECT * FROM note_table
-                WHERE parent_id = $1
-                    AND type = 'folder'
-                ORDER BY title ASC;
-            """, last_parent[-1])
-
-            last_parent.pop()
-
-            if wres:
-                for i in wres:
-                    child_list.append(i['id'])
-                    last_parent.append(i['id'])
 
         cycle = []
 
-        for i in res2:
-            if i['id'] in child_list:
-                continue
+        for i in folder_list:
             status = '⏺'
             callback = f'folder/{kwargs["folder_id"]}/change_parent/{i["id"]}/'
 
@@ -3935,7 +4132,7 @@ class AdminFolderChangeParentMenu(CallbackQueryCommand):
             })
 
         markup = markup_generate(
-            buttons=self.buttons['AdminFolderChangeParent'],
+            buttons=self.buttons['FolderChangeParent'],
             cycle=cycle,
             folder_id=kwargs['folder_id']
         )
@@ -3948,7 +4145,7 @@ class AdminFolderChangeParentMenu(CallbackQueryCommand):
         )
 
 
-class AdminFolderChangeParent(AdminFolderChangeParentMenu):
+class FolderChangeParent(FolderChangeParentMenu):
     async def define(self):
         rres = re.fullmatch(r'folder/([0-9]+)/change_parent/([0-9]+)/', self.cdata)
         if rres:
@@ -3963,13 +4160,13 @@ class AdminFolderChangeParent(AdminFolderChangeParentMenu):
             WHERE id = $2;
         """, kwargs['new_parent'], kwargs['folder_id'])
 
-        message_obj = await AdminFolderChangeParentMenu.generate_edit_message(self, **kwargs)
+        message_obj = await FolderChangeParentMenu.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
 
 
-class AdminFolderChangeTitle(CallbackQueryCommand):
+class FolderChangeTitle(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/change_title/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/change_title/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -3998,7 +4195,7 @@ class AdminFolderChangeTitle(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['folder_id'])
 
-        text = Template(self.edit_texts['AdminFolderChangeTitle']).substitute(
+        text = Template(self.edit_texts['FolderChangeTitle']).substitute(
             title=res['title']
         )
 
@@ -4006,13 +4203,13 @@ class AdminFolderChangeTitle(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/folder/{kwargs["folder_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
         )
 
 
-class AdminNote(CallbackQueryCommand):
+class Note(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/note/([0-9]+)/', self.cdata)
+        rres = re.fullmatch(r'note/([0-9]+)/', self.cdata)
         if rres:
             note_id = int(rres.group(1))
             await self.process(note_id=note_id)
@@ -4034,7 +4231,7 @@ class AdminNote(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['note_id'])
 
-        text = Template(self.edit_texts['AdminNote']).substitute(
+        text = Template(self.edit_texts['Note']).substitute(
             text=res['text'],
         )
 
@@ -4045,9 +4242,9 @@ class AdminNote(CallbackQueryCommand):
         )
 
 
-class AdminFolderDelete(AdminFolder):
+class FolderDelete(Folder):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/delete/([12])/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/delete/([12])/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             stage = int(rres.group(2))
@@ -4072,11 +4269,11 @@ class AdminFolderDelete(AdminFolder):
 
         if kwargs['stage'] == 2:
             await self.bot.delete_message(self.chat.id, self.sent_message_id)
-            message_obj2 = await AdminFolder.generate_send_message(self, folder_id=res['parent_id'])
+            message_obj2 = await Folder.generate_send_message(self, folder_id=res['parent_id'])
             await self.bot.send_text(message_obj2)
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts[f'AdminFolderDelete{kwargs["stage"]}']).substitute(
+        text = Template(self.edit_texts[f'FolderDelete{kwargs["stage"]}']).substitute(
             title=kwargs['res']['title']
         )
 
@@ -4084,7 +4281,7 @@ class AdminFolderDelete(AdminFolder):
 
         if kwargs['stage'] == 1:
             markup = markup_generate(
-                buttons=self.buttons['AdminFolderDelete2'],
+                buttons=self.buttons['FolderDelete2'],
                 folder_id=kwargs['folder_id']
             )
 
@@ -4096,9 +4293,9 @@ class AdminFolderDelete(AdminFolder):
         )
 
 
-class AdminCreateFolder(CallbackQueryCommand):
+class CreateFolder(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/create_folder/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/create_folder/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -4128,7 +4325,7 @@ class AdminCreateFolder(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['folder_id'])
 
-        text = Template(self.edit_texts['AdminCreateFolder']).substitute(
+        text = Template(self.edit_texts['CreateFolder']).substitute(
             title=res['title']
         )
 
@@ -4136,13 +4333,13 @@ class AdminCreateFolder(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/folder/{kwargs["folder_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
         )
 
 
-class AdminCreateNote(CallbackQueryCommand):
+class CreateNote(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/folder/([0-9]+)/create_note/', self.cdata)
+        rres = re.fullmatch(r'folder/([0-9]+)/create_note/', self.cdata)
         if rres:
             folder_id = int(rres.group(1))
             await self.process(folder_id=folder_id)
@@ -4171,7 +4368,7 @@ class AdminCreateNote(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['folder_id'])
 
-        text = Template(self.edit_texts['AdminCreateNote']).substitute(
+        text = Template(self.edit_texts['CreateNote']).substitute(
             title=res['title']
         )
 
@@ -4179,13 +4376,13 @@ class AdminCreateNote(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/folder/{kwargs["folder_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
         )
 
 
-class AdminNoteDelete(CallbackQueryCommand):
+class NoteDelete(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/note/([0-9]+)/delete/([12])/', self.cdata)
+        rres = re.fullmatch(r'note/([0-9]+)/delete/([12])/', self.cdata)
         if rres:
             note_id = int(rres.group(1))
             stage = int(rres.group(2))
@@ -4213,7 +4410,7 @@ class AdminNoteDelete(CallbackQueryCommand):
             await self.bot.send_text(message_obj2)
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.edit_texts[f'AdminNoteDelete{kwargs["stage"]}']).substitute(
+        text = Template(self.edit_texts[f'NoteDelete{kwargs["stage"]}']).substitute(
             title=kwargs['res']['title']
         )
 
@@ -4221,7 +4418,7 @@ class AdminNoteDelete(CallbackQueryCommand):
 
         if kwargs['stage'] == 1:
             markup = markup_generate(
-                buttons=self.buttons['AdminNoteDelete2'],
+                buttons=self.buttons['NoteDelete2'],
                 note_id=kwargs['note_id']
             )
 
@@ -4258,7 +4455,7 @@ class AdminNoteDelete(CallbackQueryCommand):
                 notes += '\n'
 
 
-        text = Template(self.edit_texts['AdminFolder']).substitute(
+        text = Template(self.edit_texts['Folder']).substitute(
             folder_title=res1['title'],
             notes=notes[:3900]
         )
@@ -4284,7 +4481,7 @@ class AdminNoteDelete(CallbackQueryCommand):
             variable.append('delete')
 
         markup = markup_generate(
-            buttons=self.buttons['AdminFolder'],
+            buttons=self.buttons['Folder'],
             folder_id=folder_id,
             cycle_folder=cycle_folder,
             cycle_note=cycle_note,
@@ -4299,9 +4496,9 @@ class AdminNoteDelete(CallbackQueryCommand):
         )
 
 
-class AdminNoteChangeTitle(CallbackQueryCommand):
+class NoteChangeTitle(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/note/([0-9]+)/change_title/', self.cdata)
+        rres = re.fullmatch(r'note/([0-9]+)/change_title/', self.cdata)
         if rres:
             note_id = int(rres.group(1))
             await self.process(note_id=note_id)
@@ -4330,7 +4527,7 @@ class AdminNoteChangeTitle(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['note_id'])
 
-        text = Template(self.edit_texts['AdminNoteChangeTitle']).substitute(
+        text = Template(self.edit_texts['NoteChangeTitle']).substitute(
             title=res['title']
         )
 
@@ -4338,13 +4535,13 @@ class AdminNoteChangeTitle(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/note/{kwargs["note_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'note/{kwargs["note_id"]}/')]])
         )
 
 
-class AdminNoteChangeText(CallbackQueryCommand):
+class NoteChangeText(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'admin/note/([0-9]+)/change_text/', self.cdata)
+        rres = re.fullmatch(r'note/([0-9]+)/change_text/', self.cdata)
         if rres:
             note_id = int(rres.group(1))
             await self.process(note_id=note_id)
@@ -4373,7 +4570,7 @@ class AdminNoteChangeText(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['note_id'])
 
-        text = Template(self.edit_texts['AdminNoteChangeText']).substitute(
+        text = Template(self.edit_texts['NoteChangeText']).substitute(
             title=res['title']
         )
 
@@ -4381,7 +4578,7 @@ class AdminNoteChangeText(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/note/{kwargs["note_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'note/{kwargs["note_id"]}/')]])
         )
 
 
@@ -5172,7 +5369,7 @@ class AdminCommands(CallbackQueryCommand):
             )
         text = Template(self.edit_texts['AdminInstruction']).substitute(
             **instruction
-        )
+        ).replace('\\', '')
 
         markup = markup_generate(
             self.buttons['AdminCommands']
@@ -5212,7 +5409,7 @@ class AdminCommandsList(CallbackQueryCommand):
         if chat_type == 'private':
             if user_type == 'admin':
                 command_list = [
-                    ('AdminMenuCommand', 'Меню админа'),
+                    ('MenuCommand', 'Меню админа'),
                     ('DistributionCommand', 'Рассылка')
                 ]
                 type_ = 'AdminInstructionAdminPrivate'
@@ -5244,7 +5441,7 @@ class AdminCommandsList(CallbackQueryCommand):
 
         text = Template(self.edit_texts[type_]).substitute(
             **self.global_texts['keywords']
-        )
+        ).replace('\\', '')
 
         cycle = []
 

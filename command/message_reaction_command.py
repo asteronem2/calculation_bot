@@ -296,16 +296,15 @@ class AdminChangeEmoji(MessageReactionCommand):
 class AdminHiddenInfo(MessageReactionCommand):
     async def define(self):
         if self.new:
-            if self.db_user['access_level'] == 'admin':
-                if self.emoji == self.reactions_text['HiddenInfo']:
-                    res1 = await self.db.fetchrow("""
-                        SELECT * FROM message_table
-                        WHERE message_id = $1
-                            AND type = 'note';
-                    """, self.message_id)
-                    if res1:
-                        await self.process(res1=res1)
-                        return True
+            if self.emoji == self.reactions_text['HiddenInfo']:
+                res1 = await self.db.fetchrow("""
+                    SELECT * FROM message_table
+                    WHERE message_id = $1
+                        AND type = 'note';
+                """, self.message_id)
+                if res1:
+                    await self.process(res1=res1)
+                    return True
 
     async def process(self, *args, **kwargs) -> None:
         res2 = await self.db.fetchrow("""
@@ -335,30 +334,29 @@ class AdminHiddenInfo(MessageReactionCommand):
 class AdminHideHiddenInfo(MessageReactionCommand):
     async def define(self):
         if self.old:
-            if self.db_user['access_level'] == 'admin':
-                if self.emoji == self.reactions_text['HiddenInfo']:
-                    res1 = await self.db.fetchrow("""
-                        SELECT * FROM message_table
-                        WHERE type = 'note'
-                            AND message_id = $1;
-                    """, self.message_id)
+            if self.emoji == self.reactions_text['HiddenInfo']:
+                res1 = await self.db.fetchrow("""
+                    SELECT * FROM message_table
+                    WHERE type = 'note'
+                        AND message_id = $1;
+                """, self.message_id)
 
-                    if res1:
-                        res2 = await self.db.fetchrow("""
-                            SELECT * FROM note_table
-                            WHERE id = $1;
-                        """, int(res1['addition']))
+                if res1:
+                    res2 = await self.db.fetchrow("""
+                        SELECT * FROM note_table
+                        WHERE id = $1;
+                    """, int(res1['addition']))
 
-                        if res2:
-                            res3 = await self.db.fetchrow("""
-                                SELECT * FROM message_table
-                                WHERE type = 'hidden_note'
-                                    AND addition = $1;
-                            """, str(res2['id']))
+                    if res2:
+                        res3 = await self.db.fetchrow("""
+                            SELECT * FROM message_table
+                            WHERE type = 'hidden_note'
+                                AND addition = $1;
+                        """, str(res2['id']))
 
-                            if res3:
-                                await self.process(res3=res3)
-                                return True
+                        if res3:
+                            await self.process(res3=res3)
+                            return True
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""

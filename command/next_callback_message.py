@@ -1268,9 +1268,9 @@ class AdminDistributionPin(NextCallbackMessageCommand):
         )
 
 
-class AdminCreateFolder(NextCallbackMessageCommand):
+class CreateFolder(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_folder/', self.cdata)
+        rres1 = re.fullmatch(r'folder/([0-9]+)/create_folder/', self.cdata)
         if rres1:
             folder_id = int(rres1.group(1))
             await self.process(folder_id=folder_id)
@@ -1306,7 +1306,7 @@ class AdminCreateFolder(NextCallbackMessageCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
-            text = Template(self.send_texts['AdminCreateFolder']).substitute()
+            text = Template(self.send_texts['CreateFolder']).substitute()
 
             return TextMessage(
                 chat_id=self.chat.id,
@@ -1342,7 +1342,7 @@ class AdminCreateFolder(NextCallbackMessageCommand):
                     notes += f'<blockquote expandable>{text}</blockquote>'
                     notes += '\n'
 
-            text = Template(self.call_edit_texts['AdminFolder']).substitute(
+            text = Template(self.call_edit_texts['Folder']).substitute(
                 folder_title=res['title'],
                 notes=notes
             )
@@ -1350,7 +1350,7 @@ class AdminCreateFolder(NextCallbackMessageCommand):
             variable = []
 
             if res['id'] == res['parent_id']:
-                if res['id'] == 0:
+                if res['id'] in (0, 1, 2):
                     variable.append('back_to_menu')
                 else:
                     variable.append('back_to_tag')
@@ -1363,12 +1363,13 @@ class AdminCreateFolder(NextCallbackMessageCommand):
 
             message_obj_1 = TextMessage(
                 chat_id=self.chat.id,
-                text=Template(self.call_send_texts['AdminFolderTopMessage']).substitute(title=res['title']),
+                text=Template(self.call_send_texts['FolderTopMessage']).substitute(title=res['title']),
                 markup=markup_generate(
-                    buttons=self.buttons['AdminFolderTopMessage'],
+                    buttons=self.buttons['FolderTopMessage'],
                     folder_id=res['id']
                 )
             )
+
             sent_message = await self.bot.send_text(message_obj_1)
             await self.db.execute("""
                 INSERT INTO message_table
@@ -1416,7 +1417,7 @@ class AdminCreateFolder(NextCallbackMessageCommand):
             } for i in child_folders]
 
             markup = markup_generate(
-                buttons=self.buttons['AdminFolder'],
+                buttons=self.buttons['Folder'],
                 folder_id=kwargs['folder_id'],
                 cycle_folder=cycle_folder,
                 parent_folder_id=res['parent_id'],
@@ -1441,9 +1442,9 @@ class AdminCreateFolder(NextCallbackMessageCommand):
         )
 
 
-class AdminFolderChangeTitle(AdminCreateFolder):
+class FolderChangeTitle(CreateFolder):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/folder/([0-9]+)/change_title/', self.cdata)
+        rres1 = re.fullmatch(r'folder/([0-9]+)/change_title/', self.cdata)
         if rres1:
             folder_id = int(rres1.group(1))
             await self.process(folder_id=folder_id)
@@ -1474,12 +1475,12 @@ class AdminFolderChangeTitle(AdminCreateFolder):
             message_id=self.press_message_id
         )
 
-        message_obj2 = await AdminCreateFolder.generate_send_message(self, stage=2, folder_id=kwargs['folder_id'])
+        message_obj2 = await CreateFolder.generate_send_message(self, stage=2, folder_id=kwargs['folder_id'])
         await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
-            text = Template(self.send_texts['AdminFolderChangeTitle']).substitute(
+            text = Template(self.send_texts['FolderChangeTitle']).substitute(
                 old_title=kwargs['res']['title'],
                 new_title=self.text
             )
@@ -1518,7 +1519,7 @@ class AdminFolderChangeTitle(AdminCreateFolder):
                     notes += f'<blockquote expandable>{text}</blockquote>'
                     notes += '\n'
 
-            text = Template(self.call_edit_texts['AdminFolder']).substitute(
+            text = Template(self.call_edit_texts['Folder']).substitute(
                 folder_title=res['title'],
                 notes=notes
             )
@@ -1539,9 +1540,9 @@ class AdminFolderChangeTitle(AdminCreateFolder):
 
             message_obj_1 = TextMessage(
                 chat_id=self.chat.id,
-                text=Template(self.call_send_texts['AdminFolderTopMessage']).substitute(title=res['title']),
+                text=Template(self.call_send_texts['FolderTopMessage']).substitute(title=res['title']),
                 markup=markup_generate(
-                    buttons=self.buttons['AdminFolderTopMessage'],
+                    buttons=self.buttons['FolderTopMessage'],
                     folder_id=res['id']
                 )
             )
@@ -1592,7 +1593,7 @@ class AdminFolderChangeTitle(AdminCreateFolder):
             } for i in child_folders]
 
             markup = markup_generate(
-                buttons=self.buttons['AdminFolder'],
+                buttons=self.buttons['Folder'],
                 folder_id=kwargs['folder_id'],
                 cycle_folder=cycle_folder,
                 parent_folder_id=res['parent_id'],
@@ -1617,9 +1618,9 @@ class AdminFolderChangeTitle(AdminCreateFolder):
         )
 
 
-class AdminCreateNote(AdminCreateFolder):
+class CreateNote(CreateFolder):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/folder/([0-9]+)/create_note/', self.cdata)
+        rres1 = re.fullmatch(r'folder/([0-9]+)/create_note/', self.cdata)
         if rres1:
             folder_id = int(rres1.group(1))
             await self.process(folder_id=folder_id)
@@ -1651,12 +1652,12 @@ class AdminCreateNote(AdminCreateFolder):
             chat_id=self.chat.id,
             message_id=self.press_message_id
         )
-        message_obj2 = await AdminCreateFolder.generate_send_message(self, stage=2, folder_id=kwargs['folder_id'])
+        message_obj2 = await CreateFolder.generate_send_message(self, stage=2, folder_id=kwargs['folder_id'])
         await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
-            text = Template(self.send_texts['AdminCreateNote']).substitute()
+            text = Template(self.send_texts['CreateNote']).substitute()
 
             return TextMessage(
                 chat_id=self.chat.id,
@@ -1692,7 +1693,7 @@ class AdminCreateNote(AdminCreateFolder):
                     notes += f'<blockquote expandable>{text}</blockquote>'
                     notes += '\n'
 
-            text = Template(self.call_edit_texts['AdminFolder']).substitute(
+            text = Template(self.call_edit_texts['Folder']).substitute(
                 folder_title=res['title'],
                 notes=notes
             )
@@ -1713,9 +1714,9 @@ class AdminCreateNote(AdminCreateFolder):
 
             message_obj_1 = TextMessage(
                 chat_id=self.chat.id,
-                text=Template(self.call_send_texts['AdminFolderTopMessage']).substitute(title=res['title']),
+                text=Template(self.call_send_texts['FolderTopMessage']).substitute(title=res['title']),
                 markup=markup_generate(
-                    buttons=self.buttons['AdminFolderTopMessage'],
+                    buttons=self.buttons['FolderTopMessage'],
                     folder_id=res['id']
                 )
             )
@@ -1766,7 +1767,7 @@ class AdminCreateNote(AdminCreateFolder):
             } for i in child_folders]
 
             markup = markup_generate(
-                buttons=self.buttons['AdminFolder'],
+                buttons=self.buttons['Folder'],
                 folder_id=kwargs['folder_id'],
                 cycle_folder=cycle_folder,
                 parent_folder_id=res['parent_id'],
@@ -1791,9 +1792,9 @@ class AdminCreateNote(AdminCreateFolder):
         )
 
 
-class AdminNoteChangeTitle(NextCallbackMessageCommand):
+class NoteChangeTitle(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/note/([0-9]+)/change_title/', self.cdata)
+        rres1 = re.fullmatch(r'note/([0-9]+)/change_title/', self.cdata)
         if rres1:
             note_id = int(rres1.group(1))
             await self.process(note_id=note_id)
@@ -1829,7 +1830,7 @@ class AdminNoteChangeTitle(NextCallbackMessageCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
-            text = Template(self.send_texts['AdminNoteChangeTitle']).substitute(
+            text = Template(self.send_texts['NoteChangeTitle']).substitute(
                 old_title=kwargs['res']['title'],
                 new_title=self.text
             )
@@ -1844,13 +1845,13 @@ class AdminNoteChangeTitle(NextCallbackMessageCommand):
                 WHERE id = $1;
             """, kwargs['note_id'])
 
-            text = Template(self.global_texts['callback_command']['edit']['AdminNote']).substitute(
+            text = Template(self.global_texts['callback_command']['edit']['Note']).substitute(
                 title=res['title'],
                 text=res['text']
             )
 
             markup = markup_generate(
-                buttons=self.buttons['AdminNote'],
+                buttons=self.buttons['Note'],
                 note_id=res['id'],
                 folder_id=res['parent_id']
             )
@@ -1872,9 +1873,9 @@ class AdminNoteChangeTitle(NextCallbackMessageCommand):
         )
 
 
-class AdminNoteChangeText(NextCallbackMessageCommand):
+class NoteChangeText(NextCallbackMessageCommand):
     async def define(self):
-        rres1 = re.fullmatch(r'admin/note/([0-9]+)/change_text/', self.cdata)
+        rres1 = re.fullmatch(r'note/([0-9]+)/change_text/', self.cdata)
         if rres1:
             note_id = int(rres1.group(1))
             await self.process(note_id=note_id)
@@ -1909,7 +1910,7 @@ class AdminNoteChangeText(NextCallbackMessageCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
-            text = Template(self.send_texts['AdminNoteChangeText']).substitute(
+            text = Template(self.send_texts['NoteChangeText']).substitute(
                 title=kwargs['res']['title']
             )
 
@@ -1923,13 +1924,13 @@ class AdminNoteChangeText(NextCallbackMessageCommand):
                 WHERE id = $1;
             """, kwargs['note_id'])
             
-            text = Template(self.global_texts['callback_command']['edit']['AdminNote']).substitute(
+            text = Template(self.global_texts['callback_command']['edit']['Note']).substitute(
                 title=res['title'],
                 text=res['text']
             )
 
             markup = markup_generate(
-                buttons=self.buttons['AdminNote'],
+                buttons=self.buttons['Note'],
                 note_id=res['id'],
                 folder_id=res['parent_id']
             )
@@ -1970,7 +1971,7 @@ class AdminChangeCommand(NextCallbackMessageCommand):
 
         before = data['ru']['keywords'][kwargs['command']]
 
-        data['ru']['keywords'][kwargs['command']] = self.text_low
+        data['ru']['keywords'][kwargs['command']] = self.text_low.replace('*', '\*')
 
         with open('locales.json', 'w') as write_file:
             json.dump(data, write_file, ensure_ascii=False)

@@ -152,6 +152,18 @@ VALUES
 (0, 0, 'Заметки', 'folder', 0, 'admin')
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO note_table
+(id, user_pid, title, type, parent_id, tag)
+VALUES
+(1, 0, 'Заметки', 'folder', 1, 'employee')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO note_table
+(id, user_pid, title, type, parent_id, tag)
+VALUES
+(2, 0, 'Заметки', 'folder', 2, 'employee_parsing')
+ON CONFLICT (id) DO NOTHING;
+
 SET timezone = 'Europe/Moscow';
 
 ALTER TABLE message_table

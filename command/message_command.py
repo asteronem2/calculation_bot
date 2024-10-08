@@ -1258,11 +1258,11 @@ class NullCommand(CurrencyNullCommand):
 
 
 # Команды для админов в приватном чате
-class AdminMenuCommand(MessageCommand):
+class MenuCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] == 'admin':
-                rres = re.fullmatch(rf'{self.keywords["AdminMenuCommand"]}', self.text_low)
+            if self.db_user['access_level'] != 'zero':
+                rres = re.fullmatch(rf'{self.keywords["MenuCommand"]}', self.text_low)
                 if not rres:
                     rres = re.fullmatch(r'/menu|/menu +@.+', self.text_low)
                 if rres:
@@ -1271,20 +1271,60 @@ class AdminMenuCommand(MessageCommand):
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_send_message()
-        sent_message = await self.bot.send_text(message_obj)
+        await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.texts['AdminMenuCommand']).substitute()
+        if self.access_level == 'admin':
+            text = Template(self.texts['MenuCommand']).substitute()
 
-        markup = markup_generate(
-            self.global_texts['buttons']['AdminMenuCommand']
-        )
+            markup = markup_generate(
+                buttons=self.buttons['MenuCommand']
+            )
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            markup=markup
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
+        else:
+            text = Template(self.global_texts['callback_command']['edit']['EmployeeMenuCommand']).substitute()
+
+            variable = []
+
+            folder_id = '_'
+
+            info_id = None
+            if self.db_user['tag']:
+                info_res = await self.db.fetchrow("""
+                    SELECT * FROM note_table
+                    WHERE id = parent_id
+                        AND tag = $1;
+                """, self.db_user['tag'])
+                info_id = info_res['id']
+                variable.append('info')
+
+            if self.access_level == 'employee':
+                variable.append('parsing')
+                variable.append('commands')
+                variable.append('notes')
+                folder_id = 1
+            elif self.access_level == 'employee_parsing':
+                variable.append('parsing')
+                variable.append('notes')
+                folder_id = 2
+
+            markup = markup_generate(
+                self.buttons['EmployeeMenuCommand'],
+                variable=variable,
+                folder_id=folder_id,
+                info_id=info_id
+            )
+
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -1508,51 +1548,6 @@ class DistributionCommand(MessageCommand):
 
 
 # Команды для сотрудников в приватном чате
-class EmployeeMenuCommand(MessageCommand):
-    async def define(self):
-        if self.chat.type == 'private':
-            if self.db_user['access_level'] in ['employee', 'client', 'employee_parsing']:
-                rres = re.fullmatch(rf'{self.keywords["EmployeeMenuCommand"]}', self.text_low)
-                if not rres:
-                    rres = re.fullmatch(r'/menu|/menu +@.+', self.text_low)
-                if rres:
-                    await self.process()
-                    return True
-
-    async def process(self, *args, **kwargs) -> None:
-        message_obj = await self.generate_send_message()
-        await self.bot.send_text(message_obj)
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        text = Template(self.texts['EmployeeMenuCommand']).substitute()
-
-        variable = []
-
-        if self.db_user['access_level'] == 'employee':
-            variable.append('info')
-            variable.append('parsing')
-            variable.append('commands')
-        elif self.db_user['access_level'] == 'client':
-            variable.append('info')
-        elif self.db_user['access_level'] == 'employee_parsing':
-            variable.append('info')
-            variable.append('parsing')
-
-        markup = markup_generate(
-            self.global_texts['buttons']['EmployeeMenuCommand'],
-            variable=variable
-        )
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            markup=markup
-        )
-
-    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
-
 class AddressListCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':

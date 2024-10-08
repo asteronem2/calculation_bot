@@ -122,10 +122,10 @@ class CallbackQueryCommand:
     async def async_init(self):
         await self._get_addition_from_db()
 
-        rres = re.fullmatch(r'admin/folder/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None', self.cdata)
+        rres = re.fullmatch(r'(folder|info)/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None|admin/tag(s|)/([^/]+/|)', self.cdata)
         if not rres:
-            rres2 = re.fullmatch(r'admin/folder/[0-9]+/(change_title|change_parent|delete)/(|1/)', self.cdata)
-            rres3 = re.fullmatch(r'admin/(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
+            rres2 = re.fullmatch(r'folder/[0-9]+/(change_title|change_parent|delete)/(|1/)', self.cdata)
+            rres3 = re.fullmatch(r'(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
 
             if rres3:
                 res = await self.db.fetch("""
