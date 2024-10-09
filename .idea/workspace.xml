@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.72 unstable version&#10;1. Много мелочей">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.73 unstable version&#10;1. Корректный выход из балансов">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,14 +105,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00017" summary="0.9.36 version&#10;Added:&#10;1. Закрепление балансов">
-      <option name="closed" value="true" />
-      <created>1725004079131</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1725004079131</updated>
     </task>
     <task id="LOCAL-00018" summary="0.9.37 version&#10;Added:&#10;1. Добавлен параметр изменения округления валют&#10;2. Добавлен новый тип сотрудников контрагенты (client)&#10;3. Корректно работает добавление всех типов пользователей">
       <option name="closed" value="true" />
@@ -496,7 +490,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728377836545</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="0.9.73 unstable version&#10;1. Корректный выход из балансов">
+      <option name="closed" value="true" />
+      <created>1728378760981</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1728378760981</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -526,7 +528,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.55 unstable version&#10;1. Логирование" />
     <MESSAGE value="0.9.55 unstable version&#10;1. Корректное отображение истории и детализации" />
     <MESSAGE value="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи" />
     <MESSAGE value="0.9.57 unstable version&#10;1. Исправлена ошибка при реакции" />
@@ -551,6 +552,7 @@
     <MESSAGE value="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно" />
     <MESSAGE value="0.9.71 unstable version&#10;1. Много мелочей" />
     <MESSAGE value="0.9.72 unstable version&#10;1. Много мелочей" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.72 unstable version&#10;1. Много мелочей" />
+    <MESSAGE value="0.9.73 unstable version&#10;1. Корректный выход из балансов" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.73 unstable version&#10;1. Корректный выход из балансов" />
   </component>
 </project>

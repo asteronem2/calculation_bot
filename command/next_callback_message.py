@@ -1247,13 +1247,13 @@ class AdminDistributionPin(NextCallbackMessageCommand):
 
             markup = markup_generate(
                 buttons=self.buttons['AdminDistribution'],
-                cycle=[{'tag': i['tag']} for i in res if i['tag']]
+                cycle=[{'tag': i['tag']} for i in res if i['tag']],
+                variable=['back']
             )
 
             return TextMessage(
                 chat_id=self.chat.id,
                 text=text,
-                message_thread_id=self.topic,
                 markup=markup
             )
 

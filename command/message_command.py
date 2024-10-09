@@ -1337,12 +1337,15 @@ class AdminChangeNote(MessageCommand):
                 if self.message.quote:
                     res = await self.db.fetchrow("""
                         SELECT * FROM message_table
-                        WHERE type = 'note'
+                        WHERE type in ('note', 'hidden_note')
                             AND is_bot_message = TRUE
                             AND message_id = $1;
                     """, self.message.reply_to_message.message_id)
                     if res:
-                        await self.process(res=res)
+                        hidden = False
+                        if res['type'] == 'hidden_note':
+                            hidden = True
+                        await self.process(res=res, hidden=hidden)
                         return True
 
     async def process(self, *args, **kwargs) -> None:
@@ -1351,16 +1354,23 @@ class AdminChangeNote(MessageCommand):
             WHERE id = $1;
         """, int(kwargs['res']['addition']))
 
-        new_text = res['text'].replace(self.message.quote.text, self.text)
+        new_text = res['add_info' if kwargs['hidden'] else 'text'].replace(self.message.quote.text, self.text)
 
-        await self.db.execute("""
-            UPDATE note_table
-            SET text = $1
-            WHERE id = $2;
-        """, new_text, res['id'])
+        if kwargs['hidden']:
+            await self.db.execute("""
+                UPDATE note_table
+                SET add_info = $1
+                WHERE id = $2;
+            """, new_text, res['id'])
+        else:
+            await self.db.execute("""
+                UPDATE note_table
+                SET text = $1
+                WHERE id = $2;
+            """, new_text, res['id'])
 
         await self.bot.delete_message(self.chat.id, self.message.message_id)
-        message_obj = await self.generate_edit_message(res=res)
+        message_obj = await self.generate_edit_message(res=res, hidden=kwargs['hidden'])
         await self.bot.edit_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1375,7 +1385,7 @@ class AdminChangeNote(MessageCommand):
             WHERE id = $1;
         """, kwargs['res']['id'])
 
-        text = new_res['text']
+        text = new_res['add_info' if kwargs['hidden'] else 'text']
 
         return EditMessage(
             chat_id=self.chat.id,
@@ -1435,17 +1445,18 @@ class FindCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
             if self.access_level == 'admin':
-                from main import check_define
-                cls_list = []
-                self_module = sys.modules[__name__]
-                for name, obj in inspect.getmembers(self_module, inspect.isclass):
-                    if obj.__dict__['__module__'] == self_module.__dict__['__name__']:
-                        if obj != FindCommand:
-                            cls_list.append(obj)
+                if not self.message.reply_to_message:
+                    from main import check_define
+                    cls_list = []
+                    self_module = sys.modules[__name__]
+                    for name, obj in inspect.getmembers(self_module, inspect.isclass):
+                        if obj.__dict__['__module__'] == self_module.__dict__['__name__']:
+                            if obj != FindCommand:
+                                cls_list.append(obj)
 
-                if await check_define(cls_list, MessageCommand, self.message) is None:
-                    await self.process()
-                    return True
+                    if await check_define(cls_list, MessageCommand, self.message) is None:
+                        await self.process()
+                        return True
 
     async def process(self, *args, **kwargs) -> None:
         res1 = await self.db.fetch("""
@@ -1455,6 +1466,7 @@ class FindCommand(MessageCommand):
         """)
 
         markup = []
+        notes = []
 
         word = self.text_low
         len_word = len(word)
@@ -1467,6 +1479,8 @@ class FindCommand(MessageCommand):
             string = i['title'].lower().strip()
             if i['text']:
                 string = i['text'].lower().strip()
+                if i['add_info']:
+                    string += i['add_info'].lower().strip()
             string.replace('\\', '/')
             find = False
             for patt in patterns_list:
@@ -1478,12 +1492,35 @@ class FindCommand(MessageCommand):
                 type_text = 'Заметка' if note_type == 'note' else 'Категория'
                 note_title = i['title']
                 note_id = i['id']
-                markup.append([IButton(text=f'{type_text} {note_title}', callback_data=f'admin/{note_type}/{note_id}/')])
+                if i['type'] == 'folder':
+                    markup.append([IButton(text=f'{type_text} {note_title}', callback_data=f'{note_type}/{note_id}/')])
+                elif i['type'] == 'note':
+                    notes.append(i)
 
-        if len(markup) == 0:
+        if len(markup) == 0 and len(notes) == 0:
             message_obj = await self.generate_error_message()
         else:
+            markup.append([IButton(text='Закрыть', callback_data='close')])
             message_obj = await self.generate_send_message(markup=markup)
+            for i in notes:
+                text = i['text']
+                if i['add_info']:
+                    text += '\n\n' + f'<blockquote expandable>{i["add_info"]}</blockquote>'
+                sent_message = await self.bot.send_text(TextMessage(
+                    chat_id=self.chat.id,
+                    text=text,
+                    destroy_timeout=120
+                ))
+                await self.db.execute("""
+                    INSERT INTO message_table
+                    (user_pid, message_id, text, type, is_bot_message)
+                    VALUES ($1, $2, $3, $4, TRUE);
+                """,
+                                      self.db_user['id'],
+                                      sent_message.message_id,
+                                      sent_message.text,
+                                      'note'
+                                      )
 
         await self.bot.send_text(message_obj)
 
@@ -1494,7 +1531,7 @@ class FindCommand(MessageCommand):
             chat_id=self.chat.id,
             text=text,
             markup=IMarkup(inline_keyboard=kwargs['markup']),
-            destroy_timeout=30
+            destroy_timeout=120
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1534,7 +1571,7 @@ class DistributionCommand(MessageCommand):
         markup = markup_generate(
             buttons=self.buttons['AdminDistribution'],
             cycle=[{'tag': i['tag']} for i in res if i['tag']],
-            variable=['close']
+            variable=['back']
         )
 
         return TextMessage(

@@ -6,7 +6,7 @@ import utils
 from BotInteraction import TextMessage, Message
 from command.command_interface import MessageReactionCommand
 from command.message_command import CurrencyCalculationCommand, CalculationCommand
-from utils import markup_generate, calculate
+from utils import markup_generate, calculate, float_to_str
 
 
 class CancelReaction(MessageReactionCommand):
@@ -23,11 +23,14 @@ class CancelReaction(MessageReactionCommand):
             SELECT 
                 story_table.expr_type AS story__expr_type,
                 story_table.before_value AS story__before_value,
+                story_table.after_value AS story__after_value,
                 story_table.expression AS story__expression,
                 story_table.message_id AS story__message_id,
                 story_table.id AS story__id,
                 currency_table.title AS currency__title,
-                currency_table.postfix AS currency__postfix
+                currency_table.postfix AS currency__postfix,
+                currency_table.value AS currency__value,
+                currency_table.id AS currency__id
 
             FROM story_table
             JOIN currency_table ON story_table.currency_pid = currency_table.id
@@ -45,12 +48,13 @@ class CancelReaction(MessageReactionCommand):
             if last_res['story__expr_type'] == 'create':
                 return
             else:
+                new_value = last_res['currency__value'] - (last_res['story__after_value'] - last_res['story__before_value'])
                 await self.db.execute("""
                     UPDATE currency_table
                     SET value = $1
                     WHERE title = $2
                     AND chat_pid = (SELECT id FROM chat_table WHERE type = 'chat' AND chat_id = $3);
-                """, last_res['story__before_value'], last_res['currency__title'], self.chat.id)
+                """, new_value, last_res['currency__title'], self.chat.id)
 
                 await self.db.execute("""
                     UPDATE story_table
@@ -58,10 +62,25 @@ class CancelReaction(MessageReactionCommand):
                     WHERE id = $1 AND status = TRUE;
                 """, last_res['story__id'])
 
-                await self.bot.delete_message(
-                    chat_id=self.chat.id,
-                    message_id=self.message_id
+                expr_link = 'https://t.me/c/{chat_id}/{msg_id}'.format(
+                    chat_id=str(self.chat.id)[4:],
+                    msg_id=str(last_res['story__message_id'])
                 )
+
+                text = Template(self.global_texts['message_command']['CancelCommand']).substitute(
+                    expr_link=expr_link,
+                    expression=last_res['story__expression'],
+                    title=last_res['currency__title'].upper(),
+                    value=float_to_str(new_value),
+                    postfix=last_res['currency__postfix'] or ''
+                )
+
+                message_obj = TextMessage(
+                    chat_id=self.chat.id,
+                    text=text,
+                )
+
+                await self.bot.send_text(message_obj)
 
 
 class DeleteNote(MessageReactionCommand):
