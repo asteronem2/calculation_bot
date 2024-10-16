@@ -180,6 +180,13 @@ class CreateCurrencyCommand(MessageCommand):
             RETURNING *;
         """, self.chat.id, title, value, postfix)
 
+        message_obj = await self.generate_send_message(**{
+            'title': title,
+            'value': value,
+            'postfix': postfix
+        })
+        sent_message = await self.bot.send_text(message_obj)
+
         await self.db.add_story(
             curr_id=after_res['id'],
             user_id=self.db_user['id'],
@@ -187,15 +194,10 @@ class CreateCurrencyCommand(MessageCommand):
             before_value=None if not before_res else before_res['value'],
             after_value=after_res['value'],
             message_id=self.message.message_id,
-            expression=split_text[2]
+            expression=split_text[2],
+            sent_message_id=sent_message.message_id
         )
 
-        message_obj = await self.generate_send_message(**{
-            'title': title,
-            'value': value,
-            'postfix': postfix
-        })
-        await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['CreateCurrencyCommand']).substitute(
@@ -242,9 +244,11 @@ class EditCurrencyCommand(MessageCommand):
         )
 
         res = await self.db.fetchrow("""
-            SELECT * FROM currency_table
-            WHERE title = $1;
-        """, kwargs['title'])
+            SELECT currency_table.* FROM currency_table
+            JOIN chat_table ON currency_table.chat_pid = chat_table.id
+            WHERE currency_table.title = $1
+            AND chat_table.chat_id = $2;
+        """, kwargs['title'], self.chat.id)
 
         markup = markup_generate(
             buttons=self.buttons['EditCurrencyCommand'],
@@ -486,6 +490,9 @@ class CurrencyCalculationCommand(MessageCommand):
             RETURNING *;
         """, new_value, kwargs['curr']['id'])
 
+        message_obj = await self.generate_send_message(new_value=new_value, **kwargs)
+        sent_message = await self.bot.send_text(message_obj)
+
         await self.db.add_story(
             curr_id=res['id'],
             user_id=self.db_user['id'],
@@ -493,11 +500,9 @@ class CurrencyCalculationCommand(MessageCommand):
             before_value=kwargs['curr']['value'],
             after_value=new_value,
             message_id=self.message.message_id,
-            expression=kwargs['expr']
+            expression=kwargs['expr'],
+            sent_message_id=sent_message.message_id
         )
-
-        message_obj = await self.generate_send_message(new_value=new_value, **kwargs)
-        await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['CurrencyBalance']).substitute(
@@ -527,12 +532,15 @@ class CalculationCommand(CurrencyCalculationCommand):
     async def define(self):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level in ('admin', 'employee'):
-                rres = re.fullmatch(r'[*+%/0-9., ()=-]+', self.text_low)
+                rres = re.fullmatch(r'[*+%/0-9., ()=\n-]+', self.text_low)
                 if rres:
                     expr = rres.group()
+                    if self.text.count('\n'):
+                        expr = expr.split('\n')[-1]
+                    else:
+                        expr = expr.split('=')[-1]
                     if self.photo is True and self.db_chat['sign'] is False:
                         expr = f'-({expr})'
-                    expr = expr.split('=')[-1]
                     calc_res = calculate(expr)
                     if calc_res is not False:
                         res = await self.db.fetch("""
@@ -560,8 +568,8 @@ class CalculationCommand(CurrencyCalculationCommand):
 
                             if not self.message.quote:
                                 if self.message.reply_to_message:
-                                        if 'reply' not in answer_mode_list:
-                                            return
+                                    if 'reply' not in answer_mode_list:
+                                        return
                                 else:
                                     if 'non_reply' not in answer_mode_list:
                                         return
@@ -643,7 +651,12 @@ class CurrencyStoryCommand(MessageCommand):
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
+        sent = await self.bot.send_text(message_obj)
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'story', $4);
+        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
@@ -663,7 +676,12 @@ class CurrencyStoryCommand(MessageCommand):
         if not today_story:
             return await self.generate_error_message(**kwargs)
 
-        story = story_generate(story_items=today_story, chat_id=self.chat.id)
+        sel = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
+        story = story_generate(story_list=today_story, chat_id=self.chat.id, rounding=sel['rounding'])
 
         text = Template(self.texts['CurrencyStoryCommand']).substitute(
             title=kwargs['title'].upper(),
@@ -920,7 +938,13 @@ class CurrencyDetailCommand(MessageCommand):
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
+        sent = await self.bot.send_text(message_obj)
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'detail', $4);
+        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
@@ -1155,6 +1179,9 @@ class CurrencyNullCommand(MessageCommand):
             WHERE id = $1;
         """, kwargs['curr_id'])
 
+        message_obj = await self.generate_send_message(**kwargs)
+        sent_message = await self.bot.send_text(message_obj)
+
         await self.db.add_story(
             curr_id=kwargs['curr_id'],
             user_id=self.db_user['id'],
@@ -1162,11 +1189,10 @@ class CurrencyNullCommand(MessageCommand):
             before_value=kwargs['value'],
             after_value=0.0,
             message_id=self.message.message_id,
-            expression=None
+            expression=None,
+            sent_message_id=sent_message.message_id
         )
 
-        message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['CurrencyBalance']).substitute(
@@ -1588,7 +1614,7 @@ class DistributionCommand(MessageCommand):
 class AddressListCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing', 'client'):
                 rres = re.fullmatch(rf'{self.keywords["AddressListCommand"]}', self.text_low)
                 if rres:
                     await self.process()
@@ -1637,7 +1663,7 @@ class AddressListCommand(MessageCommand):
 class AddAddressCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing', 'client'):
                 rres = re.fullmatch(r'[аА][дД][рР][еЕ][сС] +([^ ]+)(| +[0-9.,]+)', self.text.strip())
                 if rres:
                     address, min_value = rres.groups()
@@ -1717,7 +1743,7 @@ class AddAddressCommand(MessageCommand):
 class TrackingCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing', 'client'):
                 rres = re.fullmatch(rf'{self.keywords["TrackingCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""
@@ -1753,7 +1779,7 @@ class TrackingCommand(MessageCommand):
 class OffTrackingCommand(MessageCommand):
     async def define(self):
         if self.chat.type == 'private':
-            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing'):
+            if self.db_user['access_level'] in ('admin', 'employee', 'employee_parsing', 'client'):
                 rres = re.fullmatch(rf'{self.keywords["OffTrackingCommand"]}', self.text_low)
                 if rres:
                     res = await self.db.fetchrow("""

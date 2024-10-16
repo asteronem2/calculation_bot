@@ -1,5 +1,7 @@
 import datetime
 import re
+import traceback
+from inspect import trace
 from string import Template
 
 from aiogram.methods import SendMessage
@@ -9,7 +11,7 @@ import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import CallbackQueryCommand
 from command.inline_query_command import mega_eval
-from utils import float_to_str, markup_generate, story_generate, detail_generate, calculate, calendar
+from utils import float_to_str, markup_generate, story_generate, detail_generate, calculate, calendar, volume_generate
 
 
 class Close(CallbackQueryCommand):
@@ -1086,15 +1088,6 @@ class CurrSetNullCommand(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['curr_id'])
 
-        await self.db.add_story(
-            curr_id=kwargs['curr_id'],
-            user_id=self.db_user['id'],
-            expr_type='null',
-            before_value=res['value'],
-            after_value=0.0,
-            message_id=self.got_message_id,
-            expression='обнуление'
-        )
 
         await self.db.execute("""
             UPDATE currency_table
@@ -1103,11 +1096,23 @@ class CurrSetNullCommand(CallbackQueryCommand):
         """, kwargs['curr_id'])
 
         message_obj = await self.generate_send_message(res=res, **kwargs)
-        await self.bot.send_text(message_obj)
+        sent_message = await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.sent_message_id
         )
+
+        await self.db.add_story(
+            curr_id=kwargs['curr_id'],
+            user_id=self.db_user['id'],
+            expr_type='null',
+            before_value=res['value'],
+            after_value=0.0,
+            message_id=self.got_message_id,
+            expression='обнуление',
+            sent_message_id = sent_message.message_id
+        )
+
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.send_texts['CurrSetNullCommand']).substitute(
@@ -1245,23 +1250,12 @@ class CurrVolumeCommand(CallbackQueryCommand):
             WHERE id = $1;
         """, kwargs['curr_id'])
 
-        today_story = ''
+        story = story_generate(res, chat_id=self.chat.id, rounding=res2['rounding'])
+        today_story = re.sub(r'<[^>]+>', '', story)
+        today_story = today_story.split('-->')[1]
+        today_story = today_story.split('=')[0]
 
-        today = datetime.datetime.today().strftime('%Y.%m.%d')
-
-        for i in res:
-            story_dt = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
-            if story_dt == today:
-                today_story += '+' + i['expression']
-
-        today_story = today_story.replace('++', '+').replace('+(+', '+(')
-
-        solution = mega_eval(today_story)
-
-        if not solution:
-            return await self.generate_error_message(**kwargs)
-
-        volume = solution['solution']
+        volume = volume_generate(today_story, rounding=res2['rounding'])
 
         text = Template(self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
             title=res2['title'].upper(),
@@ -1299,11 +1293,17 @@ class CurrStoryCommand(CallbackQueryCommand):
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
+        sent = await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.sent_message_id
         )
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'story', $4);
+        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
@@ -1321,7 +1321,7 @@ class CurrStoryCommand(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
-        story = story_generate(story_items=res, chat_id=res3['chat_id'])
+        story = story_generate(story_list=res, chat_id=res3['chat_id'], rounding=res2['rounding'])
 
         if story is False:
             return await self.generate_error_message(**kwargs)
@@ -1513,7 +1513,13 @@ class CurrGetStory(CallbackQueryCommand):
 
         await self.bot.delete_message(chat_id=self.chat.id, message_id=self.sent_message_id)
         message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
+        sent = await self.bot.send_text(message_obj)
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'story', $4);
+        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -1534,7 +1540,7 @@ class CurrGetStory(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
-        story = story_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'])
+        story = story_generate(story_list=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'], rounding=res2['rounding'])
 
         if story is False:
             return await self.generate_error_message(**kwargs)
@@ -1579,11 +1585,17 @@ class CurrDetailCommand(CallbackQueryCommand):
 
     async def process(self, *args, **kwargs) -> None:
         message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
+        sent = await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.sent_message_id
         )
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'detail', $4);
+        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
@@ -1792,7 +1804,13 @@ class CurrGetDetail(CallbackQueryCommand):
 
         await self.bot.delete_message(chat_id=self.chat.id, message_id=self.sent_message_id)
         message_obj = await self.generate_send_message(**kwargs)
-        await self.bot.send_text(message_obj)
+        sent = await self.bot.send_text(message_obj)
+
+        await self.db.execute("""
+            INSERT INTO message_table
+            (user_pid, chat_pid, message_id, type, addition)
+            VALUES ($1, $2, $3, 'detail', $4);
+        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -1871,16 +1889,6 @@ class CalculationCommand(CallbackQueryCommand):
         before_value = res2['value']
         after_value = before_value + expr_res
 
-        await self.db.add_story(
-            curr_id=kwargs['curr_id'],
-            user_id=self.db_user['id'],
-            expr_type='add',
-            before_value=before_value,
-            after_value=after_value,
-            message_id=self.got_message_id,
-            expression=expression
-        )
-
         await self.db.execute("""
             UPDATE currency_table
             SET value = $1
@@ -1888,10 +1896,21 @@ class CalculationCommand(CallbackQueryCommand):
         """, after_value, kwargs['curr_id'])
 
         message_obj = await self.generate_send_message(res=res2, after_value=after_value, **kwargs)
-        await self.bot.send_text(message_obj)
+        sent_message = await self.bot.send_text(message_obj)
         await self.bot.delete_message(
             chat_id=self.chat.id,
             message_id=self.sent_message_id
+        )
+
+        await self.db.add_story(
+            curr_id=kwargs['curr_id'],
+            user_id=self.db_user['id'],
+            expr_type='add',
+            before_value=before_value,
+            after_value=after_value,
+            message_id=self.got_message_id,
+            expression=expression,
+            sent_message_id=sent_message.message_id
         )
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1914,7 +1933,7 @@ class CalculationCommand(CallbackQueryCommand):
 # Команды для сотрудников в лс
 class AddressEditCommand(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee', 'employee_parsing']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing', 'client']:
             rres = re.fullmatch(r'address/([0-9]+)/', self.cdata)
             if rres:
                 address_id = int(rres.group(1))
@@ -1952,7 +1971,7 @@ class AddressEditCommand(CallbackQueryCommand):
 
 class AddressChangeMinValueCommand(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee', 'employee_parsing']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing', 'client']:
             rres = re.fullmatch(r'address/change_min_value/([0-9]+)/', self.cdata)
             if rres:
                 address_id = int(rres.group(1))
@@ -2000,7 +2019,7 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
 
 class AddressDelete(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee', 'employee_parsing']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing', 'client']:
             rres = re.fullmatch(r'address/delete/([0-9]+)/', self.cdata)
             if rres:
                 address_id = int(rres.group(1))
@@ -2032,7 +2051,7 @@ class AddressDelete(CallbackQueryCommand):
 
 class AddressDeleteSecond(CallbackQueryCommand):
     async def define(self):
-        if self.access_level in ['admin', 'employee', 'employee_parsing']:
+        if self.access_level in ['admin', 'employee', 'employee_parsing', 'client']:
             rres = re.fullmatch(r'address/delete/([0-9]+)/([^/]+)/', self.cdata)
             if rres:
                 address_id, answer = rres.groups()
@@ -2537,6 +2556,12 @@ class Menu(CallbackQueryCommand):
                 return True
 
     async def process(self, *args, **kwargs) -> None:
+        if self.pressure_info:
+            await self.db.execute("""
+                DELETE FROM pressure_button_table
+                WHERE id = $1;
+            """, self.pressure_info['id'])
+
         message_obj = await self.generate_edit_message()
         await self.bot.edit_text(message_obj)
 
@@ -2690,7 +2715,7 @@ class AdminBalanceStory(CallbackQueryCommand):
                 WHERE currency_pid = $1 AND status = TRUE;
             """, item['id'])
 
-            story = story_generate(res3, res['chat_id']) or ''
+            story = story_generate(res3, res['chat_id'], rounding=item['rounding']) or ''
 
             curr_story_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
                 title=item['title'],
@@ -2757,23 +2782,19 @@ class AdminBalanceVolume(CallbackQueryCommand):
                 WHERE currency_pid = $1 AND status = TRUE;
             """, item['id'])
 
-            today_story = ''
+            story = story_generate(res3, chat_id=self.chat.id, rounding=item['rounding'])
 
-            for i in res3:
-                story_dt = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
-                if story_dt == today:
-                    today_story += '+' + i['expression']
-
-            today_story = today_story.replace('++', '+').replace('+(+', '+(')
-
-            solution = mega_eval(today_story)
-
-            if not solution:
+            if not story:
                 volume = ''
             else:
                 try:
-                    volume = solution['solution']
-                except:
+                    today_story = re.sub(r'<[^>]+>', '', story)
+                    today_story = today_story.split('-->')[1]
+                    today_story = today_story.split('=')[0]
+
+                    volume = volume_generate(today_story, rounding=item['rounding'])
+                except Exception as err:
+                    traceback.print_exc()
                     volume = ''
 
             curr_volume_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
@@ -4710,11 +4731,12 @@ class AdminEmojiSettings(CallbackQueryCommand):
         cycle = []
 
         command_texts = {
-            'CancelReaction': 'Отмена операции',
+            'Cancel': 'Отмена операции',
             'DeleteNote': 'Удаление заметки',
             'ReplyReaction': 'Пересыл сообщений',
             'ReplyReaction2': 'Реакция бота на пересыл',
-            "HiddenInfo": "Скрытая информация заметок"
+            'HiddenInfo': "Скрытая информация заметок",
+            'ChangeCalculation': "Изменение калькуляции"
         }
 
         for key, value in self.global_texts['reactions'].items():
@@ -5522,7 +5544,8 @@ class AdminRevise(CallbackQueryCommand):
         return EditMessage(
             chat_id=self.chat.id,
             text=text,
-            message_id=self.sent_message_id
+            message_id=self.sent_message_id,
+            markup=markup_generate([[{"text": 'Назад 🔙', 'callback_data': 'menu/'}]])
         )
 
 

@@ -1,11 +1,12 @@
 {
   "ru": {
     "reactions": {
-      "CancelReaction": "👎",
+      "Cancel": "👎",
       "DeleteNote": "💔",
       "ReplyReaction": "⚡",
       "ReplyReaction2": "🖕",
-      "HiddenInfo": "🙈"
+      "HiddenInfo": "🙈",
+      "ChangeCalculation": "👍"
     },
     "error": {
       "UnknownError": "<b>Неизвестная ошибка</b>",
@@ -222,7 +223,8 @@
       }
     },
     "reaction_command": {
-      "AdminChangeEmoji": "<b>Эмодзи $before заменено на $after</b>"
+      "AdminChangeEmoji": "<b>Эмодзи $before заменено на $after</b>",
+      "ChangeCalculation": "<b>Калькуляция <u>$before_expr</u> заменена на <u>$after_expr</u></b>"
     },
     "inline_command": {
       "1": "1"
@@ -1370,7 +1372,7 @@
       "AdminTags": [
         [
           {
-            "text": "#\uFE0F⃣ $tag",
+            "text": "#️⃣ $tag",
             "callback_data": "admin/tag/$tag/",
             "cycle": "cycle",
             "row_width": 1

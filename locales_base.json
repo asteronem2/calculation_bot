@@ -1,11 +1,12 @@
 {
   "ru": {
     "reactions": {
-      "CancelReaction": "👎",
+      "Cancel": "👎",
       "DeleteNote": "💔",
       "ReplyReaction": "⚡",
       "ReplyReaction2": "🖕",
-      "HiddenInfo": "🙈"
+      "HiddenInfo": "🙈",
+      "ChangeCalculation": "👍"
     },
     "error": {
       "UnknownError": "<b>Неизвестная ошибка</b>",
@@ -134,10 +135,11 @@
         "AdminEmployeesRemove": "<b>Укажите username с \"@\" или без, для исключения нескольких, разделите username с помощью одного из символов [,./| ]</b>",
         "AdminEmployeesParsing": "<b>Список сотрудников для отслеживания адресов:</b>\n<blockquote expandable>$employee_list</blockquote>",
         "AdminDistribution": "<b>Можете выбрать кому разослать массовое сообщение</b>",
-        "AdminDistributionChoice": "<b>Выберите с закреплением или без?</b>\n\n$story_distribution",
+        "AdminDistributionChoice": "<b>Выберите с закреплением или без?</b>",
         "AdminDistributionPin": "<b>Напишите текст, который будет разослан по $tag и закреплён</b>",
         "AdminDistributionUnpin": "<b>Напишите текст, который будет разослан по $tag без закрепления</b>",
         "Folder": "<b>Категория заметок $folder_title</b>\n$notes",
+        "Info": "<b>Категория информации $folder_title</b>\n$notes",
         "FolderChangeTitle": "<b>Напишите новое название для категории $title</b>",
         "Note": "$text",
         "CreateFolder": "<b>Укажите название новой категории в $title</b>",
@@ -157,7 +159,7 @@
         "AdminInstruction": "<b>Список команд для админа в личном чате:</b>\n$AdminInstructionAdminPrivate\n<b>Список команд для админа в группе:</b>\n$AdminInstructionAdminChat\n<b>Список команд для сотрудника в личном чате:</b>\n$AdminInstructionEmployeePrivate\n<b>Список команд для сотрудника в группе:</b>\n$AdminInstructionEmployeeChat",
         "AdminInstructionAdminPrivate": "<blockquote expandable><b>$MenuCommand</b> - открывает меню управление ботом и чатами\n<b>$DistributionCommand</b> - открывает меню массовой рассылки</blockquote>",
         "AdminInstructionAdminChat": "<blockquote expandable><b>$UnlockChatCommand</b> - разблокирует чат\n<b>$LockChatCommand</b> - блокирует чат\n<b>$EditChatThemeCommand</b> - открывает меню управления темой чата\n<b>*«валюта»</b> - открывает меню управления валютой\n<b>«название» = «значение» «постфикс»</b> - создание валюты</blockquote>",
-        "AdminInstructionEmployeePrivate": "<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>",
+        "AdminInstructionEmployeePrivate": "<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - Если адрес уже на отслеживании, открывает меню изменения минимального значения</blockquote>",
         "AdminInstructionEmployeeChat": "<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>",
         "AdminEmojiSettings": "<b>Здесь вы можете настроить различные эмодзи, на которые реагирует бот:</b>",
         "AdminChangeEmoji": "<b>Поставьте новый эмодзи на это сообщение, текущий - $emoji</b>",
@@ -172,13 +174,13 @@
         "AdminTagDeleteTag2": "<b>Тег $tag удалён</b>",
         "EmployeeMenuCommand": "<b>Меню:</b>",
         "EmployeeMenuInfoNull": "<b>У вас нет доступа к информации</b>",
-        "EmployeeMenuFolder": "Folder",
         "EmployeeMenuCommands": "<b>Список команд в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>"
       },
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
         "CurrCancelCommand": "CancelCommand",
         "FolderTopMessage": "<b>🔽 Заметки категории 🔽</b>",
+        "InfoTopMessage": "<b>🔽 Информация категории 🔽</b>",
         "5": "2",
         "6": "2",
         "7": "2",
@@ -221,7 +223,8 @@
       }
     },
     "reaction_command": {
-      "AdminChangeEmoji": "<b>Эмодзи $before заменено на $after</b>"
+      "AdminChangeEmoji": "<b>Эмодзи $before заменено на $after</b>",
+      "ChangeCalculation": "<b>Калькуляция <u>$before_expr</u> заменена на <u>$after_expr</u></b>"
     },
     "inline_command": {
       "1": "1"
@@ -984,14 +987,6 @@
         ],
         [
           {
-            "text": "$number",
-            "callback_data": "admin/ready_distribution/$dist_id/",
-            "cycle": "cycle",
-            "row_width": 2
-          }
-        ],
-        [
-          {
             "text": "В меню ❇️",
             "callback_data": "menu/"
           },
@@ -1050,11 +1045,46 @@
           }
         ]
       ],
+      "Info": [
+        [
+          {
+            "text": "🗂 $child_title",
+            "callback_data": "info/$child_id/",
+            "cycle": "cycle_folder",
+            "row_width": 2
+          }
+        ],
+        [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "menu/",
+            "variable": "to_menu"
+          },
+          {
+            "text": "Назад 🔙",
+            "callback_data": "info/$parent_folder_id/",
+            "variable": "back_to_parent_folder"
+          },
+          {
+            "text": "Назад 🔙",
+            "callback_data": "menu/",
+            "variable": "back_to_menu"
+          }
+        ]
+      ],
       "FolderTopMessage": [
         [
           {
             "text": "Настройка категории",
             "callback_data": "folder/$folder_id/settings/"
+          }
+        ]
+      ],
+      "InfoTopMessage": [
+        [
+          {
+            "text": "Настройка категории",
+            "callback_data": "info/$folder_id/settings/"
           }
         ]
       ],
@@ -1106,8 +1136,40 @@
         ],
         [
           {
-            "text": "Назад 🔙",
+            "text": "Закрыть 🔙",
             "callback_data": "folder/$folder_id/top_message/"
+          }
+        ]
+      ],
+      "InfoSettings": [
+        [
+          {
+            "text": "➿ Свернуть заметки",
+            "callback_data": "info/$folder_id/collapse/",
+            "variable": "collapse"
+          },
+          {
+            "text": "〰️ Развернуть заметки",
+            "callback_data": "info/$folder_id/expand/",
+            "variable": "expand"
+          }
+        ],
+        [
+          {
+            "text": "🙉 Показать скрытые",
+            "callback_data": "info/$folder_id/show_hidden/",
+            "variable": "show_hidden"
+          },
+          {
+            "text": "🙈 Скрыть скрытые",
+            "callback_data": "info/$folder_id/hide_hidden/",
+            "variable": "hide_hidden"
+          }
+        ],
+        [
+          {
+            "text": "Закрыть 🔙",
+            "callback_data": "info/$folder_id/top_message/"
           }
         ]
       ],
@@ -1310,7 +1372,7 @@
       "AdminTags": [
         [
           {
-            "text": "$tag",
+            "text": "#️⃣ $tag",
             "callback_data": "admin/tag/$tag/",
             "cycle": "cycle",
             "row_width": 1
@@ -1503,22 +1565,29 @@
         [
           {
             "text": "Информация",
-            "callback_data": "menu/info/",
-            "variable": "client"
+            "callback_data": "info/$info_id/",
+            "variable": "info"
+          }
+        ],
+        [
+          {
+            "text": "Заметки",
+            "callback_data": "folder/$folder_id/",
+            "variable": "notes"
           }
         ],
         [
           {
             "text": "Парсинг",
             "callback_data": "menu/parsing/",
-            "variable": "employee_parsing"
+            "variable": "parsing"
           }
         ],
         [
           {
             "text": "Команды",
             "callback_data": "menu/commands/",
-            "variable": "employee"
+            "variable": "commands"
           }
         ]
       ],

@@ -1,20 +1,25 @@
 import json
+import re
 from cmath import phase
+from pdb import post_mortem
+from pyexpat.errors import messages
 from string import Template
 
+from dotenv.main import DotEnv
+
 import utils
-from BotInteraction import TextMessage, Message
+from BotInteraction import TextMessage, Message, EditMessage
 from command.command_interface import MessageReactionCommand
 from command.message_command import CurrencyCalculationCommand, CalculationCommand
-from utils import markup_generate, calculate, float_to_str
+from utils import markup_generate, calculate, float_to_str, story_generate, detail_generate
 
 
-class CancelReaction(MessageReactionCommand):
+class Cancel(MessageReactionCommand):
     async def define(self):
         if self.new:
             if self.chat.type == 'supergroup':
                 if self.db_user['access_level'] in ['admin', 'employee']:
-                    if self.emoji == self.reactions_text['CancelReaction']:
+                    if self.emoji == self.reactions_text['Cancel']:
                         await self.process()
                         return True
 
@@ -166,9 +171,10 @@ class ReplyReaction(MessageReactionCommand):
                 WHERE id = $1;
             """, int(res['chat_pid']))
 
-            sent = await self.bot.bot.forward_message(self.chat.id, self.chat.id, self.message_id, disable_notification=True)
+            from utils import DED
+            sent = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id, disable_notification=True)
 
-            await self.bot.delete_message(self.chat.id, sent.message_id)
+            await self.bot.delete_message(sent.chat.id, sent.message_id)
 
             text = sent.text if sent.text else (sent.caption if sent.caption else 'ошибка')
             photo = sent.photo[-1].file_id if sent.photo else None
@@ -286,11 +292,12 @@ class AdminChangeEmoji(MessageReactionCommand):
             cycle = []
 
             command_texts = {
-                'CancelReaction': 'Отмена операции',
+                'Cancel': 'Отмена операции',
                 'DeleteNote': 'Удаление заметки',
                 'ReplyReaction': 'Пересыл сообщений',
                 'ReplyReaction2': 'Реакция бота на пересыл',
-                'HiddenInfo': 'Скрытая информация заметок'
+                'HiddenInfo': 'Скрытая информация заметок',
+                'ChangeCalculation': "Изменение калькуляции"
             }
 
             for key, value in gl_text['reactions'].items():
@@ -384,3 +391,171 @@ class AdminHideHiddenInfo(MessageReactionCommand):
         """, kwargs['res3']['id'])
 
         await self.bot.delete_message(self.chat.id, kwargs['res3']['message_id'])
+
+
+class ChangeCalculation(MessageReactionCommand):
+    async def define(self):
+        if self.new:
+            if self.emoji == self.reactions_text['ChangeCalculation']:
+                if self.db_chat:
+                    if self.db_user['access_level'] in ('admin', 'employee'):
+                        res = await self.db.fetchrow("""
+                            SELECT story_table.* FROM story_table
+                            JOIN currency_table ON story_table.currency_pid = currency_table.id
+                            WHERE message_id = $1 AND currency_table.chat_pid = $2;
+                        """, self.message_id, self.db_chat['id'])
+                        if res:
+                            from utils import DED
+                            try:
+                                forwarded = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id)
+                            except:
+                                return
+                            f_text = forwarded.text or forwarded.caption
+                            await self.bot.delete_message(forwarded.chat.id, forwarded.message_id)
+                            rres = re.fullmatch(r'[*+%/0-9., ()=-]+', f_text)
+                            if rres:
+                                expr = rres.group()
+                                calc_res = calculate(expr)
+                                if calc_res is not False:
+                                    await self.process(expr=expr, calc_res=calc_res, res=res)
+                                    return True
+                            else:
+                                rres2 = re.fullmatch(r'(.+) +([*+%/0-9., ()-]+)', f_text.lower())
+                                if rres2:
+                                    curr, expr = rres2.groups()
+                                    calc_res = calculate(expr)
+                                    if calc_res is not False:
+                                        res2 = await self.db.fetch("""
+                                            SELECT currency_table.*
+                                            FROM currency_table
+                                            JOIN chat_table ON chat_table.id = currency_table.chat_pid
+                                            WHERE type = 'chat' AND chat_table.chat_id = $1
+                                            ORDER BY currency_table.title ASC; 
+                                        """, self.chat.id)
+
+                                        for i in res2:
+                                            if curr == i['title']:
+                                                await self.process(
+                                                    curr=i,
+                                                    calc_res=calc_res,
+                                                    expr=expr,
+                                                    res=res
+                                                )
+                                                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        curr = kwargs.get('curr')
+        if not curr:
+            curr = await self.db.fetchrow("""
+                SELECT * FROM currency_table
+                WHERE id = $1;
+            """, kwargs['res']['currency_pid'])
+
+        res3 = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE id > $1;
+        """, kwargs['res']['id'])
+
+        plus = kwargs['calc_res']
+        real_plus = plus - (kwargs['res']['after_value'] - kwargs['res']['before_value'])
+
+        await self.db.execute("""
+            UPDATE story_table
+            SET expression = $1, after_value = $2
+            WHERE id = $3; 
+        """, kwargs['expr'], kwargs['res']['before_value'] + plus, kwargs['res']['id'])
+
+        f_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+            title=curr['title'].upper(),
+            value=float_to_str(kwargs['res']['after_value'] + real_plus, curr['rounding']),
+            postfix=curr['postfix'] or ''
+        )
+        try:
+            await self.bot.edit_text(EditMessage(
+                chat_id=self.chat.id,
+                text=f_text,
+                message_id=kwargs['res']['sent_message_id']
+            ))
+        except:
+            pass
+
+        latest_curr_value = res3[-1]['after_value'] + real_plus
+
+        for i in res3:
+            await self.db.execute("""
+                UPDATE story_table
+                SET before_value = $1, after_value = $2
+                WHERE id = $3;
+            """, i['before_value'] + real_plus, i['after_value'] + real_plus, i['id'])
+
+            f_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+                title=curr['title'].upper(),
+                value=float_to_str(i['after_value'] + real_plus, curr['rounding']),
+                postfix=curr['postfix'] or ''
+            )
+            try:
+                await self.bot.edit_text(EditMessage(
+                    chat_id=self.chat.id,
+                    text=f_text,
+                    message_id=i['sent_message_id']
+                ))
+            except:
+                continue
+
+        res4 = await self.db.fetch("""
+            SELECT * FROM message_table
+            WHERE chat_pid = $1
+                AND message_id > $2
+                AND type in ('story', 'detail')
+                AND addition = $3;
+        """, self.db_chat['id'], self.message_id, str(curr['id']))
+
+        story_list = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1
+                AND status = TRUE;
+        """, curr['id'])
+
+        for i in res4:
+            if i['type'] == 'story':
+                story = story_generate(story_list, self.chat.id, rounding=curr['rounding'])
+                f_text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
+                    title=curr['title'].upper(),
+                    story=story,
+                    postfix=((curr['postfix'] or '') if story else '')
+                )
+            else:
+                detail = detail_generate(story_list, self.chat.id)
+                f_text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
+                    title=curr['title'].upper(),
+                    detail=detail,
+                    postfix=((curr['postfix'] or '') if detail else '')
+                )
+            await self.bot.edit_text(EditMessage(
+                chat_id=self.chat.id,
+                text=f_text,
+                message_id=i['message_id']
+            ))
+
+        text = Template(self.texts['ChangeCalculation']).substitute(
+            before_expr=kwargs['res']['expression'],
+            after_expr=kwargs['expr']
+        )
+
+        await self.bot.send_text(TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            reply_to_message_id=self.message_id
+        ))
+
+        text2 = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+            title=curr['title'].upper(),
+            value=float_to_str(latest_curr_value, curr['rounding']),
+            postfix=curr['postfix'] or ''
+        )
+
+        await self.bot.send_text(TextMessage(
+            chat_id=self.chat.id,
+            text=text2
+        ))
+

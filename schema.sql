@@ -169,3 +169,5 @@ SET timezone = 'Europe/Moscow';
 ALTER TABLE message_table
 ALTER COLUMN text DROP NOT NULL;
 
+ALTER TABLE story_table
+ADD COLUMN IF NOT EXISTS sent_message_id INTEGER;

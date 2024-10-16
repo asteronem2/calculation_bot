@@ -138,16 +138,6 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
 
             new_value = calculate(self.text_low)
 
-            await self.db.add_story(
-                curr_id=kwargs['curr_id'],
-                user_id=self.db_user['id'],
-                expr_type='update',
-                before_value=res['value'],
-                after_value=new_value,
-                message_id=self.message.message_id,
-                expression=self.text_low
-            )
-
             await self.db.execute("""
                 UPDATE currency_table
                 SET value = $1
@@ -166,13 +156,34 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
             #     message_id=self.press_message_id
             # )
             message_obj = await self.generate_send_message(stage=1, title=res['title'], value=new_value, res=res, **kwargs)
-            await self.bot.send_text(message_obj)
+            sent_message = await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
             )
             message_obj2 = await self.generate_send_message(stage=2, title=res['title'], res=res, **kwargs)
             await self.bot.send_text(message_obj2)
+
+            await self.db.add_story(
+                curr_id=kwargs['curr_id'],
+                user_id=self.db_user['id'],
+                expr_type='update',
+                before_value=res['value'],
+                after_value=new_value,
+                message_id=self.message.message_id,
+                expression=self.text_low
+            )
+
+            await self.db.add_story(
+                curr_id=kwargs['curr_id'],
+                user_id=self.db_user['id'],
+                expr_type='update',
+                before_value=res['value'],
+                after_value=new_value,
+                message_id=self.message.message_id,
+                expression=self.text_low,
+                sent_message_id=sent_message.message_id
+            )
 
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -352,18 +363,8 @@ class CurrCalculationCommand(NextCallbackMessageCommand):
                 WHERE id = $2;
             """, after_value, kwargs['curr_id'])
 
-            await self.db.add_story(
-                curr_id=kwargs['curr_id'],
-                user_id=self.db_user['id'],
-                expr_type='add',
-                before_value=before_value,
-                after_value=after_value,
-                message_id=self.message.message_id,
-                expression=self.text_low
-            )
-
             message_obj = await self.generate_send_message(stage=1, res=res, after_value=after_value, **kwargs)
-            await self.bot.send_text(message_obj)
+            sent_message = await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
                 message_id=self.press_message_id
@@ -372,12 +373,23 @@ class CurrCalculationCommand(NextCallbackMessageCommand):
             message_obj2 = await self.generate_send_message(stage=2, res=res, **kwargs)
             await self.bot.send_text(message_obj2)
 
+            await self.db.add_story(
+                curr_id=kwargs['curr_id'],
+                user_id=self.db_user['id'],
+                expr_type='add',
+                before_value=before_value,
+                after_value=after_value,
+                message_id=self.message.message_id,
+                expression=self.text_low,
+                sent_message_id=sent_message.message_id
+            )
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
             text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
                 title=kwargs['res']['title'].upper(),
                 value=float_to_str(kwargs['after_value'], kwargs['res']['rounding']),
-                postfix=kwargs['res']['title']
+                postfix=kwargs['res']['title'] or ''
             )
 
             pin, thread = False, self.topic
@@ -2073,41 +2085,143 @@ class AdminReviseSecond(NextCallbackMessageCommand):
             WHERE id = $1;
         """, self.db_user['id'])
 
-        message_obj = await self.generate_send_message()
+        message_obj = await self.generate_send_message(stage=1)
         await self.bot.send_text(message_obj)
 
+        message_obj2 = await self.generate_send_message(stage=2)
+        await self.bot.send_text(message_obj2)
+
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        first_eval = None
-        second_eval = None
+        if kwargs['stage'] == 1:
+            def find_mistakes(expr1, expr2) -> str:
+                expr1 = expr1.replace(' ', '')
+                expr2 = expr2.replace(' ', '')
 
-        try:
-            first_eval = eval(self.db_user['revise_expr'].replace(',', ''))
-        except:
-            first_eval = '❌'
+                split1 = [{'el': i, 'correct': True, 'type': 'sign' if i in '*+%/()-' else 'digital'}
+                          for i in re.findall(r'[0-9,.]+|[*+%/()-]', expr1)]
+                split2 = [{'el': i, 'correct': True, 'type': 'sign' if i in '*+%/()-' else 'digital'}
+                          for i in re.findall(r'[0-9,.]+|[*+%/()-]', expr2)]
 
-        try:
-            second_eval = eval(self.text_low.replace(',', '.'))
-        except:
-            second_eval = '❌'
+                removed1 = []
+                removed2 = []
 
-        sign = '≠'
+                ind = 0
+                while ind != (len(split1) - 1):
+                    if split1[ind]['type'] == 'sign':
+                        removed1.append([split1[ind], ind])
+                        del split1[ind]
+                    else:
+                        ind += 1
 
-        if '❌' not in (first_eval, second_eval):
-            if first_eval == second_eval:
+                ind = 0
+                while ind != (len(split2) - 1):
+                    if split2[ind]['type'] == 'sign':
+                        removed2.append([split2[ind], ind])
+                        del split2[ind]
+                    else:
+                        ind += 1
+
+                ind = 0
+
+                while ind != (len(split1) - 1):
+                    # Проверка элементов на неравенство из списка 2
+                    if split1[ind] != split2[ind]:
+                        next_correct = False
+                        # Проверка есть ли элементы после этого в списке 2
+                        if len(split2) > (ind + 1):
+                            if split1[ind] == split2[ind + 1]:
+                                next_correct = True
+
+                        if next_correct is True:
+                            split2[ind]['correct'] = False
+                            removed2.append([split2[ind], ind])
+                            del split2[ind]
+                            ind -= 1
+                        else:
+                            v = False
+                            if ind < (len(split1) - 2) and ind < (len(split2) - 2):
+                                if split1[ind + 1] == split2[ind + 1]:
+                                    split1[ind]['correct'] = False
+                                    split2[ind]['correct'] = False
+                                else:
+                                    v = True
+                            else:
+                                v = True
+
+                            if v is True:
+                                split1[ind]['correct'] = False
+                                removed1.append([split1[ind], ind])
+                                del split1[ind]
+                                ind -= 1
+                    ind += 1
+
+                final_str1 = ''
+                final_str2 = ''
+
+                for i in reversed(removed1):
+                    split1.insert(i[1], i[0])
+
+                for i in reversed(removed2):
+                    split2.insert(i[1], i[0])
+
+                for i in split1:
+                    if i['correct'] is False:
+                        final_str1 += '<b><u>'
+                    final_str1 += i['el']
+                    if i['correct'] is False:
+                        final_str1 += '</u></b>'
+                for i in split2:
+                    if i['correct'] is False:
+                        final_str2 += '<b><u>'
+                    final_str2 += i['el']
+                    if i['correct'] is False:
+                        final_str2 += '</u></b>'
+
+                final_str1 = f'<blockquote>{final_str1}</blockquote>'
+                final_str2 = f'<blockquote>{final_str2}</blockquote>'
+
+                return '\n'.join((final_str1, final_str2))
+
+            res1 = '❌'
+
+            res2 = '❌'
+
+            expr_1 = self.db_user['revise_expr'].replace('\n', '').replace(' ', '').replace(',', '.')
+            expr_2 = self.text_low.replace('\n', '').replace(' ', '').replace(',', '.')
+
+            try:
+                res1 = float_to_str(eval(expr_1))
+            except:
+                pass
+
+            try:
+                res2 = float_to_str(eval(expr_2))
+            except:
+                pass
+
+            if res1 == res2:
                 sign = '='
+            else:
+                sign = '≠'
 
-        if type(first_eval) in (int, float):
-            first_eval = float_to_str(first_eval)
+            text = f'<b>{res1} {sign} {res2}</b>\n\n' + find_mistakes(expr_1, expr_2)
 
-        if type(second_eval) in (int, float):
-            second_eval = float_to_str(second_eval)
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+            )
+        else:
+            text = Template(self.global_texts['message_command']['MenuCommand']).substitute()
 
-        text = first_eval + ' ' + sign + ' ' + second_eval
+            markup = markup_generate(
+                buttons=self.buttons['MenuCommand']
+            )
 
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-        )
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                markup=markup
+            )
 
 
 class Null(NextCallbackMessageCommand):

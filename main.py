@@ -211,6 +211,17 @@ async def main():
             await db.connect()
             await db.reg_tables()
 
+            # with open('test.py', 'w') as tpy:
+            #     rrr = await db.fetch("""
+            #         SELECT story_table.* FROM story_table
+            #         JOIN currency_table ON currency_table.id = story_table.currency_pid
+            #         WHERE currency_table.title = 'гг';
+            #     """)
+            #
+            #     list_ = [dict(i) for i in rrr]
+            #
+            #     tpy.write('CONST = {list_}')
+            #
             t = Tracking()
             asyncio.create_task(t.async_init())
 

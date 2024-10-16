@@ -5,7 +5,7 @@ import datetime
 import time
 import traceback
 from string import Template
-from typing import List, Any, Union
+from typing import List, Any, Union, Dict
 import re
 import logging
 
@@ -195,13 +195,14 @@ class DataDB:
                         curr_id: int, user_id: int,
                         expr_type: str,
                         before_value: float, after_value: float,
-                        message_id: int, expression: str):
+                        message_id: int, expression: str,
+                        sent_message_id: int):
         await self.execute("""
             INSERT INTO story_table 
-            (currency_pid, user_pid, expr_type, before_value, after_value, message_id, expression)
+            (currency_pid, user_pid, expr_type, before_value, after_value, message_id, expression, sent_message_id)
             VALUES
-            ($1, $2, $3, $4, $5, $6, $7)
-        """, curr_id, user_id, expr_type, before_value, after_value, message_id, expression)
+            ($1, $2, $3, $4, $5, $6, $7, $8)
+        """, curr_id, user_id, expr_type, before_value, after_value, message_id, expression, sent_message_id)
 
     async def _destroy(self, table_name: str, id_: int, destroy_timeout: int):
         await asyncio.sleep(destroy_timeout)
@@ -395,95 +396,147 @@ def calculate(expression: str):
         return False
 
 
-def story_generate(story_items: List[Record], chat_id: int, start_date: str= None, end_date: str=None) -> str:
+def story_generate(story_list: List[Record], chat_id: int, start_date: str = None, end_date: str = None, rounding: int = 2) -> Union[str, bool]:
+    def link_txt(text, message_id) -> str:
+        return Template(f'<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id">$text</a>').substitute(
+            text=text,
+            message_id=message_id
+        )
+
     if not start_date or not end_date:
         start_date = datetime.datetime.today().strftime('%Y-%m-%d')
         end_date = datetime.datetime.today().strftime('%Y-%m-%d')
-    print(chat_id)
-    link_pattern = Template(f'$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a>')
 
-    current_story_items = []
+    story_items: List[Dict[str, Any]] = []
 
-    for i in story_items:
+    # Обработка сырых Record из бд и составление списка словарей с историей
+    for i in story_list:
         story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
         if start_date <= story_datetime <= end_date:
             if i['status'] is True:
-                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group(1) else '.', i['expression']) if i['expression'] else None
-                current_story_items.append({
-                    'type': i['expr_type'],
+                symbol = '+'
+                if i['expr_type'] == 'update':
+                    symbol = '->'
+                elif i['expr_type'] == 'null':
+                    symbol = ''
+                story_items.append({'type': 'symbol', 'symbol': symbol, 'status': True})
+                expr = (i['expression'] or '').replace(' ', '')
+
+                # Обработка выражений из под подписи с фото, которые с минусом и скобкой
+                ex_r = re.fullmatch(r'-\(.+\)', expr)
+                if ex_r:
+                    ex_r2 = re.search(r'[*%/]', expr)
+                    if not ex_r2:
+                        expr = expr[2:-1]
+                        expr = re.sub(r'(\+)|(-)', lambda x: '-' if x.group(1) else '+', expr)
+                        expr = re.sub(r'[+-]([0-9,.]+)|^([0-9,.]+)', lambda x: x.group(1) or f'-{x.group(2)}', expr)
+
+                story_items.append({
+                    'type': 'story_item',
                     'expr': expr,
-                    'after_value': i['after_value'],
+                    'message_id': i['message_id'],
                     'before_value': i['before_value'],
-                    'message_id': i['message_id']
+                    'after_value': i['after_value'],
+                    'expr_type': i['expr_type'],
+                    'id': i['id'],
+                    'split': list(re.findall(r'[0-9.,+]+|[*+%/-]|[()]', expr)),
+                    'status': True
                 })
 
-    if not current_story_items:
+    if len(story_items) == 0:
         return False
 
-    string: str = ''
+    # Обработка элементов полу готового списка
+    for ind in range(len(story_items)):
+        item = story_items[ind]
+        if item['type'] == 'story_item':
+            # Проверка сплита выражения на содержание справа делителя или умножителя
+            if len(item['split']) >= 3:
+                if item['split'][-2] == '/':
+                    story_items[ind]['division'] = item['split'][-1]
+                elif item['split'][-2] == '*':
+                    story_items[ind]['multiply'] = item['split'][-1]
 
-    temp_expr_list = []
+    # Создание комплексов
+    for ind in range(len(story_items)):
+        item = story_items[ind]
+        if item['type'] == 'story_item':
+            if item.get('division'):
+                find_complex = False
+                analog_divisions = []
+                for f_ind in range(len(story_items)):
+                    if f_ind == ind:
+                        continue
+                    f_item = story_items[f_ind]
+                    if f_item.get('division') and f_item['division'] == item['division']:
+                        analog_divisions.append(f_ind)
+                        if f_item.get('division_complex'):
+                            find_complex = True
+                            story_items[ind]['status'] = False
+                            story_items[ind - 1]['status'] = False
+                if find_complex is False:
+                    story_items[ind]['division_complex'] = [ind] + analog_divisions
+            elif item.get('multiply'):
+                find_complex = False
+                analog_multiplies = []
+                for f_ind in range(len(story_items)):
+                    if f_ind == ind:
+                        continue
+                    f_item = story_items[f_ind]
+                    if f_item.get('multiply') and f_item['multiply'] == item['multiply']:
+                        analog_multiplies.append(f_ind)
+                        if f_item.get('multiply_complex'):
+                            find_complex = True
+                            story_items[ind]['status'] = False
+                            story_items[ind - 1]['status'] = False
+                if find_complex is False:
+                    story_items[ind]['multiply_complex'] = [ind] + analog_multiplies
 
-    for story_item in current_story_items:
-        si_type = story_item['type']
+    base_string = ''
 
-        if si_type == 'add':
+    for ind in range(len(story_items)):
+        item = story_items[ind]
 
-            expr = story_item['expr']
+        if item['status'] is True:
+            if item['type'] == 'symbol':
+                if ind == 0:
+                    continue
+                base_string += item['symbol']
 
-            rres1 = re.search(r'^\(*([+-])', expr)
-            sign = '+' if not rres1 else (rres1.group(1))
+            elif item['type'] == 'story_item':
+                if item.get('division_complex'):
+                    base_string += '('
+                    for i in item['division_complex']:
+                        if i != story_items.index(item):
+                            base_string += '+'
+                        base_string += link_txt(''.join(story_items[i]['split'][:-2]), story_items[i]['message_id'])
+                    base_string += ')'
+                    base_string += '/' + item['division']
 
-            expr = re.sub(r'^[+-]', '', expr)
+                elif item.get('multiply_complex'):
+                    base_string += '('
+                    for i in item['multiply_complex']:
+                        if i != story_items.index(item):
+                            base_string += '+'
+                        base_string += link_txt(''.join(story_items[i]['split'][:-2]), story_items[i]['message_id'])
+                    base_string += ')'
+                    base_string += '*' + item['multiply']
 
-            temp_expr_list.append([
-                expr,
-                story_item['message_id'],
-                sign
-            ])
+                elif item['expr_type'] == 'null':
+                    base_string = '(' + base_string + ')' + link_txt('*0', item['message_id'])
 
-        elif si_type == 'update':
-            temp_expr_list.append([
-                story_item['after_value'],
-                story_item['message_id'],
-                '-->'
-            ])
+                else:
+                    base_string += link_txt(item['expr'], item['message_id'])
 
-        elif si_type == 'null':
-            temp_expr_list.insert(0, '(')
-            temp_expr_list.append(')')
-            temp_expr_list.append([
-                '*0',
-                story_item['message_id'],
-                ''
-            ])
+    base_string = f'<b>{float_to_str(story_items[0].get("before_value") or 0, rounding)}</b>-->' + base_string + f'=<b>{float_to_str(story_items[-1]["after_value"], rounding)}</b>'
 
-    for it in temp_expr_list:
-        if str == type(it):
-            string += it
-        elif list == type(it):
-            string += link_pattern.substitute(
-                expression=it[0],
-                message_id=it[1],
-                sign=it[2]
-            )
+    base_string = re.sub(r'\+(<a href="[^<]+?">)-', lambda x: f'-{x.group(1)}', base_string)
+    base_string = re.sub(r'\+(<a href="[^<]+?">)\+', lambda x: f'+{x.group(1)}', base_string)
+    base_string = re.sub(r'-(<a href="[^<]+?">)-', lambda x: f'+{x.group(1)}', base_string)
+    base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
+    base_string = base_string.replace(' * 0', '*0')
 
-    string = '<b>' + str(current_story_items[0]['before_value'] if current_story_items[0]['before_value'] else '0') + '</b>-->' + string
-
-    string += '=<b>' + str(current_story_items[-1]['after_value'] if current_story_items[0]['after_value'] else '0') + '</b>'
-    print(string)
-    string = re.sub(r'(<a href=.+?>)|( +)', lambda x: x.group(1) or '', string)
-    string = re.sub(r'\(([+-]?[0-9.,]+)\)', lambda x: x.group(1), string)
-    string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
-    string = re.sub(r'(<a href=.+?>|https://t.me/c/[0-9]+?/[0-9]+?/)|([0-9>])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
-    string = re.sub(r"(<a href=.+?>)|([0-9.]{2,})",
-                    lambda x: x.group(1) if x.group(1) else float_to_str(float(x.group(2))), string)
-    string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
-    string = re.sub(r' +', ' ', string)
-
-    print(string)
-
-    return string
+    return base_string
 
 
 def detail_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None) -> str:
@@ -562,64 +615,61 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     return string
 
 
-def volume_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None):
-    if not start_date or not end_date:
-        start_date = datetime.datetime.today().strftime('%Y-%m-%d')
-        end_date = datetime.datetime.today().strftime('%Y-%m-%d')
+def volume_generate(expression: str, rounding: int = 2) -> str:
+    expr = expression.replace(' ', '').replace(',', '.')
+    split = re.findall(r'[0-9,.]+|[*+/()-]', expr)
 
-    current_story_items = []
+    first_step = expr
 
-    for i in story_items:
-        story_datetime = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y-%m-%d')
-        if start_date <= story_datetime <= end_date:
-            if i['status'] is True:
-                expr = re.sub(r'(--|\+\+| )|(,)', lambda x: '' if x.group(1) else '.', i['expression']) if i['expression'] else None
-                current_story_items.append({
-                    'type': i['expr_type'],
-                    'expr': expr,
-                    'after_value': i['after_value'],
-                    'before_value': i['before_value'],
-                    'message_id': i['message_id']
-                })
+    ind = 0
 
-    if not current_story_items:
-        return False
+    brackets = []
 
-    string: str = '\n' + str(current_story_items[0]['before_value'] or 'Создание -->')
+    w_b = False
 
-    for story_item in current_story_items:
-        si_type = story_item['type']
+    while ind != (len(split) - 1):
+        if split[ind] == '(':
+            brackets.append(['(', ind])
+            del split[ind]
+            w_b = True
+        elif split[ind] == ')' and w_b is True:
+            brackets[-1][0] += ')'
+            del split[ind]
+            w_b = False
+        elif w_b is True:
+            brackets[-1][0] += split[ind]
+            del split[ind]
+        else:
+            ind += 1
 
-        # if si_type == 'add':
-        #     expr = story_item['expr']
-        #
-        #     rres1 = re.search(r'^\(*([+-])', expr)
-        #     sign = '+ ' if not rres1 else (rres1.group(1) + ' ')
-        #
-        #     expr = re.sub(r'^[+-]', '', expr)
-        #
-        #     string += link_pattern.substitute(
-        #         sign=sign,
-        #         message_id=story_item['message_id'],
-        #         expression=expr,
-        #         value=story_item['after_value']
-        #     )
-        # elif si_type == 'update':
-        #     string += link_pattern.substitute(
-        #         sign='--> ',
-        #         message_id=story_item['message_id'],
-        #         expression=story_item['after_value'],
-        #         value=''
-        #     )
-        # elif si_type == 'null':
-        #     string += link_pattern.substitute(
-        #         sign='',
-        #         message_id=story_item['message_id'],
-        #         expression='0 ',
-        #         value=''
-        #     )
+    for i in reversed(brackets):
+        res = eval(i[0])
+        split.insert(i[1], f'({res})')
 
-    return string
+    second_step = ''.join(split)
+
+    ind = 0
+
+    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+$)',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}', second_step)
+    second_step = re.sub(r'(^[0-9,.()]+[+-][0-9,.()]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}{x.group(1)[-1]}', second_step)
+
+    third_step = re.sub(r'([0-9,.]+-[0-9,.+]+)|([0-9,.()-]+[*/][0-9,.()-]+)',
+                        lambda x: x.group(1) or f'{eval(x.group(2))}', second_step)
+    four_step = str(eval(third_step))
+
+    final_text = '=' + '\n='.join((first_step, second_step, third_step, four_step))
+
+    final_text = re.sub(r'([0-9,.]+)', lambda x: float_to_str(float(x.group(1)), rounding), final_text)
+
+    return final_text
 
 
 def entities_to_html(text: str, entities: List[aiogram.types.MessageEntity]) -> str:
