@@ -536,6 +536,19 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
     base_string = re.sub(r'\+(<a href="[^<]+?">)-', lambda x: f'-{x.group(1)}', base_string)
     base_string = re.sub(r'\+(<a href="[^<]+?">)\+', lambda x: f'+{x.group(1)}', base_string)
     base_string = re.sub(r'-(<a href="[^<]+?">)-', lambda x: f'+{x.group(1)}', base_string)
+
+    while True:
+        search = re.search(r'([+-]\(<a href="[^<]+?">-[0-9,.]+</a>(?:[+-]<a href="[^>]+?">[0-9,.]+</a>)*\))',
+                           base_string)
+        if not search:
+            break
+        w_expr = search.group()
+        w_expr = ('-' if w_expr[0] == '+' else '+') + w_expr[1:]
+        w_expr = re.sub(r'(\(<a href="[^"]+">)-([0-9,.]+</a>)', lambda x: x.group(1) + x.group(2), w_expr, 1)
+        w_expr = re.sub(r'</a>([+-])<a', lambda x: f'</a>{"-" if x.group(1) == "+" else "+"}<a', w_expr)
+        base_string = base_string[:search.start()] + w_expr + base_string[search.end():]
+
+
     base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
     base_string = base_string.replace(' * 0', '*0')
 
