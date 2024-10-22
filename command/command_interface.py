@@ -386,6 +386,7 @@ class InlineQueryCommand:
         self.inline = inline
         self.query = inline.query
         self.bot = BotInteraction.BotInter()
+        self.db = utils.db
 
     async def async_init(self):
         pass

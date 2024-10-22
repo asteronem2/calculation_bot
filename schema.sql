@@ -172,3 +172,11 @@ ALTER COLUMN text DROP NOT NULL;
 
 ALTER TABLE story_table
 ADD COLUMN IF NOT EXISTS sent_message_id INTEGER;
+
+CREATE TABLE IF NOT EXISTS inline_query (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username TEXT DEFAULT NULL,
+    query TEXT NOT NULL,
+    datetime TIMESTAMPTZ DEFAULT NOW()
+);

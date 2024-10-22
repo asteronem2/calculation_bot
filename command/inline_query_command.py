@@ -200,6 +200,12 @@ class InlineCalculation(InlineQueryCommand):
         return True
 
     async def process(self, *args, **kwargs):
+        if self.query:
+            await self.db.execute("""
+                INSERT INTO inline_query
+                (user_id, query, username)
+                VALUES ($1, $2, $3);
+            """, self.inline.from_user.id, self.query, self.inline.from_user.username)
         try:
             results = await self.generate_results()
             await self.bot.answer_inline_query(results=results, query_id=self.inline.id)
@@ -217,7 +223,7 @@ class InlineCalculation(InlineQueryCommand):
                                              title=f'Результат: {result["result"]}',
                                              description=result['expression_and_percents'],
                                              input_message_content=InputTextMessageContent(
-                                                 message_text=f'{self.query} = <b>{result["result"]}</b>\n'
+                                                 message_text=f'{self.query} = <code>{result["result"]}</code>\n'
                                                               f'- - - - - - - - - - - - - - - - - - - -\n'
                                                               f'<u>Этапы вычисления:</u>\n'
                                                               f'{result["solution"]}',

@@ -1,10 +1,11 @@
 import datetime
 import inspect
+import os
 import re
 import sys
 from string import Template
 
-from aiogram.types import InlineKeyboardMarkup as IMarkup, InlineKeyboardButton as IButton
+from aiogram.types import InlineKeyboardMarkup as IMarkup, InlineKeyboardButton as IButton, FSInputFile
 
 import BotInteraction
 from command.command_interface import MessageCommand
@@ -1610,6 +1611,46 @@ class DistributionCommand(MessageCommand):
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
 
+
+class InlineTable(MessageCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            if self.text:
+                rres = re.fullmatch(r'/inline_table', self.text_low)
+                if rres:
+                    await self.process()
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        import csv
+        filename = datetime.datetime.now().strftime('%Y.%m.%d') + ' inline_table.csv'
+
+        res = await self.db.fetch("""
+            SELECT * FROM inline_query;
+        """)
+        with open(filename, 'w') as w_csv:
+            writer = csv.writer(w_csv)
+            writer.writerow(['ID', 'ID пользователя', 'Username', 'Запрос', 'Время'])
+            for i in res:
+                writer.writerow([
+                    i['id'],
+                    i['user_id'],
+                    i['username'] or 'пусто',
+                    i['query'].replace(',', '.'),
+                    i['datetime']
+                ])
+        csv_file = FSInputFile(filename)
+        await self.bot.bot.send_document(
+            chat_id=self.chat.id,
+            document=csv_file
+        )
+        os.remove(filename)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
 
 # Команды для сотрудников в приватном чате
 class AddressListCommand(MessageCommand):
