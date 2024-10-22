@@ -229,7 +229,7 @@ async def main():
 
             await log('SUCCESS: bot started', 'info')
 
-            await dispatcher.start_polling(bot, polling_timeout=300, allowed_updates=allowed_updates)
+            await dispatcher.start_polling(bot, polling_timeout=300, allowed_updates=allowed_updates, handle_signals=False)
         except Exception as err:
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
             error = traceback.format_exc()

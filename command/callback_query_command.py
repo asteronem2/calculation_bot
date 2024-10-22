@@ -5359,6 +5359,131 @@ class AdminEmployeesRemove(CallbackQueryCommand):
         )
 
 
+class AdminClientBindChat(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/client_bind_chat/', self.cdata)
+        if rres:
+            await self.process()
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM user_table
+            WHERE access_level = 'client'
+            ORDER BY id ASC;
+        """)
+
+        cycle = []
+
+        for i in res:
+            cycle.append({
+                'username': i['username'] or i['user_id'],
+                'first_name': i['first_name'] or '',
+                'client_id': i['id']
+            })
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminClientBindChat'],
+            cycle=cycle,
+        )
+
+        text = Template(self.edit_texts['AdminClientBindChat']).substitute()
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class AdminClientBind(CallbackQueryCommand):
+    async def define(self):
+        rres = re.fullmatch(r'admin/client_bind_chat/([0-9]+)/', self.cdata)
+        if rres:
+            client_id = int(rres.group(1))
+            await self.process(client_id=client_id)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        client_id = kwargs['client_id']
+
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM user_table
+            WHERE id = $1;
+        """, client_id)
+
+        text = Template(self.edit_texts['AdminClientBind']).substitute(
+            username=res1['username'] or res1['user_id'],
+            first_name=res1['first_name'] or ''
+        )
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM chat_table
+            WHERE type = 'chat'
+            ORDER BY title ASC;
+        """)
+
+        cycle = []
+
+        for i in res2:
+            status = '⏺'
+
+            if i['id'] == res1['bind_chat']:
+                status = '✅'
+
+            cycle.append({
+                'status': status,
+                'code_name': i['code_name'],
+                'title': i['title'],
+                'client_id': client_id,
+                'chat_pk': i['id']
+            })
+
+        markup = markup_generate(
+            buttons=self.buttons['AdminClientBind'],
+            cycle=cycle
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+
+class ClientBind(AdminClientBind):
+    async def define(self):
+        rres = re.fullmatch(r'admin/client_bind_chat/([0-9]+)/([0-9]+)/', self.cdata)
+        if rres:
+            client_id = int(rres.group(1))
+            chat_pk = int(rres.group(2))
+            await self.process(client_id=client_id, chat_pk=chat_pk)
+            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE user_table
+            SET bind_chat = CASE
+                WHEN bind_chat = $1 THEN NULL 
+                ELSE $1
+                END
+            WHERE id = $2;
+        """, kwargs['chat_pk'], kwargs['client_id'])
+
+        message_obj = await AdminClientBind.generate_edit_message(self, **kwargs)
+        await self.bot.edit_text(message_obj)
+
+
 # Команды
 class AdminCommands(CallbackQueryCommand):
     async def define(self):

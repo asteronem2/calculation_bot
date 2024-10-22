@@ -422,15 +422,19 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                 story_items.append({'type': 'symbol', 'symbol': symbol, 'status': True})
                 expr = (i['expression'] or '').replace(' ', '')
 
-                # Обработка выражений из под подписи с фото, которые с минусом и скобкой
+                # Обработка выражений из-под подписи с фото, которые с минусом и скобкой
                 ex_r = re.fullmatch(r'-\(.+\)', expr)
                 if ex_r:
                     ex_r2 = re.search(r'[*%/]', expr)
+                    ex_r3 = re.search(r'[+-]', expr[1:])
                     if not ex_r2:
                         expr = expr[2:-1]
                         expr = re.sub(r'(\+)|(-)', lambda x: '-' if x.group(1) else '+', expr)
                         expr = re.sub(r'[+-]([0-9,.]+)|^([0-9,.]+)', lambda x: x.group(1) or f'-{x.group(2)}', expr)
-
+                    elif ex_r2 and not ex_r3:
+                        expr = expr[0] + expr[2:-1]
+                    elif ex_r2 and expr[:3] == '-(-':
+                        expr = expr[3:-1]
                 story_items.append({
                     'type': 'story_item',
                     'expr': expr,
@@ -442,7 +446,6 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                     'split': list(re.findall(r'[0-9.,+]+|[*+%/-]|[()]', expr)),
                     'status': True
                 })
-
     if len(story_items) == 0:
         return False
 

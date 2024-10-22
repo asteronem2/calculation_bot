@@ -2,7 +2,8 @@ import json
 import re
 from string import Template
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import aiogram
+from aiogram import exceptions
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
@@ -1028,9 +1029,44 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
                 await self.db.execute("""
                         UPDATE user_table
                         SET access_level = $1
-                        WHERE username = $2
+                        WHERE lower(username) = $2
                             AND access_level <> 'admin';
-                    """, kwargs['type_'], i)
+                    """, kwargs['type_'], i.lower())
+
+                if kwargs['type_'] == 'client':
+                    res1 = await self.db.fetchrow("""
+                        SELECT * FROM user_table
+                        WHERE lower(username) = $1;
+                    """, i)
+                    if not res1:
+                        continue
+                    res2 = await self.db.fetch("""
+                        SELECT * FROM chat_table
+                        WHERE type = 'chat'
+                            AND id in (
+                                SELECT DISTINCT chat_pid
+                                FROM currency_table
+                            );
+                    """)
+                    for chat in res2:
+                        inside = False
+                        try:
+                            status = (await self.bot.bot.get_chat_member(
+                                chat_id=chat['chat_id'],
+                                user_id=res1['user_id']
+                            )).status
+                            if status != 'left':
+                                inside = True
+                        except aiogram.exceptions.TelegramBadRequest:
+                            pass
+                        if inside is True:
+                            await self.db.execute("""
+                                UPDATE user_table
+                                SET bind_chat = $1
+                                WHERE id = $2;
+                            """, chat['id'], res1['id'])
+                            break
+
 
             message_obj = await self.generate_send_message(stage=1, **kwargs)
             await self.bot.send_text(message_obj)
@@ -1052,7 +1088,8 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
             )
         else:
             res = await self.db.fetch("""
-                SELECT * FROM user_table;
+                SELECT * FROM user_table
+                ORDER BY username ASC;
             """)
 
             employees = ''
@@ -1073,9 +1110,9 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
                     clients += f'<b>{first_name}</b> ({username})\n'
 
             text = Template(self.call_edit_texts['AdminEmployees']).substitute(
-                employees=employees,
-                employees_parsing=employees_parsing,
-                clients=clients
+                employees=employees or 'Пока никого нет',
+                employees_parsing=employees_parsing or 'Пока никого нет',
+                clients=clients or 'Пока никого нет'
             )
 
             markup = markup_generate(

@@ -743,7 +743,7 @@ class StoryCommand(CurrencyStoryCommand):
         else:
             destroy_timeout = 10
             message_obj = await self.generate_send_message(res=res, destroy_timeout=destroy_timeout, **kwargs)
-            sent_message = await self.bot.send_text(message_obj)
+            await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs.get('res') and len(kwargs['res']) == 1:
@@ -1842,15 +1842,55 @@ class QuoteReplied(MessageCommand):
         pass
 
 
-class Pass(MessageCommand):
-    async def define(self):
-        pass
-
-    async def process(self, *args, **kwargs) -> None:
-        pass
-
-    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
+class ClientStory(MessageCommand):
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
+    async def define(self):
+        if self.access_level == 'client':
+            rres = re.fullmatch(rf'{self.keywords["StoryCommand"]}', self.text_low)
+            if rres:
+                if self.db_user['bind_chat']:
+                    await self.process(chat_id=self.db_user['bind_chat'])
+                    return True
+
+    async def process(self, *args, **kwargs) -> None:
+        res1 = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, kwargs['chat_id'])
+
+        res2 = await self.db.fetch("""
+            SELECT * FROM currency_table
+            WHERE chat_pid = $1;
+        """, res1['id'])
+
+        message_obj = await self.generate_send_message(res1=res1, res2=res2)
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        curr_story_list = ''
+
+        for item in kwargs['res2']:
+            res3 = await self.db.fetch("""
+                SELECT * FROM story_table
+                WHERE currency_pid = $1 AND status = TRUE;
+            """, item['id'])
+
+            story = story_generate(res3, kwargs['res1']['chat_id'], rounding=item['rounding']) or ''
+
+            curr_story_list += '<blockquote expandable>' + Template(self.texts['CurrencyStoryCommand']).substitute(
+                title=item['title'].upper(),
+                postfix=((item['postfix'] or '') if story else ''),
+                story=story
+            ) + '</blockquote>' + '\n'
+
+        text = Template(self.texts['ClientStory']).substitute(
+            title=kwargs['res1']['title'].upper(),
+            curr_story_list=curr_story_list
+        )
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+        )
