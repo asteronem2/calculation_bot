@@ -156,8 +156,10 @@ class CreateCurrencyCommand(MessageCommand):
                     rres = re.fullmatch(r'([^ ]+) *= *([0-9.,-]+) *([^ ]*)', self.text)
                     if rres:
                         title, value, postfix = rres.groups()
-                        await self.process(title=title, value=value, postfix=postfix)
-                        return True
+                        rres2 = re.search(r'[а-яa-z]', title)
+                        if rres2:
+                            await self.process(title=title, value=value, postfix=postfix)
+                            return True
 
     async def process(self, **kwargs) -> None:
         split_text = self.text_low.split(' ')
@@ -197,7 +199,6 @@ class CreateCurrencyCommand(MessageCommand):
             expression=split_text[2],
             sent_message_id=sent_message.message_id
         )
-
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.texts['CreateCurrencyCommand']).substitute(
@@ -314,7 +315,7 @@ class EditChatThemeCommand(MessageCommand):
         else:
             if 'non_forward' in rres:
                 variable.append('non_forward')
-                
+
         if 'reply' in rres:
             if 'non_reply' in rres:
                 variable.append('reply|non_reply')
@@ -332,7 +333,7 @@ class EditChatThemeCommand(MessageCommand):
         else:
             if 'non_quote' in rres:
                 variable.append('non_quote')
-                
+
 
         markup = markup_generate(
             self.buttons['EditChatThemeCommand'],
