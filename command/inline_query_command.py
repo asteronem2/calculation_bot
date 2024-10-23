@@ -1,5 +1,7 @@
 import re
+import time
 import traceback
+import datetime
 
 from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
 
@@ -19,9 +21,42 @@ def mega_eval(expression: str):
             pass
 
         def bracket_calc(expr: str) -> tuple:
+            bracket_nested_2 = []
+            bracket_nested_1 = []
+
+            while True:
+                search = re.search(r'(\([^(]*\([^(]*)(\(.*?\))([^)]*\)[^)]*\))', expr)
+                if not search:
+                    break
+
+                eval_res = str(eval(search.group(2)))
+                expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
+                bracket_nested_2.append([
+                    search.group(2),
+                    eval_res
+                ])
+
+            while True:
+                search = re.search(r'(\([^(]*)(\(.+?\))([^)]*\))', expr)
+                if not search:
+                    break
+
+                eval_res = str(eval(search.group(2)))
+                expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
+                bracket_nested_1.append([
+                    search.group(2),
+                    eval_res
+                ])
+
             reply = ['', expr]
 
-            bracket_list = [[i.strip(), None] for i in re.findall(r'(\(.*?\))', expr)]
+            if bracket_nested_2:
+                reply[0] += '<blockquote>' + ' | '.join([f'{i[0]} = {i[1]}' for i in bracket_nested_2]) + '</blockquote>\n'
+
+            if bracket_nested_1:
+                reply[0] += '<blockquote>' + ' | '.join([f'{i[0]} = {i[1]}' for i in bracket_nested_1]) + '</blockquote>\n'
+
+            bracket_list = [[i.strip(), None] for i in re.findall(r'(\([^)]*\))', expr)]
 
             for i in bracket_list:
                 res = f'{eval(i[0])}'
@@ -29,7 +64,7 @@ def mega_eval(expression: str):
 
                 reply[1] = reply[1].replace(i[0], i[1], 1)
 
-            reply[0] = ' | '.join([f'{i[0]} = {i[1]}' for i in bracket_list])
+            reply[0] += '<blockquote>' +  ' | '.join([f'{i[0]} = {i[1]}' for i in bracket_list]) + '</blockquote>'
 
             return tuple(reply)
 
@@ -122,7 +157,7 @@ def mega_eval(expression: str):
         if expression.count('('):
             res = bracket_calc(expression)
             expression = res[1]
-            solution_list.append(f'<blockquote>{res[0]}</blockquote>')
+            solution_list.append(res[0])
 
         if expression.count('/') or expression.count('*'):
             res = mul_div_calc(expression)
@@ -201,11 +236,21 @@ class InlineCalculation(InlineQueryCommand):
 
     async def process(self, *args, **kwargs):
         if self.query:
-            await self.db.execute("""
-                INSERT INTO inline_query
-                (user_id, query, username)
-                VALUES ($1, $2, $3);
-            """, self.inline.from_user.id, self.query, self.inline.from_user.username)
+            db_res = await self.db.fetchrow("""
+                SELECT * FROM inline_query
+                WHERE user_id = $1
+                ORDER BY id DESC
+            """, self.inline.from_user.id)
+
+            now_timestamp = datetime.datetime.utcnow().timestamp()
+            res_timestamp = db_res['datetime'].timestamp()
+
+            if now_timestamp-res_timestamp > 60:
+                await self.db.execute("""
+                    INSERT INTO inline_query 
+                    (user_id, query, username, datetime)
+                    VALUES ($1, $2, $3, $4);
+                """, self.inline.from_user.id, self.query, self.inline.from_user.username, datetime.datetime.utcnow())
         try:
             results = await self.generate_results()
             await self.bot.answer_inline_query(results=results, query_id=self.inline.id)

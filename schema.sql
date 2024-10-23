@@ -180,3 +180,6 @@ CREATE TABLE IF NOT EXISTS inline_query (
     query TEXT NOT NULL,
     datetime TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE inline_query
+ALTER COLUMN datetime TYPE TIMESTAMP;

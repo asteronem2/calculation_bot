@@ -1630,14 +1630,13 @@ class InlineTable(MessageCommand):
         """)
         with open(filename, 'w') as w_csv:
             writer = csv.writer(w_csv)
-            writer.writerow(['ID', 'ID пользователя', 'Username', 'Запрос', 'Время'])
+            writer.writerow(['ID', 'ID пользователя', 'Username', 'Время'])
             for i in res:
                 writer.writerow([
                     i['id'],
                     i['user_id'],
                     i['username'] or 'пусто',
-                    i['query'].replace(',', '.'),
-                    i['datetime']
+                    (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d %H:%M:%S')
                 ])
         csv_file = FSInputFile(filename)
         await self.bot.bot.send_document(
