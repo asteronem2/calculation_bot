@@ -899,7 +899,11 @@ class Tracking:
                                         headers={'TRON-PRO-API-KEY': DED.TRONSCAN_API_KEY} if DED.TRONSCAN_API_KEY else None)
 
         self.last_parse_time = time.time()
-        token_transfers = response.json().get('token_transfers')
+        try:
+            token_transfers = response.json().get('token_transfers')
+        except json.decoder.JSONDecodeError:
+            await log(str(response), 'info')
+            return
         if token_transfers:
             return response.status_code, token_transfers[0], response
         else:
