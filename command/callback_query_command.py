@@ -4818,7 +4818,7 @@ class AdminTags(CallbackQueryCommand):
         res = await self.db.fetch("""
             SELECT tag FROM note_table
             WHERE id = parent_id
-                AND tag <> 'admin'
+                AND tag NOT IN ('admin', 'employee', 'employee_parsing')
             ORDER BY title ASC;
         """)
 

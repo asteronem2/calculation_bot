@@ -124,7 +124,7 @@ class CallbackQueryCommand:
 
         rres = re.fullmatch(r'(folder|info)/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None|admin/tag(s|)/([^/]+/|)', self.cdata)
         if not rres:
-            rres2 = re.fullmatch(r'folder/[0-9]+/(change_title|change_parent|delete)/(|1/)', self.cdata)
+            rres2 = re.fullmatch(r'folder/[0-9]+/((change_title|change_parent|delete)/(1/|)|)', self.cdata)
             rres3 = re.fullmatch(r'(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
 
             if rres3:
