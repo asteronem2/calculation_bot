@@ -445,6 +445,11 @@ class ChangeCalculation(MessageReactionCommand):
 
     async def process(self, *args, **kwargs) -> None:
         curr = kwargs.get('curr')
+        expr = kwargs['expr']
+        res_expr = kwargs['res']['expression']
+        if res_expr and len(res_expr) > 1 and res_expr[:2] == '-(' and res_expr[-1] == ')':
+            expr = f'-({expr})'
+
         if not curr:
             curr = await self.db.fetchrow("""
                 SELECT * FROM currency_table
@@ -456,14 +461,14 @@ class ChangeCalculation(MessageReactionCommand):
             WHERE id > $1;
         """, kwargs['res']['id'])
 
-        plus = kwargs['calc_res']
+        plus = calculate(expr)
         real_plus = plus - (kwargs['res']['after_value'] - kwargs['res']['before_value'])
 
         await self.db.execute("""
             UPDATE story_table
             SET expression = $1, after_value = $2
             WHERE id = $3; 
-        """, kwargs['expr'], kwargs['res']['before_value'] + plus, kwargs['res']['id'])
+        """, expr, kwargs['res']['before_value'] + plus, kwargs['res']['id'])
 
         f_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
             title=curr['title'].upper(),
@@ -539,7 +544,7 @@ class ChangeCalculation(MessageReactionCommand):
 
         text = Template(self.texts['ChangeCalculation']).substitute(
             before_expr=kwargs['res']['expression'],
-            after_expr=kwargs['expr']
+            after_expr=expr
         )
 
         await self.bot.send_text(TextMessage(

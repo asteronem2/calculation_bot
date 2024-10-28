@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.79 final unstable version&#10;1. Корректная работа inline калькуляции">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,14 +104,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00025" summary="0.9.43 unstable version&#10;1. Корректно округление&#10;2. Корректная отмена">
-      <option name="closed" value="true" />
-      <created>1725436758525</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1725436758525</updated>
     </task>
     <task id="LOCAL-00026" summary="0.9.44 unstable version&#10;1. Обновлено меню">
       <option name="closed" value="true" />
@@ -498,7 +489,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730109803420</updated>
     </task>
-    <option name="localTasksCounter" value="74" />
+    <task id="LOCAL-00074" summary="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад">
+      <option name="closed" value="true" />
+      <created>1730112721883</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1730112721883</updated>
+    </task>
+    <option name="localTasksCounter" value="75" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -528,7 +527,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.61 unstable version&#10;1. История работает корректно" />
     <MESSAGE value="0.9.62 unstable version&#10;1. Бот реагирует на &quot;Адрес&quot;, а не только на &quot;адрес&quot;" />
     <MESSAGE value="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <MESSAGE value="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
@@ -553,6 +551,7 @@
     <MESSAGE value="0.9.77 final unstable version&#10;1. История инвертирует знаки в скобке, если первый знак &quot;-&quot;" />
     <MESSAGE value="0.9.78 final unstable version&#10;1. Выгрузка таблицы inline запросов пользователей" />
     <MESSAGE value="0.9.79 final unstable version&#10;1. Корректная работа inline калькуляции" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.79 final unstable version&#10;1. Корректная работа inline калькуляции" />
+    <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад" />
   </component>
 </project>
