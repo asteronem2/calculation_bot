@@ -242,15 +242,23 @@ class InlineCalculation(InlineQueryCommand):
                 ORDER BY id DESC
             """, self.inline.from_user.id)
 
-            now_timestamp = datetime.datetime.utcnow().timestamp()
-            res_timestamp = db_res['datetime'].timestamp()
+            if db_res:
+                now_timestamp = datetime.datetime.utcnow().timestamp()
+                res_timestamp = db_res['datetime'].timestamp()
 
-            if now_timestamp-res_timestamp > 60:
+                if now_timestamp-res_timestamp > 60:
+                    await self.db.execute("""
+                        INSERT INTO inline_query 
+                        (user_id, query, username, datetime)
+                        VALUES ($1, $2, $3, $4);
+                    """, self.inline.from_user.id, self.query, self.inline.from_user.username, datetime.datetime.utcnow())
+            else:
                 await self.db.execute("""
                     INSERT INTO inline_query 
                     (user_id, query, username, datetime)
                     VALUES ($1, $2, $3, $4);
                 """, self.inline.from_user.id, self.query, self.inline.from_user.username, datetime.datetime.utcnow())
+
         try:
             results = await self.generate_results()
             await self.bot.answer_inline_query(results=results, query_id=self.inline.id)
