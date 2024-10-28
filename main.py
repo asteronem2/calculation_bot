@@ -1,8 +1,10 @@
 import asyncio
 import inspect
 import logging
+import os.path
 import time
 import traceback
+from datetime import datetime
 from typing import Type
 
 import aiogram
@@ -15,7 +17,7 @@ from aiogram.types.inline_query import InlineQuery
 
 import command.message_command
 from command.command_interface import MessageCommand, CallbackQueryCommand, NextCallbackMessageCommand, InlineQueryCommand, MessageReactionCommand
-from utils import DotEnvData, db, Tracking, GetLocales, log, entities_to_html
+from utils import DotEnvData, db, Tracking, GetLocales, log, entities_to_html, DED
 
 EnvData = DotEnvData()
 
@@ -193,9 +195,32 @@ async def telegram_inline_query_update(inline: InlineQuery):
 
 allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_query']
 
+async def check_logs():
+    while True:
+        try:
+            if os.path.exists('logs.log'):
+                file_size = os.path.getsize('logs.log')
+                file_size_mb = file_size / 1024 / 1024
+                if file_size_mb > 20:
+                    print("SEND LOGS")
+                    await bot.send_document(
+                        chat_id=DED.DEBUG_CHAT_ID,
+                        document=FSInputFile('logs.log'),
+                        caption=datetime.today().strftime('%Y.%m.%d %H:%M:%S'),
+                        disable_notification=True
+                    )
+                    with open('logs.log', 'w') as w:
+                        w.write('')
+            else:
+                with open('logs.log', 'w') as w:
+                    w.write('')
+            await asyncio.sleep(1*60*60)
+        except:
+            await asyncio.sleep(1*60*60)
 
 # noinspection PyAsyncCall
 async def main():
+    asyncio.create_task(check_logs())
     try:
         await bot.send_document(EnvData.DEBUG_CHAT_ID, FSInputFile('logs.log'), disable_notification=True)
     except Exception as err:
@@ -238,7 +263,6 @@ async def main():
             print(error)
             await log(error)
             time.sleep(3)
-
 
 if __name__ == '__main__':
     asyncio.run(main())
