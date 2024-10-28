@@ -198,6 +198,7 @@ allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_quer
 async def check_logs():
     while True:
         try:
+            await asyncio.sleep(1*60*60)
             if os.path.exists('logs.log'):
                 file_size = os.path.getsize('logs.log')
                 file_size_mb = file_size / 1024 / 1024
@@ -214,7 +215,6 @@ async def check_logs():
             else:
                 with open('logs.log', 'w') as w:
                     w.write('')
-            await asyncio.sleep(1*60*60)
         except:
             await asyncio.sleep(1*60*60)
 
