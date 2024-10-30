@@ -124,10 +124,11 @@ class CallbackQueryCommand:
 
         rres = re.fullmatch(r'(folder|info)/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None|admin/tag(s|)/([^/]+/|)', self.cdata)
         if not rres:
+            rres1 = re.fullmatch(r'(folder/[0-9]+/|menu/)', self.cdata)
             rres2 = re.fullmatch(r'folder/[0-9]+/((change_title|change_parent|delete)/(1/|)|)', self.cdata)
             rres3 = re.fullmatch(r'(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
 
-            if rres3:
+            if rres3 or rres1:
                 res = await self.db.fetch("""
                     SELECT * FROM message_table
                     WHERE user_pid = $1

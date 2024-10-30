@@ -158,16 +158,24 @@ def mega_eval(expression: str):
             res = bracket_calc(expression)
             expression = res[1]
             solution_list.append(res[0])
+            print(expression)
+            print(solution_list[-1])
 
         if expression.count('/') or expression.count('*'):
             res = mul_div_calc(expression)
             expression = res[1]
             solution_list.append(f'<blockquote>{res[0]}</blockquote>')
+            print(expression)
+            print(solution_list[-1])
 
         if expression.count('-') or expression.count('+') or expression.count('%'):
+            expression = expression.replace('--', '+').replace('++', '+').replace('+-', '-').replace('-+', '-')
+            expression = expression.replace('--', '+').replace('++', '+').replace('+-', '-').replace('-+', '-')
             res = plus_minus_calc(expression)
             expression = res[1]
             solution_list.append(f'<blockquote>{res[0]}</blockquote>')
+            print(expression)
+            print(solution_list[-1])
 
         for i in range(len(solution_list)):
             solution_list[i] = re.sub(

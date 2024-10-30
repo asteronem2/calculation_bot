@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад&#10;3. Корректное изменение калькуляции реакцией (работает с калькуляцией под фото)">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/inline_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/inline_query_command.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,22 +105,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00027" summary="0.9.45 unstable version&#10;1. Переработано создание тегов и добавление чатов к тегу&#10;2. После отправки сообщения после нажатия кнопки возвращается меню из которого оно было нажато">
-      <option name="closed" value="true" />
-      <created>1725599870812</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1725599870812</updated>
-    </task>
-    <task id="LOCAL-00028" summary="0.9.46 unstable version&#10;1. Форматирование балансов">
-      <option name="closed" value="true" />
-      <created>1725620427296</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1725620427296</updated>
     </task>
     <task id="LOCAL-00029" summary="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками">
       <option name="closed" value="true" />
@@ -497,7 +482,23 @@
       <option name="project" value="LOCAL" />
       <updated>1730117415150</updated>
     </task>
-    <option name="localTasksCounter" value="76" />
+    <task id="LOCAL-00076" summary="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log">
+      <option name="closed" value="true" />
+      <created>1730119686614</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1730119686615</updated>
+    </task>
+    <task id="LOCAL-00077" summary="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log">
+      <option name="closed" value="true" />
+      <created>1730119697295</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1730119697295</updated>
+    </task>
+    <option name="localTasksCounter" value="78" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -527,7 +528,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <MESSAGE value="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <MESSAGE value="0.9.63 unstable version&#10;1. Очень много всего" />
     <MESSAGE value="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН" />
@@ -552,6 +552,7 @@
     <MESSAGE value="0.9.79 final unstable version&#10;1. Корректная работа inline калькуляции" />
     <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад" />
     <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад&#10;3. Корректное изменение калькуляции реакцией (работает с калькуляцией под фото)" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад&#10;3. Корректное изменение калькуляции реакцией (работает с калькуляцией под фото)" />
+    <MESSAGE value="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log" />
   </component>
 </project>
