@@ -151,7 +151,7 @@ class CallbackQueryCommand:
 
             for i in res:
                 await self.db.execute("""
-                    DELETE FROM messate_table
+                    DELETE FROM message_table
                     WHERE id = $1;
                 """, i['id'])
 
