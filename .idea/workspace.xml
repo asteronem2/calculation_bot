@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/inline_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/inline_query_command.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,14 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00029" summary="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками">
-      <option name="closed" value="true" />
-      <created>1725865273823</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1725865273823</updated>
     </task>
     <task id="LOCAL-00030" summary="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска">
       <option name="closed" value="true" />
@@ -498,7 +488,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730119697295</updated>
     </task>
-    <option name="localTasksCounter" value="78" />
+    <task id="LOCAL-00078" summary="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок">
+      <option name="closed" value="true" />
+      <created>1730278800232</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1730278800233</updated>
+    </task>
+    <option name="localTasksCounter" value="79" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -528,7 +526,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки" />
     <MESSAGE value="0.9.63 unstable version&#10;1. Очень много всего" />
     <MESSAGE value="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН" />
     <MESSAGE value="0.9.65 unstable version&#10;1. Bug fixing" />
@@ -553,6 +550,7 @@
     <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад" />
     <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад&#10;3. Корректное изменение калькуляции реакцией (работает с калькуляцией под фото)" />
     <MESSAGE value="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log" />
+    <MESSAGE value="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок" />
   </component>
 </project>

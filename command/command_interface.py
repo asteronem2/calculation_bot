@@ -128,6 +128,8 @@ class CallbackQueryCommand:
             rres2 = re.fullmatch(r'folder/[0-9]+/((change_title|change_parent|delete)/(1/|)|)', self.cdata)
             rres3 = re.fullmatch(r'(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
 
+            res = []
+
             if rres3 or rres1:
                 res = await self.db.fetch("""
                     SELECT * FROM message_table
@@ -147,11 +149,11 @@ class CallbackQueryCommand:
                         AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
                 """, self.db_user['id'])
 
-            await self.db.execute("""
-                DELETE FROM message_table
-                WHERE user_pid = $1
-                    AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
-            """, self.db_user['id'])
+            for i in res:
+                await self.db.execute("""
+                    DELETE FROM messate_table
+                    WHERE id = $1;
+                """, i['id'])
 
             if res:
                 msg_ids = [i['message_id'] for i in res]
