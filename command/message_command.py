@@ -549,7 +549,7 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 SELECT currency_table.*
                                 FROM currency_table
                                 JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                                WHERE type = 'chat' AND chat_table.chat_id = $1
+                                WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                                 ORDER BY currency_table.title ASC; 
                             """, self.chat.id)
                         if res:

@@ -157,7 +157,10 @@ class CallbackQueryCommand:
 
             if res:
                 msg_ids = [i['message_id'] for i in res]
-                await self.bot.bot.delete_messages(self.chat.id, msg_ids)
+                try:
+                    await self.bot.bot.delete_messages(self.chat.id, msg_ids)
+                except:
+                    pass
 
 
     @abstractmethod

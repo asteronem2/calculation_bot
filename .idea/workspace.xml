@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.84 final unstable version">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,22 +104,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00030" summary="0.9.47 unstable version&#10;1. Изменено взаимодействие с заметками ещё раз&#10;2. Корректная работа поиска">
-      <option name="closed" value="true" />
-      <created>1725880956512</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1725880956512</updated>
-    </task>
-    <task id="LOCAL-00031" summary="0.9.48 unstable version&#10;1. После создания заметки/категории отображается корректное меню&#10;2. Изменена история">
-      <option name="closed" value="true" />
-      <created>1726213972390</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1726213972390</updated>
     </task>
     <task id="LOCAL-00032" summary="0.9.49 unstable version&#10;1. Кнопка назад работает корректно в папке заметок">
       <option name="closed" value="true" />
@@ -496,7 +481,23 @@
       <option name="project" value="LOCAL" />
       <updated>1730278800233</updated>
     </task>
-    <option name="localTasksCounter" value="79" />
+    <task id="LOCAL-00079" summary="0.9.83 final unstable version">
+      <option name="closed" value="true" />
+      <created>1730369080852</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1730369080852</updated>
+    </task>
+    <task id="LOCAL-00080" summary="0.9.84 final unstable version">
+      <option name="closed" value="true" />
+      <created>1730388694367</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1730388694367</updated>
+    </task>
+    <option name="localTasksCounter" value="81" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -526,8 +527,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.63 unstable version&#10;1. Очень много всего" />
-    <MESSAGE value="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН" />
     <MESSAGE value="0.9.65 unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.66 unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.67 unstable version&#10;1. Кнопка &quot;в меню&quot;" />
@@ -551,6 +550,8 @@
     <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад&#10;3. Корректное изменение калькуляции реакцией (работает с калькуляцией под фото)" />
     <MESSAGE value="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log" />
     <MESSAGE value="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок" />
+    <MESSAGE value="0.9.83 final unstable version" />
+    <MESSAGE value="0.9.84 final unstable version" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.84 final unstable version" />
   </component>
 </project>
