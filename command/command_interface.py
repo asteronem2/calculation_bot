@@ -122,45 +122,46 @@ class CallbackQueryCommand:
     async def async_init(self):
         await self._get_addition_from_db()
 
-        rres = re.fullmatch(r'(folder|info)/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None|admin/tag(s|)/([^/]+/|)', self.cdata)
-        if not rres:
-            rres1 = re.fullmatch(r'(folder/[0-9]+/|menu/)', self.cdata)
-            rres2 = re.fullmatch(r'folder/[0-9]+/((change_title|change_parent|delete)/(1/|)|)', self.cdata)
-            rres3 = re.fullmatch(r'(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
+        if self.chat.type == 'private':
+            rres = re.fullmatch(r'(folder|info)/[0-9]+/(settings|(show|hide)_hidden|top_message)/|None|admin/tag(s|)/([^/]+/|)', self.cdata)
+            if not rres:
+                rres1 = re.fullmatch(r'(folder/[0-9]+/|menu/)', self.cdata)
+                rres2 = re.fullmatch(r'folder/[0-9]+/((change_title|change_parent|delete)/(1/|)|)', self.cdata)
+                rres3 = re.fullmatch(r'(menu/|folder/[0-9]+/(create_folder|create_note)/)', self.cdata)
 
-            res = []
+                res = []
 
-            if rres3 or rres1:
-                res = await self.db.fetch("""
-                    SELECT * FROM message_table
-                    WHERE user_pid = $1
-                        AND type in ('note', 'settings_folder', 'hidden_note');
-                """, self.db_user['id'])
-            elif rres2:
-                res = await self.db.fetch("""
-                    SELECT * FROM message_table
-                    WHERE user_pid = $1
-                        AND type in ('note', 'hidden_note', 'menu_folder');
-                """, self.db_user['id'])
-            else:
-                res = await self.db.fetch("""
-                    SELECT * FROM message_table
-                    WHERE user_pid = $1
-                        AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
-                """, self.db_user['id'])
+                if rres3 or rres1:
+                    res = await self.db.fetch("""
+                        SELECT * FROM message_table
+                        WHERE user_pid = $1
+                            AND type in ('note', 'settings_folder', 'hidden_note');
+                    """, self.db_user['id'])
+                elif rres2:
+                    res = await self.db.fetch("""
+                        SELECT * FROM message_table
+                        WHERE user_pid = $1
+                            AND type in ('note', 'hidden_note', 'menu_folder');
+                    """, self.db_user['id'])
+                else:
+                    res = await self.db.fetch("""
+                        SELECT * FROM message_table
+                        WHERE user_pid = $1
+                            AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
+                    """, self.db_user['id'])
 
-            for i in res:
-                await self.db.execute("""
-                    DELETE FROM message_table
-                    WHERE id = $1;
-                """, i['id'])
+                for i in res:
+                    await self.db.execute("""
+                        DELETE FROM message_table
+                        WHERE id = $1;
+                    """, i['id'])
 
-            if res:
-                msg_ids = [i['message_id'] for i in res]
-                try:
-                    await self.bot.bot.delete_messages(self.chat.id, msg_ids)
-                except:
-                    pass
+                if res:
+                    msg_ids = [i['message_id'] for i in res]
+                    try:
+                        await self.bot.bot.delete_messages(self.chat.id, msg_ids)
+                    except:
+                        pass
 
 
     @abstractmethod
