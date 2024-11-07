@@ -561,7 +561,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
         base_string = base_string[:search.start()] + w_expr + base_string[search.end():]
 
 
-    base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
+    base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9)])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
     base_string = base_string.replace(' * 0', '*0')
 
     return base_string
