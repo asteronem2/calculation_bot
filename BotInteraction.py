@@ -128,8 +128,8 @@ class BotInter:
 
                     return sent_message
                 except aiogram.exceptions.TelegramNetworkError:
-                    asyncio.sleep(2)
-                    await self.send_text(message_obj)
+                    asyncio.sleep(3)
+                    return await self.send_text(message_obj)
                 except aiogram.exceptions.TelegramRetryAfter:
                     await asyncio.sleep(3)
                 except Exception as err:
