@@ -82,7 +82,6 @@ class BotInter:
                             disable_notification=self.disable_notifications,
                             reply_to_message_id=message_obj.reply_to_message_id
                         )
-
                     else:
                         sent_message = await self.bot.send_message(
                             chat_id=message_obj.chat_id,
@@ -128,7 +127,9 @@ class BotInter:
                             ))
 
                     return sent_message
-
+                except aiogram.exceptions.TelegramNetworkError:
+                    asyncio.sleep(2)
+                    await self.send_text(message_obj)
                 except aiogram.exceptions.TelegramRetryAfter:
                     await asyncio.sleep(3)
                 except Exception as err:
@@ -155,6 +156,9 @@ class BotInter:
                 parse_mode=self._parse_mode,
                 disable_web_page_preview=self.disable_web_page_preview
             )
+        except aiogram.exceptions.TelegramNetworkError:
+            asyncio.sleep(2)
+            await self.edit_text(message_obj)
         except aiogram.exceptions.TelegramBadRequest as err:
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
         except Exception as err:
