@@ -198,7 +198,7 @@ allowed_updates = ['message', 'message_reaction', 'inline_query', 'callback_quer
 async def check_logs():
     while True:
         try:
-            await asyncio.sleep(1*60*60)
+            await asyncio.sleep(4*60*60) # *60*60 - hours
             if os.path.exists('logs.log'):
                 file_size = os.path.getsize('logs.log')
                 file_size_mb = file_size / 1024 / 1024
