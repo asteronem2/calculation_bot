@@ -439,7 +439,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                     'type': 'story_item',
                     'expr': expr,
                     'message_id': i['message_id'],
-                    'before_value': i['before_value'],
+                    'before_value': i.get('before_value'),
                     'after_value': i['after_value'],
                     'expr_type': i['expr_type'],
                     'id': i['id'],
@@ -531,7 +531,19 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                 else:
                     base_string += link_txt(item['expr'], item['message_id'])
 
-    base_string = f'<b>{float_to_str(story_items[0].get("before_value") or 0, rounding)}</b>-->' + base_string + f'=<b>{float_to_str(story_items[-1]["after_value"], rounding)}</b>'
+    first_before = None
+    for i in story_items:
+        if i['type'] == 'story_item':
+            first_before = i['before_value'] or 0
+            break
+
+    last_after = None
+    for i in reversed(story_items):
+        if i['type'] == 'story_item':
+            last_after = i['after_value']
+            break
+
+    base_string = f'<b>{float_to_str(first_before, rounding)}</b>-->' + base_string + f'=<b>{float_to_str(last_after, rounding)}</b>'
 
     base_string = re.sub(r'\+(<a href="[^<]+?">)-', lambda x: f'-{x.group(1)}', base_string)
     base_string = re.sub(r'\+(<a href="[^<]+?">)\+', lambda x: f'+{x.group(1)}', base_string)

@@ -225,7 +225,7 @@ class EditCurrencyCommand(MessageCommand):
                         SELECT currency_table.title 
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                         ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
@@ -249,7 +249,8 @@ class EditCurrencyCommand(MessageCommand):
             SELECT currency_table.* FROM currency_table
             JOIN chat_table ON currency_table.chat_pid = chat_table.id
             WHERE currency_table.title = $1
-            AND chat_table.chat_id = $2;
+            AND chat_table.chat_id = $2
+            AND chat_table.type = 'chat';
         """, kwargs['title'], self.chat.id)
 
         markup = markup_generate(
@@ -369,7 +370,7 @@ class BalanceListCommand(MessageCommand):
             SELECT currency_table.* 
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1
+            WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
             ORDER BY currency_table.title ASC;
         """, self.chat.id)
         if res:
@@ -416,7 +417,7 @@ class CurrencyCommand(MessageCommand):
                     SELECT currency_table.*
                     FROM currency_table
                     JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                    WHERE type = 'chat' AND chat_table.chat_id = $1
+                    WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                     ORDER BY currency_table.title ASC; 
                 """, self.chat.id)
                 for i in res:
@@ -469,7 +470,7 @@ class CurrencyCalculationCommand(MessageCommand):
                             SELECT currency_table.*
                             FROM currency_table
                             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                            WHERE type = 'chat' AND chat_table.chat_id = $1
+                            WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                             ORDER BY currency_table.title ASC; 
                         """, self.chat.id)
 
@@ -642,7 +643,7 @@ class CurrencyStoryCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                         ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
@@ -727,7 +728,7 @@ class StoryCommand(CurrencyStoryCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1
+            WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
             ORDER BY currency_table.title ASC; 
         """, chat_id)
 
@@ -788,7 +789,7 @@ class CurrencyVolumeCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                         ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
@@ -869,7 +870,7 @@ class VolumeCommand(CurrencyVolumeCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1
+            WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
             ORDER BY currency_table.title ASC; 
         """, chat_id)
 
@@ -929,7 +930,7 @@ class CurrencyDetailCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                         ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
@@ -1005,7 +1006,7 @@ class DetailCommand(CurrencyDetailCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1
+            WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
             ORDER BY currency_table.title ASC; 
         """, self.chat.id)
 
@@ -1160,7 +1161,7 @@ class CurrencyNullCommand(MessageCommand):
                         SELECT currency_table.*
                         FROM currency_table
                         JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                        WHERE type = 'chat' AND chat_table.chat_id = $1
+                        WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
                         ORDER BY currency_table.title ASC; 
                     """, self.chat.id)
 
@@ -1234,7 +1235,7 @@ class NullCommand(CurrencyNullCommand):
             SELECT currency_table.*
             FROM currency_table
             JOIN chat_table ON chat_table.id = currency_table.chat_pid
-            WHERE type = 'chat' AND chat_table.chat_id = $1
+            WHERE chat_table.type = 'chat' AND chat_table.chat_id = $1
             ORDER BY currency_table.title ASC; 
         """, self.chat.id)
 
