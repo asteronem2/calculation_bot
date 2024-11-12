@@ -157,7 +157,7 @@ class CreateCurrencyCommand(MessageCommand):
                     rres = re.fullmatch(r'([^ ]+) *= *([0-9.,-]+) *([^ ]*)', self.text)
                     if rres:
                         title, value, postfix = rres.groups()
-                        rres2 = re.search(r'[а-яa-z]', title)
+                        rres2 = re.search(r'[а-яА-Яa-zA-Z]', title)
                         if rres2:
                             await self.process(title=title, value=value, postfix=postfix)
                             return True

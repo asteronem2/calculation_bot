@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.90 final unstable version" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.91 final unstable version">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,14 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00038" summary="0.9.54(2) unstable version&#10;1. Фикс &quot;история&quot;">
-      <option name="closed" value="true" />
-      <created>1727204010320</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1727204010320</updated>
     </task>
     <task id="LOCAL-00039" summary="0.9.55 unstable version&#10;1. Логирование">
       <option name="closed" value="true" />
@@ -494,7 +488,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730975581739</updated>
     </task>
-    <option name="localTasksCounter" value="87" />
+    <task id="LOCAL-00087" summary="0.9.91 final unstable version">
+      <option name="closed" value="true" />
+      <created>1730975964942</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1730975964942</updated>
+    </task>
+    <option name="localTasksCounter" value="88" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -524,7 +526,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом" />
     <MESSAGE value="0.9.70 unstable version&#10;1. Лог ошибки 403" />
     <MESSAGE value="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно" />
     <MESSAGE value="0.9.71 unstable version&#10;1. Много мелочей" />
@@ -549,6 +550,7 @@
     <MESSAGE value="0.9.88 final unstable version" />
     <MESSAGE value="0.9.89 final unstable version" />
     <MESSAGE value="0.9.90 final unstable version" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.90 final unstable version" />
+    <MESSAGE value="0.9.91 final unstable version" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.91 final unstable version" />
   </component>
 </project>
