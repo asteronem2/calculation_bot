@@ -420,7 +420,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                 elif i['expr_type'] == 'null':
                     symbol = ''
                 story_items.append({'type': 'symbol', 'symbol': symbol, 'status': True})
-                expr = (i['expression'] or '').replace(' ', '')
+                expr = (i['expression'] or '').replace(' ', '').replace(',', '.')
 
                 # Обработка выражений из-под подписи с фото, которые с минусом и скобкой
                 ex_r = re.fullmatch(r'-\(.+\)', expr)
