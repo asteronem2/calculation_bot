@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.91 final unstable version">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.93 final unstable version&#10;1. Update story_generate">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,22 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00039" summary="0.9.55 unstable version&#10;1. Логирование">
-      <option name="closed" value="true" />
-      <created>1727252814648</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1727252814648</updated>
-    </task>
-    <task id="LOCAL-00040" summary="0.9.55 unstable version&#10;1. Корректное отображение истории и детализации">
-      <option name="closed" value="true" />
-      <created>1727264090213</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1727264090213</updated>
     </task>
     <task id="LOCAL-00041" summary="0.9.56 unstable version&#10;1. Обновлено подключение к бд&#10;2. Обновлены логи">
       <option name="closed" value="true" />
@@ -496,7 +480,23 @@
       <option name="project" value="LOCAL" />
       <updated>1730975964942</updated>
     </task>
-    <option name="localTasksCounter" value="88" />
+    <task id="LOCAL-00088" summary="0.9.92 final unstable version&#10;1. Поддержка всех регистров при создании валюты">
+      <option name="closed" value="true" />
+      <created>1731407260690</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1731407260691</updated>
+    </task>
+    <task id="LOCAL-00089" summary="0.9.93 final unstable version&#10;1. Update story_generate">
+      <option name="closed" value="true" />
+      <created>1731962426458</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1731962426459</updated>
+    </task>
+    <option name="localTasksCounter" value="90" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -526,8 +526,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.70 unstable version&#10;1. Лог ошибки 403" />
-    <MESSAGE value="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно" />
     <MESSAGE value="0.9.71 unstable version&#10;1. Много мелочей" />
     <MESSAGE value="0.9.72 unstable version&#10;1. Много мелочей" />
     <MESSAGE value="0.9.73 unstable version&#10;1. Корректный выход из балансов" />
@@ -551,6 +549,8 @@
     <MESSAGE value="0.9.89 final unstable version" />
     <MESSAGE value="0.9.90 final unstable version" />
     <MESSAGE value="0.9.91 final unstable version" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.91 final unstable version" />
+    <MESSAGE value="0.9.92 final unstable version&#10;1. Поддержка всех регистров при создании валюты" />
+    <MESSAGE value="0.9.93 final unstable version&#10;1. Update story_generate" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.93 final unstable version&#10;1. Update story_generate" />
   </component>
 </project>

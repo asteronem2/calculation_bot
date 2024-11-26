@@ -201,7 +201,7 @@ async def check_logs():
             await asyncio.sleep(4*60*60) # *60*60 - hours
             if os.path.exists('logs.log'):
                 file_size = os.path.getsize('logs.log')
-                file_size_mb = file_size / 1024 / 1024
+                file_size_mb = file_size / 1024 / 1024 # / 1024 / 1024 - megabytes
                 if file_size_mb > 20:
                     print("SEND LOGS")
                     await bot.send_document(
@@ -210,11 +210,11 @@ async def check_logs():
                         caption=datetime.today().strftime('%Y.%m.%d %H:%M:%S'),
                         disable_notification=True
                     )
-                    with open('logs.log', 'w') as w:
-                        w.write('')
+                    os.close(os.open("logs.log", os.O_WRONLY | os.O_TRUNC))
+
             else:
-                with open('logs.log', 'w') as w:
-                    w.write('')
+                os.close(os.open("logs.log", os.O_WRONLY | os.O_TRUNC))
+
         except:
             await asyncio.sleep(1*60*60)
 
