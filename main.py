@@ -204,12 +204,15 @@ async def check_logs():
                 file_size_mb = file_size / 1024 / 1024 # / 1024 / 1024 - megabytes
                 if file_size_mb > 20:
                     print("SEND LOGS")
-                    await bot.send_document(
-                        chat_id=DED.DEBUG_CHAT_ID,
-                        document=FSInputFile('logs.log'),
-                        caption=datetime.today().strftime('%Y.%m.%d %H:%M:%S'),
-                        disable_notification=True
-                    )
+                    try:
+                        await bot.send_document(
+                            chat_id=DED.DEBUG_CHAT_ID,
+                            document=FSInputFile('logs.log'),
+                            caption=datetime.today().strftime('%Y.%m.%d %H:%M:%S'),
+                            disable_notification=True
+                        )
+                    except:
+                        pass
                     os.close(os.open("logs.log", os.O_WRONLY | os.O_TRUNC))
 
             else:
