@@ -3653,9 +3653,11 @@ class AdminDistributionPinUnpin(CallbackQueryCommand):
             VALUES ($1, $2, $3, $4)
             ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
         """, None, self.db_user['id'], self.sent_message_id, self.cdata)
-
-        message_obj = await self.generate_edit_message(**kwargs)
-        await self.bot.edit_text(message_obj)
+        try:
+            message_obj = await self.generate_edit_message(**kwargs)
+            await self.bot.edit_text(message_obj)
+        except:
+            pass
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
