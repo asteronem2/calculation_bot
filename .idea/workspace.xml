@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.96 final unstable version&#10;1. Bug fixing">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.97 final unstable version&#10;1. Bug fixing" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -103,14 +101,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00044" summary="0.9.58 unstable version&#10;1. Разное+">
-      <option name="closed" value="true" />
-      <created>1727677294604</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1727677294604</updated>
     </task>
     <task id="LOCAL-00045" summary="0.9.59 unstable version&#10;1. Корректна калькуляция под фото">
       <option name="closed" value="true" />
@@ -496,7 +486,15 @@
       <option name="project" value="LOCAL" />
       <updated>1735288231934</updated>
     </task>
-    <option name="localTasksCounter" value="93" />
+    <task id="LOCAL-00093" summary="0.9.97 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1735297008391</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1735297008392</updated>
+    </task>
+    <option name="localTasksCounter" value="94" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -526,7 +524,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.73 unstable version&#10;1. Поиск&#10;2. Отмена по реакции&#10;3. Меню массовой рассылки" />
     <MESSAGE value="0.9.74 final unstable version&#10;1. Много всего" />
     <MESSAGE value="0.9.75 final unstable version&#10;1. Много всего" />
     <MESSAGE value="0.9.76 final unstable version&#10;1. Условие для создания валюты - наличие русской или английской буквы в title" />
@@ -551,6 +548,7 @@
     <MESSAGE value="0.9.94 final unstable version&#10;1. Update send logs" />
     <MESSAGE value="0.9.95 final unstable version&#10;1. Update send logs" />
     <MESSAGE value="0.9.96 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.96 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.9.97 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.97 final unstable version&#10;1. Bug fixing" />
   </component>
 </project>

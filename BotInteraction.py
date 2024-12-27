@@ -93,38 +93,38 @@ class BotInter:
                             disable_web_page_preview=self.disable_web_page_preview,
                             reply_to_message_id=message_obj.reply_to_message_id
                         )
-                        rres = re.sub(r'<.+?>|/n', '', sent_message.text)
-                        await log(f'SEND BOT: {rres}', 'info')
-                        print(f'\033[1;36mSEND BOT: \033[1;32m{rres}\033[0;0m')
+                    rres = re.sub(r'<.+?>|/n', '', sent_message.text or sent_message.caption or 'Without caption')
+                    await log(f'SEND BOT: {rres}', 'info')
+                    print(f'\033[1;36mSEND BOT: \033[1;32m{rres}\033[0;0m')
 
-                        if message_obj.pin is True:
-                            await self.bot.pin_chat_message(
+                    if message_obj.pin is True:
+                        await self.bot.pin_chat_message(
+                            chat_id=message_obj.chat_id,
+                            message_id=sent_message.message_id,
+                            disable_notification=True
+                        )
+
+                        try:
+                            await self.bot.delete_message(
                                 chat_id=message_obj.chat_id,
-                                message_id=sent_message.message_id,
-                                disable_notification=True
+                                message_id=sent_message.message_id + 1,
                             )
+                        except:
+                            pass
 
-                            try:
-                                await self.bot.delete_message(
-                                    chat_id=message_obj.chat_id,
-                                    message_id=sent_message.message_id + 1,
-                                )
-                            except:
-                                pass
+                    if message_obj.destroy_timeout != 0:
+                        asyncio.create_task(self._destroy_message(
+                            message=sent_message,
+                            destroy_timeout=message_obj.destroy_timeout
+                        ))
 
-                        if message_obj.destroy_timeout != 0:
-                            asyncio.create_task(self._destroy_message(
-                                message=sent_message,
-                                destroy_timeout=message_obj.destroy_timeout
-                            ))
-
-                        if message_obj.button_destroy != 0:
-                            asyncio.create_task(self._destroy_buttons(
-                                chat_id=sent_message.chat.id,
-                                message_id=sent_message.message_id,
-                                destroy_timeout=message_obj.button_destroy,
-                                message_obj=message_obj
-                            ))
+                    if message_obj.button_destroy != 0:
+                        asyncio.create_task(self._destroy_buttons(
+                            chat_id=sent_message.chat.id,
+                            message_id=sent_message.message_id,
+                            destroy_timeout=message_obj.button_destroy,
+                            message_obj=message_obj
+                        ))
 
                     return sent_message
                 except aiogram.exceptions.TelegramNetworkError:
@@ -233,15 +233,16 @@ class BotInter:
                 print(err_str)
                 await log(err_str)
 
-    async def _destroy_buttons(self, chat_id: int, message_id: int, destroy_timeout: int, message_obj: Message):
+    async def _destroy_buttons(self, chat_id: int, message_id: int, destroy_timeout: int, message_obj: TextMessage):
         await asyncio.sleep(destroy_timeout)
         try:
-            await self.bot.edit_message_text(
-                text=message_obj.text[:4000],
-                chat_id=chat_id,
-                message_id=message_id,
-                parse_mode=self._parse_mode
-            )
+            if not message_obj.photo:
+                await self.bot.edit_message_text(
+                    text=message_obj.text[:4000],
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    parse_mode=self._parse_mode
+                )
         except Exception as err:
             if err.__str__() not in [
                 'Telegram server says - Bad Request: message to edit not found',
