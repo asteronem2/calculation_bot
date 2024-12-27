@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.94 final unstable version&#10;1. Update send logs" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.9.95 final unstable version&#10;1. Update send logs">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,14 +108,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00042" summary="0.9.57 unstable version&#10;1. Исправлена ошибка при реакции">
-      <option name="closed" value="true" />
-      <created>1727336665714</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1727336665714</updated>
     </task>
     <task id="LOCAL-00043" summary="0.9.58 unstable version&#10;1. Разное">
       <option name="closed" value="true" />
@@ -494,7 +493,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732607347906</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary="0.9.95 final unstable version&#10;1. Update send logs">
+      <option name="closed" value="true" />
+      <created>1732685198055</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1732685198055</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -524,7 +531,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.72 unstable version&#10;1. Много мелочей" />
     <MESSAGE value="0.9.73 unstable version&#10;1. Корректный выход из балансов" />
     <MESSAGE value="0.9.73 unstable version&#10;1. Поиск&#10;2. Отмена по реакции&#10;3. Меню массовой рассылки" />
     <MESSAGE value="0.9.74 final unstable version&#10;1. Много всего" />
@@ -549,6 +555,7 @@
     <MESSAGE value="0.9.92 final unstable version&#10;1. Поддержка всех регистров при создании валюты" />
     <MESSAGE value="0.9.93 final unstable version&#10;1. Update story_generate" />
     <MESSAGE value="0.9.94 final unstable version&#10;1. Update send logs" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.9.94 final unstable version&#10;1. Update send logs" />
+    <MESSAGE value="0.9.95 final unstable version&#10;1. Update send logs" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.9.95 final unstable version&#10;1. Update send logs" />
   </component>
 </project>

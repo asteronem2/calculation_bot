@@ -1231,11 +1231,17 @@ class AdminDistributionPin(NextCallbackMessageCommand):
                 WHERE super = FALSE;
             """)
 
-        text = entities_to_html(self.message.text, self.message.entities)
+        text = entities_to_html(self.message.text, self.message.entities) if self.message.text else\
+            (entities_to_html(self.message.caption, self.message.caption_entities) if self.message.caption else '_')
 
+        photo = self.message.photo
         for i in res:
-            message_obj = TextMessage(chat_id=i['chat_id'], text=text, pin=kwargs['pin'])
-            await self.bot.send_text(message_obj)
+            if photo:
+                message_obj = TextMessage(chat_id=i['chat_id'], text=text, pin=kwargs['pin'], photo=photo[-1].file_id)
+                await self.bot.send_text(message_obj)
+            else:
+                message_obj = TextMessage(chat_id=i['chat_id'], text=text, pin=kwargs['pin'])
+                await self.bot.send_text(message_obj)
 
         message_obj = await self.generate_send_message(stage=1, **kwargs)
         await self.bot.send_text(message_obj)

@@ -566,6 +566,12 @@
             "text": "Удалить",
             "callback_data": "address/delete/$address_id/"
           }
+        ],
+        [
+          {
+            "text": "Закрыть",
+            "callback_data": "close"
+          }
         ]
       ],
       "AddressDeleteCommand": [

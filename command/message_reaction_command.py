@@ -458,8 +458,8 @@ class ChangeCalculation(MessageReactionCommand):
 
         res3 = await self.db.fetch("""
             SELECT * FROM story_table
-            WHERE id > $1;
-        """, kwargs['res']['id'])
+            WHERE id > $1 and currency_pid = $2;
+        """, kwargs['res']['id'], curr['id'])
 
         plus = calculate(expr)
         real_plus = plus - (kwargs['res']['after_value'] - kwargs['res']['before_value'])
@@ -506,6 +506,12 @@ class ChangeCalculation(MessageReactionCommand):
                 ))
             except:
                 continue
+
+        await self.db.execute("""
+            UPDATE currency_table
+            SET value = $1
+            WHERE id = $2;
+        """, latest_curr_value, curr['id'])
 
         res4 = await self.db.fetch("""
             SELECT * FROM message_table

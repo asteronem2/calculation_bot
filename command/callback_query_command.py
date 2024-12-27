@@ -22,7 +22,6 @@ class Close(CallbackQueryCommand):
                 await self.process()
                 return True
 
-
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
             DELETE FROM pressure_button_table

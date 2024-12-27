@@ -26,7 +26,7 @@ class TextMessage(Message):
     destroy_timeout: int = 0
     button_destroy: int = 0
     pin: bool = False
-    photo: int = None
+    photo: str = None
     reply_to_message_id: int = None
 
 
