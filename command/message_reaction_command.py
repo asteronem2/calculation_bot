@@ -458,7 +458,7 @@ class ChangeCalculation(MessageReactionCommand):
 
         res3 = await self.db.fetch("""
             SELECT * FROM story_table
-            WHERE id > $1 and currency_pid = $2;
+            WHERE id > $1 AND currency_pid = $2 AND status = TRUE;
         """, kwargs['res']['id'], curr['id'])
 
         plus = calculate(expr)
