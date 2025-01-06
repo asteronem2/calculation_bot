@@ -145,6 +145,8 @@ def mega_eval(expression: str):
         pure_expression = expression
 
         expression = expression.replace(',', '.').replace(' ', '')
+        expression = expression.replace('\n', '+')
+        expression = expression.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*', '*').replace('+%', '%')
 
         solution_list = []
 
