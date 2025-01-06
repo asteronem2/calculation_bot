@@ -163,7 +163,6 @@ class CallbackQueryCommand:
                     except:
                         pass
 
-
     @abstractmethod
     async def define(self):
         """

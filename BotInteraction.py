@@ -156,11 +156,15 @@ class BotInter:
                 parse_mode=self._parse_mode,
                 disable_web_page_preview=self.disable_web_page_preview
             )
-        except aiogram.exceptions.TelegramNetworkError:
+        except aiogram.exceptions.TelegramNetworkError as err:
+            print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
             asyncio.sleep(2)
             await self.edit_text(message_obj)
         except aiogram.exceptions.TelegramBadRequest as err:
+            err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
+            print(err_str)
+            await log(err_str)
         except Exception as err:
             err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")

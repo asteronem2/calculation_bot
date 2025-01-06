@@ -502,8 +502,6 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
 
         if item['status'] is True:
             if item['type'] == 'symbol':
-                if ind == 0:
-                    continue
                 base_string += item['symbol']
 
             elif item['type'] == 'story_item':
@@ -693,7 +691,14 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
                         lambda x: x.group(1) or f'{eval(x.group(2))}', second_step)
     four_step = str(eval(third_step))
 
-    final_text = '=' + '\n='.join((first_step, second_step, third_step, four_step))
+    if second_step == first_step:
+        second_step = ''
+    if third_step == second_step:
+        third_step = ''
+    if four_step == third_step:
+        four_step = ''
+
+    final_text = '=' + '\n='.join([i for i in (first_step, second_step, third_step, four_step) if i])
 
     final_text = re.sub(r'([0-9,.]+)', lambda x: float_to_str(float(x.group(1)), rounding), final_text)
 

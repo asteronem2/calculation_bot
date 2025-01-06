@@ -14,7 +14,7 @@ from BotInteraction import TextMessage, EditMessage
 from command.inline_query_command import mega_eval
 from main import message_command_cls
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
-    story_generate, entities_to_html
+    story_generate, entities_to_html, volume_generate
 
 
 class StartCommand(MessageCommand):
@@ -689,7 +689,7 @@ class CurrencyStoryCommand(MessageCommand):
         text = Template(self.texts['CurrencyStoryCommand']).substitute(
             title=kwargs['title'].upper(),
             story=story,
-            postfix=kwargs['postfix'] if kwargs['postfix'] else ''
+            postfix=kwargs['postfix'] if kwargs.get('postfix') else ''
         )
 
         return TextMessage(
@@ -811,26 +811,20 @@ class CurrencyVolumeCommand(MessageCommand):
             WHERE currency_pid = $1 AND status = TRUE;
         """, kwargs['curr_id'])
 
-        today_story = ''
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
 
-        today = datetime.datetime.today().strftime('%Y.%m.%d')
+        story = story_generate(res, chat_id=self.chat.id, rounding=res2['rounding'])
+        today_story = re.sub(r'<[^>]+>', '', story)
+        today_story = today_story.split('-->')[1]
+        today_story = today_story.split('=')[0]
 
-        for i in res:
-            story_dt = (i['datetime'] + datetime.timedelta(hours=3)).strftime('%Y.%m.%d')
-            if story_dt == today:
-                today_story += '+' + i['expression']
+        volume = volume_generate(today_story, rounding=res2['rounding'])
 
-        today_story = today_story.replace('++', '+').replace('+(+', '+(')
-
-        solution = mega_eval(today_story)
-
-        if not solution:
-            return await self.generate_error_message(**kwargs)
-
-        volume = solution['solution']
-
-        text = Template(self.texts['CurrencyVolumeCommand']).substitute(
-            title=kwargs['title'].upper(),
+        text = Template(self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
+            title=res2['title'].upper(),
             volume=volume
         )
 

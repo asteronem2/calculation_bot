@@ -1271,8 +1271,13 @@ class CurrVolumeCommand(CallbackQueryCommand):
         pass
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
         text = Template(self.global_texts['error']['NoCurrencyVolumeToday']).substitute(
-            title=kwargs['title'].upper()
+            title=res['title'].upper()
         )
         return TextMessage(
             chat_id=self.chat.id,
@@ -2561,6 +2566,12 @@ class Menu(CallbackQueryCommand):
                 DELETE FROM pressure_button_table
                 WHERE id = $1;
             """, self.pressure_info['id'])
+
+        await self.db.execute("""
+            DELETE FROM message_table
+                WHERE user_pid = $1
+                    AND type in ('note', 'settings_folder', 'hidden_note', 'menu_folder', 'distribution_last');
+        """, self.db_user['id'])
 
         message_obj = await self.generate_edit_message()
         await self.bot.edit_text(message_obj)

@@ -2090,11 +2090,15 @@ class AdminRevise(NextCallbackMessageCommand):
             WHERE id = $1;
         """, self.pressure_info['id'])
 
+        revise_expr = self.text_low
+        revise_expr = revise_expr.replace('\n', '+')
+        revise_expr = revise_expr.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*', '*').replace('+%', '%')
+
         await self.db.execute("""
             UPDATE user_table
             SET revise_expr = $1
             WHERE id = $2;
-        """, self.text_low, self.db_user['id'])
+        """, revise_expr, self.db_user['id'])
 
         message_obj = await self.generate_send_message()
         await self.bot.send_text(message_obj)
@@ -2229,8 +2233,13 @@ class AdminReviseSecond(NextCallbackMessageCommand):
 
             res2 = '❌'
 
-            expr_1 = self.db_user['revise_expr'].replace('\n', '').replace(' ', '').replace(',', '.')
-            expr_2 = self.text_low.replace('\n', '').replace(' ', '').replace(',', '.')
+            expr_1 = self.db_user['revise_expr'].replace(' ', '').replace(',', '.')
+            expr_1 = expr_1.replace('\n', '+')
+            expr_1 = expr_1.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*','*').replace('+%', '%')
+            expr_2 = self.text_low.replace(' ', '').replace(',', '.')
+            expr_2 = expr_2.replace('\n', '+')
+            expr_2 = expr_2.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*','*').replace('+%', '%')
+
 
             try:
                 res1 = float_to_str(eval(expr_1))
