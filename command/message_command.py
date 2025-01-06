@@ -154,7 +154,7 @@ class CreateCurrencyCommand(MessageCommand):
         if self.db_chat and self.db_chat['locked'] is False:
             if self.access_level == 'admin':
                 if not self.text.count('\n'):
-                    rres = re.fullmatch(r'([^ ]+) *= *([0-9.,-]+) *([^ ]*)', self.text)
+                    rres = re.fullmatch(r'([^ ]+) = ([0-9.,-]+) ?([^ ]*)', self.text)
                     if rres:
                         title, value, postfix = rres.groups()
                         rres2 = re.search(r'[а-яА-Яa-zA-Z]', title)

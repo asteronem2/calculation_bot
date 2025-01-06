@@ -227,7 +227,8 @@
     },
     "reaction_command": {
       "AdminChangeEmoji": "<b>Эмодзи $before заменено на $after</b>",
-      "ChangeCalculation": "<b>Калькуляция <u>$before_expr</u> заменена на <u>$after_expr</u></b>"
+      "ChangeCalculation": "<b>Калькуляция <u>$before_expr</u> заменена на <u>$after_expr</u></b>",
+      "ChangeCalculationLaterNull": "<b>В изменении нет смысла, далее идёт обнуление</b>"
     },
     "inline_command": {
       "1": "1"

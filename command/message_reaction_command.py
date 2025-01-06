@@ -461,6 +461,15 @@ class ChangeCalculation(MessageReactionCommand):
             WHERE id > $1 AND currency_pid = $2 AND status = TRUE;
         """, kwargs['res']['id'], curr['id'])
 
+        for i in res3:
+            if i['expr_type'] == 'null':
+                await self.bot.send_text(TextMessage(
+                    chat_id=self.chat.id,
+                    text=Template(self.texts['ChangeCalculationLaterNull']).substitute(),
+                    destroy_timeout=15
+                ))
+                return
+
         plus = calculate(expr)
         real_plus = plus - (kwargs['res']['after_value'] - kwargs['res']['before_value'])
 

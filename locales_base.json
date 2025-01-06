@@ -38,7 +38,7 @@
       "EditCurrencyCommand": "Меню валюты <b>$title</b>",
       "EditChatThemeCommand": "<b>Меню настройки чата/темы</b>",
       "BalanceListCommand": "<b>💰 Балансы всех валют чата:</b>\n<blockquote expandable>$curr_info_list</blockquote>",
-      "CurrencyBalance": "💰 Баланс <u>$title:</u> <b>$value $postfix</b>",
+      "CurrencyBalance": "💰 Баланс <u>$title</u>: <b>$value $postfix</b>",
       "CurrencyCommand": "CurrencyBalance",
       "CurrencyCalculationCommand": "CurrencyBalance",
       "CalculationCommand": "<b>Выберите валюту, с которой желаете произвести калькуляцию</b>\n<i>$expression</i>",
@@ -227,7 +227,8 @@
     },
     "reaction_command": {
       "AdminChangeEmoji": "<b>Эмодзи $before заменено на $after</b>",
-      "ChangeCalculation": "<b>Калькуляция <u>$before_expr</u> заменена на <u>$after_expr</u></b>"
+      "ChangeCalculation": "<b>Калькуляция <u>$before_expr</u> заменена на <u>$after_expr</u></b>",
+      "ChangeCalculationLaterNull": "<b>В изменении нет смысла, далее идёт обнуление</b>"
     },
     "inline_command": {
       "1": "1"
@@ -565,6 +566,12 @@
           {
             "text": "Удалить",
             "callback_data": "address/delete/$address_id/"
+          }
+        ],
+        [
+          {
+            "text": "Закрыть",
+            "callback_data": "close"
           }
         ]
       ],
@@ -1693,11 +1700,11 @@
       ]
     },
     "addition": {
-      "curr_info_list": "Баланс <u>$title:</u> <b>$value $postfix</b>\n",
+      "curr_info_list": "Баланс <u>$title</u>: <b>$value $postfix</b>\n",
       "address_list": "<blockquote expandable><a href='https://tronscan.org/#/address/$address'>$address</a> <i>min: $min_value</i></blockquote>\n",
       "new_transaction": "➕Новый трансфер на адрес:\n<b>$address</b>\nСумма: <a href='$transaction_link'>$value</a>, Время: $datetime",
       "chat_balance": "<blockquote expandable>💰 Баланс чата <a href='$link'><b>$title</b></a> ($code_name):\n$curr_info_list</blockquote>",
-      "little_balance": "<u>$title:</u> <b>$value $postfix</b>\n"
+      "little_balance": "<u>$title</u>: <b>$value $postfix</b>\n"
     },
     "cancel": [
       [
