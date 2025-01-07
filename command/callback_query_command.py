@@ -3174,6 +3174,11 @@ class AdminChatDelete(CallbackQueryCommand):
             """, kwargs['chat_pk'])
 
             await self.db.execute("""
+                DELETE FROM message_table
+                WHERE chat_pid = $1;
+            """, kwargs['chat_pk'])
+
+            await self.db.execute("""
                 DELETE FROM pressure_button_table
                 WHERE chat_pid = $1;
             """, kwargs['chat_pk'])

@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.0 final unstable version&#10;1. Bug fixing" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.5 final unstable version&#10;1. Bug fixing">
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/command_interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/command_interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,46 +105,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00048" summary="0.9.62 unstable version&#10;1. Бот реагирует на &quot;Адрес&quot;, а не только на &quot;адрес&quot;">
-      <option name="closed" value="true" />
-      <created>1727758559081</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1727758559081</updated>
-    </task>
-    <task id="LOCAL-00049" summary="0.9.63 unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки">
-      <option name="closed" value="true" />
-      <created>1727765916458</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1727765916458</updated>
-    </task>
-    <task id="LOCAL-00050" summary="0.9.63(2) unstable version&#10;1. Вывод информации о парсинге в логи в случае 403 ошибки">
-      <option name="closed" value="true" />
-      <created>1727767634775</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1727767634776</updated>
-    </task>
-    <task id="LOCAL-00051" summary="0.9.63 unstable version&#10;1. Очень много всего">
-      <option name="closed" value="true" />
-      <created>1727941270474</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1727941270474</updated>
-    </task>
-    <task id="LOCAL-00052" summary="0.9.64 unstable version&#10;1. Добавлен АПИ ключ для запросов к ТРОНСКАН">
-      <option name="closed" value="true" />
-      <created>1727944634201</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1727944634201</updated>
     </task>
     <task id="LOCAL-00053" summary="0.9.65 unstable version&#10;1. Bug fixing">
       <option name="closed" value="true" />
@@ -494,7 +458,47 @@
       <option name="project" value="LOCAL" />
       <updated>1736147799564</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="0.10.1 final unstable version&#10;1. Update inline calculation">
+      <option name="closed" value="true" />
+      <created>1736164739994</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1736164739994</updated>
+    </task>
+    <task id="LOCAL-00098" summary="0.10.2 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736186676739</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1736186676739</updated>
+    </task>
+    <task id="LOCAL-00099" summary="0.10.3 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736244648299</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1736244648299</updated>
+    </task>
+    <task id="LOCAL-00100" summary="0.10.4 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736267455761</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1736267455761</updated>
+    </task>
+    <task id="LOCAL-00101" summary="0.10.5 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736268075798</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1736268075798</updated>
+    </task>
+    <option name="localTasksCounter" value="102" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -506,6 +510,11 @@
         <entry key="MAIN">
           <value>
             <State>
+              <option name="COLUMN_ID_WIDTH">
+                <map>
+                  <entry key="Table.Default.Date.ColumnIdWidth" value="125" />
+                </map>
+              </option>
               <option name="FILTERS">
                 <map>
                   <entry key="branch">
@@ -524,11 +533,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.77 final unstable version&#10;1. История инвертирует знаки в скобке, если первый знак &quot;-&quot;" />
-    <MESSAGE value="0.9.78 final unstable version&#10;1. Выгрузка таблицы inline запросов пользователей" />
-    <MESSAGE value="0.9.79 final unstable version&#10;1. Корректная работа inline калькуляции" />
-    <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад" />
-    <MESSAGE value="0.9.80 final unstable version&#10;1. Корректная работа тегов (не отображаются employee, employee_parsing)&#10;2. Корректное удаление заметок после перехода назад&#10;3. Корректное изменение калькуляции реакцией (работает с калькуляцией под фото)" />
     <MESSAGE value="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log" />
     <MESSAGE value="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок" />
     <MESSAGE value="0.9.83 final unstable version" />
@@ -549,6 +553,22 @@
     <MESSAGE value="0.9.98 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.99 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.0 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.0 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.1 final unstable version&#10;1. Update inline calculation" />
+    <MESSAGE value="0.10.2 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.3 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.4 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.5 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.5 final unstable version&#10;1. Bug fixing" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/command/inline_query_command.py</url>
+          <line>234</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

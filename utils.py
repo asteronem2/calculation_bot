@@ -556,11 +556,12 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
         w_expr = re.sub(r'</a>([+-])<a', lambda x: f'</a>{"-" if x.group(1) == "+" else "+"}<a', w_expr)
         base_string = base_string[:search.start()] + w_expr + base_string[search.end():]
 
-
-    base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{float_to_str(float(x.group(1)), rounding)}{x.group()[-1]}", base_string)
-    base_string = f'<b>{float_to_str(first_before, rounding)}</b>-->' + base_string + f'=<b>{float_to_str(last_after, rounding)}</b>'
     base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9)])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
+    base_string += ' '
+    base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{float_to_str(float(x.group(1)), rounding)}{x.group()[-1]}", base_string)
     base_string = base_string.replace(' * 0', '*0')
+    base_string = f'<b>{float_to_str(first_before, rounding)}</b> -->' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
+    base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9)])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
 
     return base_string
 
@@ -643,9 +644,29 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
 
 def volume_generate(expression: str, rounding: int = 2) -> str:
     expr = expression.replace(' ', '').replace(',', '.')
-    split = re.findall(r'[0-9,.]+|[*+/()-]', expr)
-
     first_step = expr
+    print(expr)
+
+    while True:
+        search = re.search(r'(\([^(]*\([^(]*)(\(.*?\))([^)]*\)[^)]*\))', expr)
+        if not search:
+            break
+
+        eval_res = str(eval(search.group(2)))
+        expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
+
+    while True:
+        search = re.search(r'(\([^(]*)(\(.+?\))([^)]*\))', expr)
+        if not search:
+            break
+
+        eval_res = str(eval(search.group(2)))
+        expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
+    print(expr)
+
+    split = re.findall(r'[0-9,.]+|[*+/()-]', expr)
+    print(split)
+
 
     ind = 0
 
@@ -673,12 +694,13 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
         split.insert(i[1], f'({res})')
 
     second_step = ''.join(split)
+    print(second_step)
 
-    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
+    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
                         lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
+    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
                         lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
+    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
                         lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
     second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+$)',
                         lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}', second_step)
