@@ -560,6 +560,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
 
 
     base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9)])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
+    base_string = re.sub(r'>([0-9]+|[0-9]+\.[0-9]+)<', lambda x: f">{float_to_str(float(x.group(1)), rounding)}<", base_string)
     base_string = base_string.replace(' * 0', '*0')
 
     return base_string
@@ -674,8 +675,6 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
 
     second_step = ''.join(split)
 
-    ind = 0
-
     second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
                         lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
     second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+[+-])',
@@ -697,6 +696,8 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
         third_step = ''
     if four_step == third_step:
         four_step = ''
+    if second_step[1:] == four_step:
+        second_step = ''
 
     final_text = '=' + '\n='.join([i for i in (first_step, second_step, third_step, four_step) if i])
 
