@@ -430,7 +430,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                     if not ex_r2:
                         expr = expr[2:-1]
                         expr = re.sub(r'(\+)|(-)', lambda x: '-' if x.group(1) else '+', expr)
-                        expr = re.sub(r'[+-]([0-9,.]+)|^([0-9,.]+)', lambda x: x.group(1) or f'-{x.group(2)}', expr)
+                        expr = re.sub(r'([+-][0-9,.]+)|^([0-9,.]+)', lambda x: x.group(1) or f'-{x.group(2)}', expr)
                     elif ex_r2 and not ex_r3:
                         expr = expr[0] + expr[2:-1]
                     elif ex_r2 and expr[:3] == '-(-':

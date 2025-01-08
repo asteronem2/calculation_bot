@@ -412,9 +412,11 @@ class ChangeCalculation(MessageReactionCommand):
                                 return
                             f_text = forwarded.text or forwarded.caption
                             await self.bot.delete_message(forwarded.chat.id, forwarded.message_id)
-                            rres = re.fullmatch(r'[*+%/0-9., ()=-]+', f_text)
+                            rres = re.fullmatch(r'([*+%/0-9., ()=-]+\n|)[*+%/0-9., ()=-]+', f_text)
                             if rres:
                                 expr = rres.group()
+                                if rres.group(1):
+                                    expr = expr.split('\n', 1)[-1]
                                 calc_res = calculate(expr)
                                 if calc_res is not False:
                                     await self.process(expr=expr, calc_res=calc_res, res=res)
