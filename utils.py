@@ -645,7 +645,6 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
 def volume_generate(expression: str, rounding: int = 2) -> str:
     expr = expression.replace(' ', '').replace(',', '.')
     first_step = expr
-    print(expr)
 
     while True:
         search = re.search(r'(\([^(]*\([^(]*)(\(.*?\))([^)]*\)[^)]*\))', expr)
@@ -662,10 +661,8 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
 
         eval_res = str(eval(search.group(2)))
         expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
-    print(expr)
 
     split = re.findall(r'[0-9,.]+|[*+/()-]', expr)
-    print(split)
 
 
     ind = 0
@@ -694,7 +691,6 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
         split.insert(i[1], f'({res})')
 
     second_step = ''.join(split)
-    print(second_step)
 
     second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
                         lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
@@ -709,6 +705,7 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
 
     third_step = re.sub(r'([0-9,.]+-[0-9,.+]+)|([0-9,.()-]+[*/][0-9,.()-]+)',
                         lambda x: x.group(1) or f'{eval(x.group(2))}', second_step)
+
     four_step = str(eval(third_step))
 
     if second_step == first_step:
@@ -719,6 +716,22 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
         four_step = ''
     if second_step[1:] == four_step:
         second_step = ''
+
+    try:
+        float(first_step)
+        first_step = ''
+    except:
+        pass
+    try:
+        float(second_step)
+        second_step = ''
+    except:
+        pass
+    try:
+        float(third_step)
+        third_step = ''
+    except:
+        pass
 
     final_text = '=' + '\n='.join([i for i in (first_step, second_step, third_step, four_step) if i])
 
