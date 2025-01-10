@@ -531,7 +531,7 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
                 message_id=self.press_message_id
             )
         else:
-            new_code_name = self.text_low
+            new_code_name = self.text
             await self.db.execute("""
                 UPDATE chat_table
                 SET code_name = $1

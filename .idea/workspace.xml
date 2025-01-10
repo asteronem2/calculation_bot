@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.9 final unstable version&#10;1. Bug fixing">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.11 final unstable version&#10;1. Bug fixing">
+      <change beforePath="$PROJECT_DIR$/command/next_callback_message.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/next_callback_message.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,22 +103,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00057" summary="0.9.67 unstable version&#10;1. Кнопка &quot;в меню&quot;">
-      <option name="closed" value="true" />
-      <created>1728029049134</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1728029049134</updated>
-    </task>
-    <task id="LOCAL-00058" summary="0.9.68 unstable version&#10;1. Больше логирования (трекинг, отправленные ботом сообщения)&#10;2. Сохранение истории рассылок">
-      <option name="closed" value="true" />
-      <created>1728033698473</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1728033698474</updated>
     </task>
     <task id="LOCAL-00059" summary="0.9.68 unstable version&#10;1. Ошибки в tracking теперь не скипаются">
       <option name="closed" value="true" />
@@ -497,7 +480,23 @@
       <option name="project" value="LOCAL" />
       <updated>1736424655583</updated>
     </task>
-    <option name="localTasksCounter" value="106" />
+    <task id="LOCAL-00106" summary="0.10.10 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736498641136</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1736498641137</updated>
+    </task>
+    <task id="LOCAL-00107" summary="0.10.11 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736498950250</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1736498950250</updated>
+    </task>
+    <option name="localTasksCounter" value="108" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -532,8 +531,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.85 final unstable version" />
-    <MESSAGE value="0.9.86 final unstable version" />
     <MESSAGE value="0.9.87 final unstable version" />
     <MESSAGE value="0.9.88 final unstable version" />
     <MESSAGE value="0.9.89 final unstable version" />
@@ -557,7 +554,9 @@
     <MESSAGE value="0.10.7 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.8 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.9 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.9 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.10 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.11 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.11 final unstable version&#10;1. Bug fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
