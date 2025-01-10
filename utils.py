@@ -560,7 +560,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
     base_string += ' '
     base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{float_to_str(float(x.group(1)), rounding)}{x.group()[-1]}", base_string)
     base_string = base_string.replace(' * 0', '*0')
-    base_string = f'<b>{float_to_str(first_before, rounding)}</b> -->' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
+    base_string = f'<b>{float_to_str(first_before, rounding)}</b> --> ' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
     base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9)])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
 
     return base_string
@@ -756,7 +756,7 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
     except:
         pass
 
-    final_text = '=' + '\n='.join([i for i in (first_step, second_step, third_step, four_step) if i])
+    final_text = '= ' + '\n= '.join([i for i in (first_step, second_step, third_step, four_step) if i])
 
     final_text = re.sub(r'([0-9,.]+)', lambda x: float_to_str(float(x.group(1)), rounding), final_text)
     final_text = re.sub(r'(<a href=.+?>)|([0-9>\n=])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', final_text)
