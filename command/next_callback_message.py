@@ -570,10 +570,26 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
                 WHERE id = $1;
             """, kwargs['chat_pk'])
 
+            res2 = await self.db.fetch("""
+                SELECT * FROM currency_table
+                WHERE chat_pid = $1
+                ORDER BY title ASC;
+            """, kwargs['chat_pk'])
+
+            curr_info_list = ''
+
+            for i in res2:
+                curr_info_list += Template(self.global_texts['addition']['little_balance']).substitute(
+                    title=i['title'].upper(),
+                    value=float_to_str(i['value'], i['rounding']),
+                    postfix=i['postfix'] if i['postfix'] else ''
+                )
+
             text = Template(self.call_edit_texts['AdminChat']).substitute(
                 title=res['title'],
                 link=res['link'],
-                code_name=res['code_name']
+                code_name=res['code_name'],
+                curr_info_list=curr_info_list
             )
 
             variable_list = []
@@ -592,11 +608,7 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
             else:
                 variable_list.append('set_super')
 
-            if res['tag']:
-                variable_list.append('change_tag')
-                markup_kwargs['tag'] = res['tag']
-            else:
-                variable_list.append('set_tag')
+            markup_kwargs['tag'] = res['tag'] if res['tag'] else 'Пусто'
 
             markup = markup_generate(
                 buttons=self.buttons['AdminChat'],
@@ -607,7 +619,6 @@ class AdminChatChangeCodeName(NextCallbackMessageCommand):
             return TextMessage(
                 chat_id=self.chat.id,
                 text=text,
-                message_thread_id=self.topic,
                 markup=markup
             )
 
