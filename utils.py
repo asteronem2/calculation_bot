@@ -691,48 +691,43 @@ def volume_generate(expression: str, rounding: int = 2) -> str:
 
     second_step = ''.join(split)
 
-    if second_step.count('+') or second_step.count('-'):
-        second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
-                            lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-        second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
-                            lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-        second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
-                            lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-        second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+$)',
-                            lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}', second_step)
-        second_step = re.sub(r'(^[0-9,.()]+[+-][0-9,.()]+[+-])',
-                            lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
+    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+$)',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}', second_step)
+    second_step = re.sub(r'(^[0-9,.()]+[+-][0-9,.()]+[+-])',
+                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{eval(x.group(1))}{x.group(1)[-1]}', second_step)
 
-        second_split = re.findall(r'[0-9,.]+|[*+/()-]', second_step)
+    second_split = re.findall(r'[0-9,.]+|[*+/()-]', second_step)
 
-        ind = 0
-        while ind != (len(second_split) - 1):
-            wres = re.fullmatch(r'[0-9,.]+', second_split[ind])
-            if wres:
-                if (ind == 0 or second_split[ind-1] in '+-') and (second_split[ind+1] in '+-'):
-                    ind_2 = -1
-                    while ind_2 != (len(second_split) * -1):
-                        if second_split[ind] == second_split[ind_2]:
-                            break
-                        wres2 = re.fullmatch(r'[0-9,.]+', second_split[ind_2])
-                        if wres2:
-                            if (second_split[ind_2-1] in '+-') and (ind_2 == -1 or second_split[ind+1] in '+-'):
-                                second_split[ind] = str(eval(f'{second_split[ind]}{second_split[ind_2-1]}{second_split[ind_2]}'))
-                                del second_split[ind_2]
-                                del second_split[ind_2]
-                                continue
-                        ind_2 -= 1
-                    break
-            ind += 1
+    ind = 0
+    while ind != (len(second_split) - 1):
+        wres = re.fullmatch(r'[0-9,.]+', second_split[ind])
+        if wres:
+            if (ind == 0 or second_split[ind-1] in '+-') and (second_split[ind+1] in '+-'):
+                ind_2 = -1
+                while ind_2 != (len(second_split) * -1):
+                    if second_split[ind] == second_split[ind_2]:
+                        break
+                    wres2 = re.fullmatch(r'[0-9,.]+', second_split[ind_2])
+                    if wres2:
+                        if (second_split[ind_2-1] in '+-') and (ind_2 == -1 or second_split[ind+1] in '+-'):
+                            second_split[ind] = str(eval(f'{second_split[ind]}{second_split[ind_2-1]}{second_split[ind_2]}'))
+                            del second_split[ind_2]
+                            del second_split[ind_2]
+                            continue
+                    ind_2 -= 1
+                break
+        ind += 1
 
-        second_step = ''.join(second_split)
+    second_step = ''.join(second_split)
 
-        third_step = re.sub(r'([0-9,.]+-[0-9,.+]+)|([0-9,.()-]+[*/][0-9,.()-]+)',
-                            lambda x: x.group(1) or f'{eval(x.group(2))}', second_step)
-    else:
-        third_step = re.sub(r'([0-9,.]+-[0-9,.+]+)|([0-9,.()-]+[*/][0-9,.()-]+)',
-                            lambda x: x.group(1) or f'{eval(x.group(2))}', second_step)
-        second_step = ''
+    third_step = re.sub(r'([0-9,.]+-[0-9,.+]+)|([0-9,.()-]+[*/][0-9,.()-]+)',
+                        lambda x: x.group(1) or f'{eval(x.group(2))}', second_step)
 
     four_step = str(eval(third_step))
 
