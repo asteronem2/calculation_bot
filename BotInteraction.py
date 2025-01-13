@@ -160,16 +160,19 @@ class BotInter:
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
             asyncio.sleep(2)
             await self.edit_text(message_obj)
+            return
         except aiogram.exceptions.TelegramBadRequest as err:
             err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
             print(err_str)
             await log(err_str)
+            return
         except Exception as err:
             err_str = traceback.format_exc()
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
             print(err_str)
             await log(err_str)
+            return
 
         if message_obj.button_destroy != 0:
             asyncio.create_task(self._destroy_buttons(

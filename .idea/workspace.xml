@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.13 final unstable version&#10;1. Bug fixing" />
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.14 final unstable version&#10;1. Bug fixing">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -41,19 +47,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.main.executor": "Run",
-    "Python.message_command.executor": "Run",
-    "Python.next_callback_message.executor": "Run",
-    "Python.test.executor": "Run",
-    "Python.utils.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/Users/ded/Programming/calculation_bot",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.message_command.executor&quot;: &quot;Run&quot;,
+    &quot;Python.next_callback_message.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.utils.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/ded/Programming/calculation_bot&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -101,14 +107,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00061" summary="0.9.69(2) unstable version&#10;1. Устранена ошибка с трекингом">
-      <option name="closed" value="true" />
-      <created>1728049944558</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1728049944558</updated>
     </task>
     <task id="LOCAL-00062" summary="0.9.70 unstable version&#10;1. Лог ошибки 403">
       <option name="closed" value="true" />
@@ -494,7 +492,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736499505949</updated>
     </task>
-    <option name="localTasksCounter" value="110" />
+    <task id="LOCAL-00110" summary="0.10.14 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736499793532</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1736499793532</updated>
+    </task>
+    <option name="localTasksCounter" value="111" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -529,7 +535,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.89 final unstable version" />
     <MESSAGE value="0.9.90 final unstable version" />
     <MESSAGE value="0.9.91 final unstable version" />
     <MESSAGE value="0.9.92 final unstable version&#10;1. Поддержка всех регистров при создании валюты" />
@@ -554,7 +559,8 @@
     <MESSAGE value="0.10.11 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.12 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.13 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.13 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.14 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.14 final unstable version&#10;1. Bug fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

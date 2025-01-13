@@ -404,116 +404,135 @@ class ChangeCalculation(MessageReactionCommand):
                             JOIN currency_table ON story_table.currency_pid = currency_table.id
                             WHERE message_id = $1 AND currency_table.chat_pid = $2;
                         """, self.message_id, self.db_chat['id'])
-                        if res:
+                        curr_id = res['currency_pid']
+                        if res and res["expr_type"] == 'add':
                             from utils import DED
                             try:
                                 forwarded = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id)
                             except:
                                 return
-                            f_text = forwarded.text or forwarded.caption
+                            f_text = forwarded.text
+                            is_photo = False
+                            if not f_text:
+                                f_text = forwarded.caption
+                                is_photo = True
                             await self.bot.delete_message(forwarded.chat.id, forwarded.message_id)
                             rres = re.fullmatch(r'([*+%/0-9., ()=-]+\n|)[*+%/0-9., ()=-]+', f_text)
-                            if rres:
+
+                            if not rres:
+                                # Если калькуляция с названием валюты в начале
+                                rres2 = re.fullmatch(r'(.+) +([*+%/0-9., ()-]+)', f_text.lower())
+                                if not rres2:
+                                    return
+                                curr_title, expr = rres2.groups()
+                                calc_res = calculate(expr)
+                                curr_row = await self.db.fetchrow("""
+                                    SELECT * FROM currency_table WHERE id = $1;
+                                """, int(curr_id))
+                                if not curr_row:
+                                    return
+                                if curr_title != curr_row['title']:
+                                    return
+                            else:
                                 expr = rres.group()
                                 if rres.group(1):
                                     expr = expr.split('\n', 1)[-1]
                                 calc_res = calculate(expr)
-                                if calc_res is not False:
-                                    await self.process(expr=expr, calc_res=calc_res, res=res)
-                                    return True
-                            else:
-                                rres2 = re.fullmatch(r'(.+) +([*+%/0-9., ()-]+)', f_text.lower())
-                                if rres2:
-                                    curr, expr = rres2.groups()
-                                    calc_res = calculate(expr)
-                                    if calc_res is not False:
-                                        res2 = await self.db.fetch("""
-                                            SELECT currency_table.*
-                                            FROM currency_table
-                                            JOIN chat_table ON chat_table.id = currency_table.chat_pid
-                                            WHERE type = 'chat' AND chat_table.chat_id = $1
-                                            ORDER BY currency_table.title ASC; 
-                                        """, self.chat.id)
 
-                                        for i in res2:
-                                            if curr == i['title']:
-                                                await self.process(
-                                                    curr=i,
-                                                    calc_res=calc_res,
-                                                    expr=expr,
-                                                    res=res
-                                                )
-                                                return True
+                            if calc_res is not False:
+                                await self.process(
+                                    curr_id=curr_id,
+                                    expr=expr,
+                                    res=res,
+                                    is_photo=is_photo
+                                )
+                                return True
 
     async def process(self, *args, **kwargs) -> None:
-        curr = kwargs.get('curr')
-        expr = kwargs['expr']
-        res_expr = kwargs['res']['expression']
-        if res_expr and len(res_expr) > 1 and res_expr[:2] == '-(' and res_expr[-1] == ')':
+        curr = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs["curr_id"])
+        expr = kwargs["expr"]
+        story_row = kwargs['res']
+
+        if self.db_chat["sign"] is False and kwargs["is_photo"] is True:
             expr = f'-({expr})'
 
-        if not curr:
-            curr = await self.db.fetchrow("""
-                SELECT * FROM currency_table
-                WHERE id = $1;
-            """, kwargs['res']['currency_pid'])
-
-        res3 = await self.db.fetch("""
+        after_stories = await self.db.fetch("""
             SELECT * FROM story_table
             WHERE id > $1 AND currency_pid = $2 AND status = TRUE;
-        """, kwargs['res']['id'], curr['id'])
+        """, story_row['id'], curr['id'])
 
-        for i in res3:
-            if i['expr_type'] == 'null':
+        for story in after_stories:
+            if story['expr_type'] in ["null", "update"]:
                 await self.bot.send_text(TextMessage(
                     chat_id=self.chat.id,
-                    text=Template(self.texts['ChangeCalculationLaterNull']).substitute(),
+                    text=Template(self.texts['ChangeCalculationLaterNullOrUpdate']).substitute(),
                     destroy_timeout=15
                 ))
                 return
 
-        plus = calculate(expr)
-        real_plus = plus - (kwargs['res']['after_value'] - kwargs['res']['before_value'])
+        calc_res = calculate(expr)
+        if calc_res is False:
+            await self.bot.send_text(TextMessage(
+                chat_id=self.chat.id,
+                text=Template(self.texts['IncorrectCalculation']).substitute(),
+                destroy_timeout=15
+            ))
+            return
+
+        real_plus = calc_res - (story_row['after_value'] - story_row['before_value'])
 
         await self.db.execute("""
             UPDATE story_table
             SET expression = $1, after_value = $2
             WHERE id = $3; 
-        """, expr, kwargs['res']['before_value'] + plus, kwargs['res']['id'])
+        """, expr, story_row['before_value'] + calc_res, story_row['id'])
 
-        f_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+        story_row_updated = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE id = $1;
+        """, story_row["id"])
+
+        new_balance_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
             title=curr['title'].upper(),
-            value=float_to_str(kwargs['res']['after_value'] + real_plus, curr['rounding']),
+            value=float_to_str(story_row['after_value'] + real_plus, curr["rounding"]),
             postfix=curr['postfix'] or ''
         )
         try:
             await self.bot.edit_text(EditMessage(
                 chat_id=self.chat.id,
-                text=f_text,
-                message_id=kwargs['res']['sent_message_id']
+                text=new_balance_text,
+                message_id=story_row['sent_message_id']
             ))
         except:
             pass
 
-        latest_curr_value = res3[-1]['after_value'] + real_plus
+        # latest_curr_value = after_stories[-1]['after_value'] + real_plus
 
-        for i in res3:
+        latest_after_value = story_row_updated["after_value"]
+
+        for story in after_stories:
+            new_after_value = latest_after_value + calculate(story["expression"])
             await self.db.execute("""
                 UPDATE story_table
                 SET before_value = $1, after_value = $2
                 WHERE id = $3;
-            """, i['before_value'] + real_plus, i['after_value'] + real_plus, i['id'])
+            """, latest_after_value, new_after_value, story["id"])
 
-            f_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
+            latest_after_value = new_after_value
+
+            edited_balance_text = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
                 title=curr['title'].upper(),
-                value=float_to_str(i['after_value'] + real_plus, curr['rounding']),
+                value=float_to_str(new_after_value, curr["rounding"]),
                 postfix=curr['postfix'] or ''
             )
             try:
                 await self.bot.edit_text(EditMessage(
                     chat_id=self.chat.id,
-                    text=f_text,
-                    message_id=i['sent_message_id']
+                    text=edited_balance_text,
+                    message_id=story["sent_message_id"]
                 ))
             except:
                 continue
@@ -522,46 +541,56 @@ class ChangeCalculation(MessageReactionCommand):
             UPDATE currency_table
             SET value = $1
             WHERE id = $2;
-        """, latest_curr_value, curr['id'])
+        """, latest_after_value, curr["id"])
 
-        res4 = await self.db.fetch("""
+        after_detail_and_story_list = await self.db.fetch("""
             SELECT * FROM message_table
             WHERE chat_pid = $1
                 AND message_id > $2
                 AND type in ('story', 'detail')
                 AND addition = $3;
-        """, self.db_chat['id'], self.message_id, str(curr['id']))
+        """, self.db_chat["id"], self.message_id, str(curr["id"]))
 
-        story_list = await self.db.fetch("""
-            SELECT * FROM story_table
-            WHERE currency_pid = $1
-                AND status = TRUE;
-        """, curr['id'])
-
-        for i in res4:
-            if i['type'] == 'story':
+        for story_or_detail in after_detail_and_story_list:
+            # Выборка всех строк истории в тот же день до самого сообщения об истории
+            story_list = await self.db.fetch("""
+                SELECT * 
+                FROM story_table
+                WHERE currency_pid = $1
+                  AND message_id < $2
+                  AND DATE(datetime AT TIME ZONE 'UTC' AT TIME ZONE '+3') = (
+                      SELECT DATE(datetime AT TIME ZONE 'UTC' AT TIME ZONE '+3')
+                      FROM story_table
+                      WHERE currency_pid = $1
+                        AND message_id < $2
+                      ORDER BY id DESC
+                      LIMIT 1
+                  )
+            """, curr["id"], story_or_detail["message_id"])
+            if story_or_detail['type'] == 'story':
                 story = story_generate(story_list, self.chat.id, rounding=curr['rounding'])
-                f_text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
+                new_text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
                     title=curr['title'].upper(),
                     story=story,
                     postfix=((curr['postfix'] or '') if story else '')
                 )
             else:
                 detail = detail_generate(story_list, self.chat.id)
-                f_text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
+                new_text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
                     title=curr['title'].upper(),
                     detail=detail,
                     postfix=((curr['postfix'] or '') if detail else '')
                 )
+
             await self.bot.edit_text(EditMessage(
                 chat_id=self.chat.id,
-                text=f_text,
-                message_id=i['message_id']
+                text=new_text,
+                message_id=story_or_detail["message_id"]
             ))
 
         text = Template(self.texts['ChangeCalculation']).substitute(
-            before_expr=kwargs['res']['expression'],
-            after_expr=expr
+            before_expr=story_row["expression"],
+            after_expr=story_row_updated["expression"]
         )
 
         await self.bot.send_text(TextMessage(
@@ -572,7 +601,7 @@ class ChangeCalculation(MessageReactionCommand):
 
         text2 = Template(self.global_texts['message_command']['CurrencyBalance']).substitute(
             title=curr['title'].upper(),
-            value=float_to_str(latest_curr_value, curr['rounding']),
+            value=float_to_str(latest_after_value, curr['rounding']),
             postfix=curr['postfix'] or ''
         )
 
