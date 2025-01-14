@@ -695,7 +695,8 @@ class CurrencyStoryCommand(MessageCommand):
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=self.topic,
+            reply_to_message_id=today_story[0]["message_id"]
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:

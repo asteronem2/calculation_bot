@@ -678,136 +678,100 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     return string
 
 
-def volume_generate(expression: str, rounding: int = 2) -> str:
-    expr = expression.replace(' ', '').replace(',', '.')
-    first_step = expr
+def get_element(mylist, index, default=None):
+    return mylist[index] if -len(mylist) <= index < len(mylist) else default
 
-    while True:
-        search = re.search(r'(\([^(]*\([^(]*)(\(.*?\))([^)]*\)[^)]*\))', expr)
-        if not search:
-            break
 
-        eval_res = str(eval(search.group(2)))
-        expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
-
-    while True:
-        search = re.search(r'(\([^()]*)(\(.+?\))([^()]*\))', expr)
-        if not search:
-            break
-
-        eval_res = str(eval(search.group(2)))
-        expr = expr[:search.start()] + search.group(1) + eval_res + search.group(3) + expr[search.end():]
-
-    split = re.findall(r'[0-9,.]+|[*+/()-]', expr)
-
-    ind = 0
-
-    brackets = []
-
-    w_b = False
-
-    while ind != (len(split) - 1):
-        if split[ind] == '(':
-            brackets.append(['(', ind])
-            del split[ind]
-            w_b = True
-        elif split[ind] == ')' and w_b is True:
-            brackets[-1][0] += ')'
-            del split[ind]
-            w_b = False
-        elif w_b is True:
-            brackets[-1][0] += split[ind]
-            del split[ind]
-        else:
-            ind += 1
-
-    for i in reversed(brackets):
-        res = eval(i[0])
-        split.insert(i[1], f'({res})')
-
-    second_step = ''.join(split)
-
-    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
-                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{calculate(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
-                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{calculate(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-    second_step = re.sub(r'([+-][0-9,.(]+[+-][0-9,.)]+[+-])',
-                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{calculate(x.group(1)[:-1])}{x.group(1)[-1]}', second_step)
-    second_step = re.sub(r'([+-][0-9,.()]+[+-][0-9,.()]+$)',
-                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{calculate(x.group(1))}', second_step)
-    second_step = re.sub(r'(^[0-9,.()]+[+-][0-9,.()]+[+-])',
-                        lambda x: f'{"" if x.group(1)[0] == "-" else "+"}{calculate(x.group(1))}{x.group(1)[-1]}', second_step)
-
-    second_split = re.findall(r'[0-9,.]+|[*+/()-]', second_step)
-
-    ind = 0
-    while ind != (len(second_split) - 1):
-        wres = re.fullmatch(r'[0-9,.]+', second_split[ind])
-        if wres:
-            if (ind == 0 or second_split[ind-1] in '+-') and (second_split[ind+1] in '+-'):
-                ind_2 = -1
-                while ind_2 != (len(second_split) * -1):
-                    if second_split[ind] == second_split[ind_2]:
-                        break
-                    wres2 = re.fullmatch(r'[0-9,.]+', second_split[ind_2])
-                    if wres2:
-                        if (second_split[ind_2-1] in '+-') and (ind_2 == -1 or second_split[ind+1] in '+-'):
-                            second_split[ind] = str(eval(f'{second_split[ind]}{second_split[ind_2-1]}{second_split[ind_2]}'))
-                            del second_split[ind_2]
-                            del second_split[ind_2]
-                            continue
-                    ind_2 -= 1
+def volume_generate(expression: str, rounding: int = 2):
+    def decompose_brackets(expr):
+        while True:
+            search = re.search(r'(\([^(]*\([^(]*)(\(.*?\))([^)]*\)[^)]*\))', expr)
+            if not search:
                 break
-        ind += 1
 
-    second_step = ''.join(second_split)
+            calculate_res = str(calculate(search.group(2)))
+            expr = expr[:search.start()] + search.group(1) + calculate_res + search.group(3) + expr[search.end():]
 
-    third_step = re.sub(r'([0-9,.]+-[0-9,.+]+)|([0-9,.()-]+[*/][0-9,.()-]+)',
-                        lambda x: x.group(1) or f'{calculate(x.group(2))}', second_step)
+        while True:
+            search = re.search(r'(\([^()]*)(\(.+?\))([^()]*\))', expr)
+            if not search:
+                break
 
-    four_step = str(calculate(third_step))
+            calculate_res = str(calculate(search.group(2)))
+            expr = expr[:search.start()] + search.group(1) + calculate_res + search.group(3) + expr[search.end():]
 
-    if second_step == first_step:
-        second_step = ''
-    if third_step == second_step:
-        third_step = ''
-    if four_step == third_step:
-        four_step = ''
-    if second_step[1:] == four_step:
-        second_step = ''
+        while True:
+            search = re.search(r'(\([^()]+?\))', expr)
+            if not search:
+                break
 
-    try:
-        float(first_step)
-        first_step = ''
-    except:
-        pass
-    try:
-        float(second_step)
-        second_step = ''
-    except:
-        pass
-    try:
-        float(third_step)
-        third_step = ''
-    except:
-        pass
+            calculate_res = str(calculate(search.group()))
+            expr = expr[:search.start()] + calculate_res + expr[search.end():]
 
-    first_step = re.sub(r'([0-9,.]+)', lambda x: format_number(x.group(1)), first_step)
+        return expr
 
-    steps = [second_step, third_step, four_step]
+    def decompose_plus_minus(expr):
+        multiplies_and_divisions = [i[0] for i in re.findall(r"((\+|\n|-|^)([\d.]+[*/][\d.]+))", expr)]
+        for i in multiplies_and_divisions:
+            expr = expr.replace(i, "", 1)
+        expr = str(calculate(expr))
+        expr = expr + "".join(multiplies_and_divisions)
+        return expr
 
-    for index, step in enumerate(steps):
-        if step:
-            steps[index] = re.sub(r'([0-9,.]+)', lambda x: float_to_str(float(x.group(1)), rounding), step)
+    def decompose_multiply_division(expr):
+        expr = re.sub(r"[\d.]+[*/][\d.]+", lambda x: str(calculate(x.group())), expr)
+        return expr
 
-    second_step, third_step, four_step = steps
+    steps = [expression]
 
-    final_text = '= ' + '\n= '.join([i for i in (first_step, second_step, third_step, four_step) if i])
+    actual_expr = re.sub(r'\s', '', expression)
+    actual_expr = re.sub(r',', '.', actual_expr)
 
-    # final_text = re.sub(r'(<a href=.+?>)|([0-9>\n=])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', final_text)
-    final_text = re.sub(r'(<a href=.+?>)|([*+%/=-])([^ a-zA-Z])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', final_text)
-    final_text = re.sub(r'(<a href=.+?>)|([^ a-zA-Z<])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', final_text)
+    re_null = re.fullmatch(r'\((.+)\)\*0', actual_expr)
+    all_null = False
+    if re_null:
+        all_null = True
+        actual_expr = re_null.group(1)
 
+    re2_null = re.search(r'\((.+?)\)\*0', actual_expr)
+    if re2_null:
+        actual_expr = actual_expr[:re2_null.start()] + "00000" + actual_expr[re2_null.end():]
+        expr_in_brackets = re2_null.group(1)
+        expr_in_brackets = decompose_brackets(expr_in_brackets)
+        expr_in_brackets = decompose_plus_minus(expr_in_brackets)
+        steps.append(actual_expr.replace("00000", "(" + expr_in_brackets + ")*0", 1))
+        expr_in_brackets = decompose_multiply_division(expr_in_brackets)
+        steps.append(actual_expr.replace("00000", "(" + expr_in_brackets + ")*0", 1))
+        expr_in_brackets = decompose_plus_minus(expr_in_brackets)
+        steps.append(actual_expr.replace("00000", "(" + expr_in_brackets + ")*0", 1))
+        actual_expr = actual_expr.replace("00000", "0", 1)
+        steps.append(actual_expr)
+
+    actual_expr = decompose_brackets(actual_expr)
+    actual_expr = decompose_plus_minus(actual_expr)
+    if actual_expr != steps[-1]:
+        steps.append(actual_expr)
+    actual_expr = decompose_multiply_division(actual_expr)
+    if actual_expr != steps[-1]:
+        steps.append(actual_expr)
+    actual_expr = decompose_plus_minus(actual_expr)
+    if actual_expr != steps[-1]:
+        steps.append(actual_expr)
+
+    if all_null:
+        for i in range(len(steps)):
+            if i != 0:
+                steps[i] = "(" + steps[i] + ")*0"
+        steps.append("0")
+
+    for i in range(len(steps)):
+        if i != 0:
+            steps[i] = re.sub(r'[0-9.]+', lambda x: float_to_str(float(x.group()), rounding), steps[i])
+
+    final_text = "\n= ".join(steps)
+
+    final_text = re.sub(r'([*+%/=-])([^ a-zA-Z])', lambda x: f'{x.group(1)} {x.group(2)}', final_text)
+    final_text = re.sub(r'([^ a-zA-Z<])([*+%/=-])', lambda x: f'{x.group(1)} {x.group(2)}', final_text)
     return final_text
 
 

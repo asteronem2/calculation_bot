@@ -404,8 +404,8 @@ class ChangeCalculation(MessageReactionCommand):
                             JOIN currency_table ON story_table.currency_pid = currency_table.id
                             WHERE message_id = $1 AND currency_table.chat_pid = $2;
                         """, self.message_id, self.db_chat['id'])
-                        curr_id = res['currency_pid']
                         if res and res["expr_type"] == 'add':
+                            curr_id = res['currency_pid']
                             from utils import DED
                             try:
                                 forwarded = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id)
@@ -572,14 +572,16 @@ class ChangeCalculation(MessageReactionCommand):
                 new_text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
                     title=curr['title'].upper(),
                     story=story,
-                    postfix=((curr['postfix'] or '') if story else '')
+                    postfix=((curr['postfix'] or '') if story else ''),
+                    reply_to_message_id=story_list[0]["message_id"]
                 )
             else:
                 detail = detail_generate(story_list, self.chat.id)
                 new_text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
                     title=curr['title'].upper(),
                     detail=detail,
-                    postfix=((curr['postfix'] or '') if detail else '')
+                    postfix=((curr['postfix'] or '') if detail else ''),
+                    reply_to_message_id=story_list[0]["message_id"]
                 )
 
             await self.bot.edit_text(EditMessage(
