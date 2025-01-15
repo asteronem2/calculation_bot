@@ -1348,7 +1348,7 @@ class CurrStoryCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=before_first_story["sent_message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"] if before_first_story else None
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1575,7 +1575,7 @@ class CurrGetStory(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=before_first_story["sent_message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"] if before_first_story else None
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1655,7 +1655,7 @@ class CurrDetailCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=before_first_story["sent_message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"] if before_first_story else None
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1881,7 +1881,7 @@ class CurrGetDetail(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=before_first_story["sent_message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"] if before_first_story else None
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:

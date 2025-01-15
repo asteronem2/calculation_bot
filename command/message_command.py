@@ -703,7 +703,7 @@ class CurrencyStoryCommand(MessageCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=before_first_story["sent_message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"] if before_first_story else None
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -992,7 +992,7 @@ class CurrencyDetailCommand(MessageCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=before_first_story["sent_message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"] if before_first_story else None
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
