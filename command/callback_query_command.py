@@ -1326,6 +1326,13 @@ class CurrStoryCommand(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
+        before_first_story = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND id < $2
+            ORDER BY id DESC
+            LIMIT 1;
+        """, res[0]["currency_pid"], res[0]["id"])
+
         story = story_generate(story_list=res, chat_id=res3['chat_id'], rounding=res2['rounding'])
 
         if story is False:
@@ -1341,7 +1348,7 @@ class CurrStoryCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=res[0]["message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"]
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1548,6 +1555,13 @@ class CurrGetStory(CallbackQueryCommand):
 
         story = story_generate(story_list=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'], rounding=res2['rounding'])
 
+        before_first_story = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND id < $2
+            ORDER BY id DESC
+            LIMIT 1;
+        """, res[0]["currency_pid"], res[0]["id"])
+
         if story is False:
             return await self.generate_error_message(**kwargs)
 
@@ -1561,7 +1575,7 @@ class CurrGetStory(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=res[0]["message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"]
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1620,10 +1634,17 @@ class CurrDetailCommand(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
-        detail = detail_generate(story_items=res, chat_id=res3['chat_id'])
+        detail = detail_generate(story_items=res, chat_id=res3['chat_id'], rounding=res2["rounding"])
 
         if detail is False:
             return await self.generate_error_message(**kwargs)
+
+        before_first_story = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND id < $2
+            ORDER BY id DESC
+            LIMIT 1;
+        """, res[0]["currency_pid"], res[0]["id"])
 
         text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
             title=res2['title'].upper(),
@@ -1633,7 +1654,8 @@ class CurrDetailCommand(CallbackQueryCommand):
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=self.topic,
+            reply_to_message_id=before_first_story["sent_message_id"]
         )
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -1838,10 +1860,17 @@ class CurrGetDetail(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
-        detail = detail_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'])
+        detail = detail_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'], rounding=res2["rounding"])
 
         if detail is False:
             return await self.generate_error_message(**kwargs)
+
+        before_first_story = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND id < $2
+            ORDER BY id DESC
+            LIMIT 1;
+        """, res[0]["currency_pid"], res[0]["id"])
 
         text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
             title=res2['title'].upper(),
@@ -1851,7 +1880,8 @@ class CurrGetDetail(CallbackQueryCommand):
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=self.topic,
+            reply_to_message_id=before_first_story["sent_message_id"]
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -2874,7 +2904,7 @@ class AdminBalanceDetail(CallbackQueryCommand):
 
             curr_detail_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
                 title=item['title'],
-                detail=detail_generate(res3, res['chat_id']) or ''
+                detail=detail_generate(res3, res['chat_id'], rounding=item["rounding"]) or ''
             ) + '</blockquote>' + '\n'
 
         text = Template(self.edit_texts['AdminBalanceDetail']).substitute(

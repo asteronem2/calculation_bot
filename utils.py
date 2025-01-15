@@ -600,7 +600,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
     return base_string
 
 
-def detail_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None) -> Union[str, bool]:
+def detail_generate(story_items: List[Record], chat_id: int, start_date: str = None, end_date: str = None, rounding: int = 2) -> Union[str, bool]:
     if not start_date or not end_date:
         start_date = datetime.datetime.today().strftime('%Y-%m-%d')
         end_date = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -625,7 +625,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     if not current_story_items:
         return False
 
-    string: str = '\n' + '<b>' +str(float_to_str(current_story_items[0]['before_value']) or 'Создание -->') + '</b>'
+    string: str = '\n' + '<b>' +str(float_to_str(current_story_items[0]['before_value'], rounding) or 'Создание -->') + '</b>'
 
     for story_item in current_story_items:
         if current_story_items.index(story_item) == len(current_story_items)-1:
@@ -647,13 +647,13 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
                 sign=sign,
                 message_id=story_item['message_id'],
                 expression=expr,
-                value=story_item['after_value'] if not last else f'<b>{float_to_str(story_item["after_value"])}</b>'
+                value=story_item['after_value'] if not last else f'<b>{float_to_str(story_item["after_value"], rounding)}</b>'
             )
         elif si_type == 'update':
             string += link_pattern.substitute(
                 sign='--> ',
                 message_id=story_item['message_id'],
-                expression=story_item['after_value'] if not last else f'<b>{float_to_str(story_item["after_value"])}</b>',
+                expression=story_item['after_value'] if not last else f'<b>{float_to_str(story_item["after_value"], rounding)}</b>',
                 value=''
             )
         elif si_type == 'null':
@@ -669,7 +669,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
     string = re.sub(r'(<a href=.+?>)|([0-9>\n])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
     string = re.sub(r"(= ?[+-?] ?)([0-9.]{2,})(\n)",
-                    lambda x: f'{x.group(1)}{float_to_str(float(x.group(2)))}{x.group(3)}', string)
+                    lambda x: f'{x.group(1)}{float_to_str(float(x.group(2)), rounding)}{x.group(3)}', string)
     string = re.sub(r"([+*/%-] ?<.+?> ?)([0-9.]{2,})(</.+?>)",
                     lambda x: f'{x.group(1)}{format_number(x.group(2))}{x.group(3)}', string)
     string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)

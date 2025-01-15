@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.15 final unstable version&#10;1. Bug fixing">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.16 final unstable version&#10;1. Bug fixing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
@@ -107,14 +107,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00063" summary="0.9.70 unstable version&#10;1. Теперь время в запросах работает корректно">
-      <option name="closed" value="true" />
-      <created>1728054414640</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1728054414640</updated>
     </task>
     <task id="LOCAL-00064" summary="0.9.71 unstable version&#10;1. Много мелочей">
       <option name="closed" value="true" />
@@ -500,7 +492,15 @@
       <option name="project" value="LOCAL" />
       <updated>1736781250504</updated>
     </task>
-    <option name="localTasksCounter" value="112" />
+    <task id="LOCAL-00112" summary="0.10.16 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1736884243985</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1736884243985</updated>
+    </task>
+    <option name="localTasksCounter" value="113" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -535,7 +535,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.91 final unstable version" />
     <MESSAGE value="0.9.92 final unstable version&#10;1. Поддержка всех регистров при создании валюты" />
     <MESSAGE value="0.9.93 final unstable version&#10;1. Update story_generate" />
     <MESSAGE value="0.9.94 final unstable version&#10;1. Update send logs" />
@@ -560,7 +559,8 @@
     <MESSAGE value="0.10.13 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.14 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.15 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.15 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.16 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.16 final unstable version&#10;1. Bug fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -567,21 +567,28 @@ class ChangeCalculation(MessageReactionCommand):
                       LIMIT 1
                   )
             """, curr["id"], story_or_detail["message_id"])
+            before_first_story = await self.db.fetchrow("""
+                SELECT * FROM story_table
+                WHERE currency_pid = $1 AND id < $2
+                ORDER BY id DESC
+                LIMIT 1;
+            """, story_list[0]["currency_pid"], story_list[0]["id"])
+
             if story_or_detail['type'] == 'story':
                 story = story_generate(story_list, self.chat.id, rounding=curr['rounding'])
                 new_text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
                     title=curr['title'].upper(),
                     story=story,
                     postfix=((curr['postfix'] or '') if story else ''),
-                    reply_to_message_id=story_list[0]["message_id"]
+                    reply_to_message_id=before_first_story["sent_message_id"]
                 )
             else:
-                detail = detail_generate(story_list, self.chat.id)
+                detail = detail_generate(story_list, self.chat.id, rounding=curr["rounding"])
                 new_text = Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
                     title=curr['title'].upper(),
                     detail=detail,
                     postfix=((curr['postfix'] or '') if detail else ''),
-                    reply_to_message_id=story_list[0]["message_id"]
+                    reply_to_message_id=before_first_story["sent_message_id"]
                 )
 
             await self.bot.edit_text(EditMessage(

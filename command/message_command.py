@@ -684,6 +684,13 @@ class CurrencyStoryCommand(MessageCommand):
             WHERE id = $1;
         """, kwargs['curr_id'])
 
+        before_first_story = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND id < $2
+            ORDER BY id DESC
+            LIMIT 1;
+        """, today_story[0]["currency_pid"], today_story[0]["id"])
+
         story = story_generate(story_list=today_story, chat_id=self.chat.id, rounding=sel['rounding'])
 
         text = Template(self.texts['CurrencyStoryCommand']).substitute(
@@ -696,7 +703,7 @@ class CurrencyStoryCommand(MessageCommand):
             chat_id=self.chat.id,
             text=text,
             message_thread_id=self.topic,
-            reply_to_message_id=today_story[0]["message_id"]
+            reply_to_message_id=before_first_story["sent_message_id"]
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
@@ -950,6 +957,11 @@ class CurrencyDetailCommand(MessageCommand):
             WHERE currency_pid = $1 AND status = TRUE;
         """, kwargs['curr_id'])
 
+        res2 = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs['curr_id'])
+
         today_story = []
 
         today = datetime.datetime.today().strftime('%Y.%m.%d')
@@ -962,7 +974,14 @@ class CurrencyDetailCommand(MessageCommand):
         if not today_story:
             return await self.generate_error_message(**kwargs)
 
-        detail = detail_generate(today_story, chat_id=self.chat.id)
+        detail = detail_generate(today_story, chat_id=self.chat.id, rounding=res2["rounding"])
+
+        before_first_story = await self.db.fetchrow("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1 AND id < $2
+            ORDER BY id DESC
+            LIMIT 1;
+        """, today_story[0]["currency_pid"], today_story[0]["id"])
 
         text = Template(self.texts['CurrencyDetailCommand']).substitute(
             title=kwargs['title'].upper(),
@@ -972,7 +991,8 @@ class CurrencyDetailCommand(MessageCommand):
         return TextMessage(
             chat_id=self.chat.id,
             text=text,
-            message_thread_id=self.topic
+            message_thread_id=self.topic,
+            reply_to_message_id=before_first_story["sent_message_id"]
         )
 
     async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
