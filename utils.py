@@ -4,7 +4,6 @@ import os
 import datetime
 import time
 import traceback
-from encodings.idna import ace_prefix
 from string import Template
 from typing import List, Any, Union, Dict
 import re
@@ -595,8 +594,16 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
     base_string = f'<b>{float_to_str(first_before, rounding)}</b> --> ' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
     base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
     base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
-
-    print(base_string)
+    base_string = re.sub(
+        r'[( ](<[^>]+>) ',
+        lambda x: x.group()[0] + x.group(1),
+        base_string
+    )
+    base_string = re.sub(
+        r' (<[^>]+>)[ )]',
+        lambda x: x.group(1) + x.group()[-1],
+        base_string
+    )
 
     return base_string
 
@@ -677,7 +684,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     string = re.sub(r' +', ' ', string)
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
-    string = re.sub(r' (<[^>]+>) ', lambda x: f" {x.group(1)}", string)
+    string = re.sub(r'[( ](<[^>]+>)[ )]', lambda x: f" {x.group(1)}", string)
 
     return string
 
@@ -770,9 +777,17 @@ def volume_generate(expression: str, rounding: int = 2):
                 steps[i] = "(" + steps[i] + ")*0"
         steps.append("0")
 
+    clear_expression = re.sub('\s', '', expression)
+    clear_expression = re.sub(',', '.', clear_expression)
+    list_unformatted_numbers = [i for i in re.findall(r'[0-9.]+', clear_expression)]
+
     for i in range(len(steps)):
         if i != 0:
-            steps[i] = re.sub(r'[0-9.]+', lambda x: float_to_str(float(x.group()), rounding), steps[i])
+            steps[i] = re.sub(
+                r'[0-9.]+',
+                lambda x: format_number(x.group()) if x.group() in list_unformatted_numbers else float_to_str(float(x.group()), rounding),
+                steps[i]
+            )
 
     final_text = "\n= ".join(steps)
 
