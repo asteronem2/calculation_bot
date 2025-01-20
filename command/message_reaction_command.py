@@ -566,13 +566,8 @@ class ChangeCalculation(MessageReactionCommand):
                       ORDER BY id DESC
                       LIMIT 1
                   )
+                  ORDER BY id ASC;
             """, curr["id"], story_or_detail["message_id"])
-            before_first_story = await self.db.fetchrow("""
-                SELECT * FROM story_table
-                WHERE currency_pid = $1 AND id < $2
-                ORDER BY id DESC
-                LIMIT 1;
-            """, story_list[0]["currency_pid"], story_list[0]["id"])
 
             if story_or_detail['type'] == 'story':
                 story = story_generate(story_list, self.chat.id, rounding=curr['rounding'])

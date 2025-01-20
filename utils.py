@@ -4,6 +4,7 @@ import os
 import datetime
 import time
 import traceback
+from encodings.idna import ace_prefix
 from string import Template
 from typing import List, Any, Union, Dict
 import re
@@ -592,8 +593,8 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
     base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{format_number(x.group(1))}{x.group()[-1]}", base_string)
     base_string = base_string.replace(' * 0', '*0')
     base_string = f'<b>{float_to_str(first_before, rounding)}</b> --> ' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
-    base_string = re.sub(r'(a href="[^<]+"|/a|-->)|([*+%/=-])([^ a-zA-Z])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
-    base_string = re.sub(r'(a href="[^<]+"|/a|-->)|([^ a-zA-Z<])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
+    base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
+    base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
 
     print(base_string)
 
@@ -605,7 +606,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
         start_date = datetime.datetime.today().strftime('%Y-%m-%d')
         end_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
-    link_pattern = Template(f'\n$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id/">$expression</a> = $value')
+    link_pattern = Template(f'\n$sign<a href="https://t.me/c/{str(chat_id)[4:]}/$message_id">$expression</a> = $value')
 
     current_story_items = []
 
@@ -667,13 +668,16 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     string = re.sub(r'(<a href=.+?>)|( +)', lambda x: x.group(1) or '', string)
     string = re.sub(r'\(([+-]?[0-9.,]+)\)', lambda x: x.group(1), string)
     string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
-    string = re.sub(r'(<a href=.+?>)|([0-9>\n])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
+    # string = re.sub(r'(<a href=[^>]+>)|([0-9>\n])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
     string = re.sub(r"(= ?[+-?] ?)([0-9.]{2,})(\n)",
                     lambda x: f'{x.group(1)}{float_to_str(float(x.group(2)), rounding)}{x.group(3)}', string)
     string = re.sub(r"([+*/%-] ?<.+?> ?)([0-9.]{2,})(</.+?>)",
                     lambda x: f'{x.group(1)}{format_number(x.group(2))}{x.group(3)}', string)
     string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
     string = re.sub(r' +', ' ', string)
+    string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
+    string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
+    string = re.sub(r' (<[^>]+>) ', lambda x: f" {x.group(1)}", string)
 
     return string
 
@@ -726,6 +730,8 @@ def volume_generate(expression: str, rounding: int = 2):
 
     actual_expr = re.sub(r'\s', '', expression)
     actual_expr = re.sub(r',', '.', actual_expr)
+    actual_expr = re.sub(r"\(\)\*0", '', actual_expr)
+    actual_expr = re.sub(r"\(([0-9.]+)\)", lambda x: x.group(1), actual_expr)
 
     re_null = re.fullmatch(r'\((.+)\)\*0', actual_expr)
     all_null = False

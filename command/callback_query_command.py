@@ -1621,7 +1621,8 @@ class CurrDetailCommand(CallbackQueryCommand):
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
             SELECT * FROM story_table
-            WHERE currency_pid = $1 AND status = TRUE;
+            WHERE currency_pid = $1 AND status = TRUE
+            ORDER BY id ASC;
         """, kwargs['curr_id'])
 
         res2 = await self.db.fetchrow("""
@@ -1847,7 +1848,8 @@ class CurrGetDetail(CallbackQueryCommand):
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         res = await self.db.fetch("""
             SELECT * FROM story_table
-            WHERE currency_pid = $1 AND status = TRUE;
+            WHERE currency_pid = $1 AND status = TRUE
+            ORDER BY id ASC;
         """, kwargs['curr_id'])
 
         res2 = await self.db.fetchrow("""
@@ -2899,7 +2901,8 @@ class AdminBalanceDetail(CallbackQueryCommand):
         for item in res2:
             res3 = await self.db.fetch("""
                 SELECT * FROM story_table
-                WHERE currency_pid = $1 AND status = TRUE;
+                WHERE currency_pid = $1 AND status = TRUE
+                ORDER BY id ASC;
             """, item['id'])
 
             curr_detail_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
