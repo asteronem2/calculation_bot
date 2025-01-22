@@ -1250,11 +1250,8 @@ class CurrVolumeCommand(CallbackQueryCommand):
         """, kwargs['curr_id'])
 
         story = story_generate(res, chat_id=self.chat.id, rounding=res2['rounding'])
-        today_story = re.sub(r'<[^>]+>', '', story)
-        today_story = today_story.split('-->')[1]
-        today_story = today_story.split('=')[0]
 
-        volume = volume_generate(today_story, rounding=res2['rounding'])
+        volume = volume_generate(story, rounding=res2['rounding'])
 
         text = Template(self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
             title=res2['title'].upper(),
@@ -2833,11 +2830,7 @@ class AdminBalanceVolume(CallbackQueryCommand):
                 volume = ''
             else:
                 try:
-                    today_story = re.sub(r'<[^>]+>', '', story)
-                    today_story = today_story.split('-->')[1]
-                    today_story = today_story.split('=')[0]
-
-                    volume = volume_generate(today_story, rounding=item['rounding'])
+                    volume = volume_generate(story, rounding=item['rounding'])
                 except Exception as err:
                     traceback.print_exc()
                     volume = ''

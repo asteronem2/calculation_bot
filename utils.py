@@ -292,6 +292,7 @@ def float_to_str(value: float, rounding: int = 2) -> Union[str, bool]:
             return final_before_dot_str
     except:
         return False
+
 def format_number(value: str):
     rounding = 20
     value = value.replace(',', '.').replace(' ', '')
@@ -466,6 +467,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
                         expr = expr[0] + expr[2:-1]
                     elif ex_r2 and expr[:3] == '-(-':
                         expr = expr[3:-1]
+                expr = re.sub(r"-\(([0-9.]+)\)", lambda x: x.group(1), expr)
                 story_items.append({
                     'type': 'story_item',
                     'expr': expr,
@@ -592,8 +594,8 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
     base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{format_number(x.group(1))}{x.group()[-1]}", base_string)
     base_string = base_string.replace(' * 0', '*0')
     base_string = f'<b>{float_to_str(first_before, rounding)}</b> --> ' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
-    base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
-    base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
+    base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=-])([^ a-zA-Z])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
+    base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
     base_string = re.sub(
         r'[( ](<[^>]+>) ',
         lambda x: x.group()[0] + x.group(1),
@@ -678,7 +680,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     # string = re.sub(r'(<a href=[^>]+>)|([0-9>\n])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
     string = re.sub(r"(= ?[+-?] ?)([0-9.]{2,})(\n)",
                     lambda x: f'{x.group(1)}{float_to_str(float(x.group(2)), rounding)}{x.group(3)}', string)
-    string = re.sub(r"([+*/%-] ?<.+?> ?)([0-9.]{2,})(</.+?>)",
+    string = re.sub(r"([+*/%-] ?<.+?> ?)([^<]{2,})(</.+?>)",
                     lambda x: f'{x.group(1)}{format_number(x.group(2))}{x.group(3)}', string)
     string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
     string = re.sub(r' +', ' ', string)
@@ -693,7 +695,15 @@ def get_element(mylist, index, default=None):
     return mylist[index] if -len(mylist) <= index < len(mylist) else default
 
 
-def volume_generate(expression: str, rounding: int = 2):
+def volume_generate(story_expression: str, rounding: int = 2):
+
+    story_expression = re.sub(r'\s', '', story_expression)
+    story_expression = re.sub(r',', '.', story_expression)
+
+    story_expression = re.sub(r">([*+/0-9.%()-]+%[*+/0-9.%()-]*)<", lambda x: ">" + float_to_str(calculate(x.group(1)), rounding) + "<", story_expression)
+    story_expression = re.sub(r"<[^>]+>", "", story_expression)
+    story_expression = story_expression.split('-->')[1]
+    expression = story_expression.split('=')[0]
     def decompose_brackets(expr):
         while True:
             search = re.search(r'(\([^(]*\([^(]*)(\(.*?\))([^)]*\)[^)]*\))', expr)
@@ -785,7 +795,7 @@ def volume_generate(expression: str, rounding: int = 2):
         if i != 0:
             steps[i] = re.sub(
                 r'[0-9.]+',
-                lambda x: format_number(x.group()) if x.group() in list_unformatted_numbers else float_to_str(float(x.group()), rounding),
+                lambda x: str(format_number(x.group())) if x.group() in list_unformatted_numbers else float_to_str(float(x.group()), rounding),
                 steps[i]
             )
 
