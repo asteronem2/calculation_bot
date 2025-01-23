@@ -687,7 +687,6 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'[( ](<[^>]+>)[ )]', lambda x: f" {x.group(1)}", string)
-    print(string)
     string = re.sub(r"<b>([+\d., -]+?)</b>", lambda x: "<b>" + float_to_str(float(x.group(1).replace(' ', '').replace(',', '.')), rounding) +"</b>", string)
 
     return string
@@ -794,7 +793,13 @@ def volume_generate(story_expression: str, rounding: int = 2):
     list_unformatted_numbers = [i for i in re.findall(r'[0-9.]+', clear_expression)]
 
     for i in range(len(steps)):
-        if i != 0:
+        if i == 0:
+            steps[i] = re.sub(
+                r'[0-9.,]+',
+                lambda x: str(format_number(x.group())),
+                steps[i]
+            )
+        elif i != 0:
             steps[i] = re.sub(
                 r'[0-9.]+',
                 lambda x: str(format_number(x.group())) if x.group() in list_unformatted_numbers else float_to_str(float(x.group()), rounding),

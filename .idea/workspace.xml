@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.21 final unstable version&#10;1. Bug fixing">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.22 final unstable version&#10;1. Bug fixing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
@@ -104,14 +104,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00069" summary="0.9.75 final unstable version&#10;1. Много всего">
-      <option name="closed" value="true" />
-      <created>1729593369825</created>
-      <option name="number" value="00069" />
-      <option name="presentableId" value="LOCAL-00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1729593369826</updated>
     </task>
     <task id="LOCAL-00070" summary="0.9.76 final unstable version&#10;1. Условие для создания валюты - наличие русской или английской буквы в title">
       <option name="closed" value="true" />
@@ -497,7 +489,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737548695163</updated>
     </task>
-    <option name="localTasksCounter" value="118" />
+    <task id="LOCAL-00118" summary="0.10.22 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1737619960781</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1737619960782</updated>
+    </task>
+    <option name="localTasksCounter" value="119" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -532,7 +532,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.97 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.98 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.99 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.0 final unstable version&#10;1. Bug fixing" />
@@ -557,7 +556,8 @@
     <MESSAGE value="0.10.19 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.20 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.21 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.21 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.22 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.22 final unstable version&#10;1. Bug fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
