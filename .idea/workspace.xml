@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.20 final unstable version&#10;1. Bug fixing">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.21 final unstable version&#10;1. Bug fixing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -106,14 +104,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00068" summary="0.9.74 final unstable version&#10;1. Много всего">
-      <option name="closed" value="true" />
-      <created>1729060735886</created>
-      <option name="number" value="00068" />
-      <option name="presentableId" value="LOCAL-00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1729060735887</updated>
     </task>
     <task id="LOCAL-00069" summary="0.9.75 final unstable version&#10;1. Много всего">
       <option name="closed" value="true" />
@@ -499,7 +489,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737369079993</updated>
     </task>
-    <option name="localTasksCounter" value="117" />
+    <task id="LOCAL-00117" summary="0.10.21 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1737548695162</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1737548695163</updated>
+    </task>
+    <option name="localTasksCounter" value="118" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -534,7 +532,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.96 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.97 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.98 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.9.99 final unstable version&#10;1. Bug fixing" />
@@ -559,7 +556,8 @@
     <MESSAGE value="0.10.18 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.19 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.20 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.20 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.21 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.21 final unstable version&#10;1. Bug fixing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

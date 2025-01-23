@@ -635,7 +635,7 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     if not current_story_items:
         return False
 
-    string: str = '\n' + '<b>' +str(float_to_str(current_story_items[0]['before_value'], rounding) or 'Создание -->') + '</b>'
+    string: str = '\n' + '<b>' + str(float_to_str(current_story_items[0]['before_value'], rounding) or 'Создание -->') + '</b>'
 
     for story_item in current_story_items:
         if current_story_items.index(story_item) == len(current_story_items)-1:
@@ -687,6 +687,8 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'[( ](<[^>]+>)[ )]', lambda x: f" {x.group(1)}", string)
+    print(string)
+    string = re.sub(r"<b>([+\d., -]+?)</b>", lambda x: "<b>" + float_to_str(float(x.group(1).replace(' ', '').replace(',', '.')), rounding) +"</b>", string)
 
     return string
 
