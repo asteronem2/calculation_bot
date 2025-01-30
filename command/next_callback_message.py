@@ -1,3 +1,4 @@
+import asyncio
 import json
 import re
 from string import Template
@@ -8,6 +9,7 @@ from aiogram import exceptions
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
 from command.command_interface import NextCallbackMessageCommand
+from main import message_command_cls
 from utils import calculate, float_to_str, str_to_float, markup_generate, entities_to_html
 
 
@@ -56,7 +58,7 @@ class CurrChangeTitleCommand(NextCallbackMessageCommand):
             #     chat_id=self.chat.id,
             #     message_id=self.press_message_id
             # )
-            message_obj = await self.generate_send_message(stage=1,title1=res['title'], title2=self.text_low, **kwargs)
+            message_obj = await self.generate_send_message(stage=1, title1=res['title'], title2=self.text_low, **kwargs)
             await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
@@ -92,7 +94,6 @@ class CurrChangeTitleCommand(NextCallbackMessageCommand):
                 message_thread_id=self.topic,
                 markup=markup
             )
-
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -156,7 +157,8 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
             #     chat_id=self.chat.id,
             #     message_id=self.press_message_id
             # )
-            message_obj = await self.generate_send_message(stage=1, title=res['title'], value=new_value, res=res, **kwargs)
+            message_obj = await self.generate_send_message(stage=1, title=res['title'], value=new_value, res=res,
+                                                           **kwargs)
             sent_message = await self.bot.send_text(message_obj)
             await self.bot.delete_message(
                 chat_id=self.chat.id,
@@ -185,7 +187,6 @@ class CurrChangeValueCommand(NextCallbackMessageCommand):
                 expression=self.text_low,
                 sent_message_id=sent_message.message_id
             )
-
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         if kwargs['stage'] == 1:
@@ -962,7 +963,6 @@ class AdminTagCreateTag(NextCallbackMessageCommand):
             else:
                 pass
 
-
         message_obj2 = await self.generate_send_message(stage=2, tag=tag)
         await self.bot.send_text(message_obj2)
 
@@ -1077,7 +1077,6 @@ class AdminEmployeesAdd(NextCallbackMessageCommand):
                                 WHERE id = $2;
                             """, chat['id'], res1['id'])
                             break
-
 
             message_obj = await self.generate_send_message(stage=1, **kwargs)
             await self.bot.send_text(message_obj)
@@ -1194,7 +1193,6 @@ class AdminEmployeesRemove(AdminEmployeesAdd):
             message_obj2 = await AdminEmployeesAdd.generate_send_message(self, stage=2, **kwargs)
             await self.bot.send_text(message_obj2)
 
-
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.send_texts['AdminEmployeesRemove']).substitute()
 
@@ -1242,7 +1240,7 @@ class AdminDistributionPin(NextCallbackMessageCommand):
                 WHERE super = FALSE;
             """)
 
-        text = entities_to_html(self.message.text, self.message.entities) if self.message.text else\
+        text = entities_to_html(self.message.text, self.message.entities) if self.message.text else \
             (entities_to_html(self.message.caption, self.message.caption_entities) if self.message.caption else '_')
 
         photo = self.message.photo
@@ -1454,26 +1452,37 @@ class CreateFolder(NextCallbackMessageCommand):
                     message_obj = TextMessage(
                         chat_id=self.chat.id,
                         text=i['text'],
-                        photo=i['file_id']
+                        photo=i['file_id'],
+                        disable_web_page_preview=i["disable_preview"]
                     )
-                    sent_message = await self.bot.send_text(message_obj)
+                    file_rows = await self.db.fetch("""
+                        SELECT * FROM note_files_table
+                        WHERE note_pid = $1;
+                    """, i["id"])
+                    if file_rows:
+                        message_obj.photo = [message_obj.photo] + [i["file_id"] for i in file_rows]
+                        sent_message = await self.bot.send_text(message_obj)
+                    else:
+                        sent_message = [await self.bot.send_text(message_obj)]
+
                     if i['add_info']:
                         await self.bot.set_emoji(
-                            chat_id=sent_message.chat.id,
-                            message_id=sent_message.message_id,
+                            chat_id=sent_message[0].chat.id,
+                            message_id=sent_message[0].message_id,
                             emoji=self.global_texts['reactions']['HiddenInfo']
                         )
-                    await self.db.execute("""
-                        INSERT INTO message_table
-                        (user_pid, message_id, text, type, is_bot_message, addition)
-                        VALUES ($1, $2, $3, $4, TRUE, $5);
-                    """,
-                                          self.db_user['id'],
-                                          sent_message.message_id,
-                                          sent_message.text,
-                                          'note',
-                                          str(i['id'])
-                                          )
+                    for ii in sent_message:
+                        await self.db.execute("""
+                            INSERT INTO message_table
+                            (user_pid, message_id, text, type, is_bot_message, addition)
+                            VALUES ($1, $2, $3, $4, TRUE, $5);
+                        """,
+                                              self.db_user['id'],
+                                              ii.message_id,
+                                              ii.text,
+                                              'note',
+                                              str(i['id'])
+                                              )
             else:
                 variable.append('expand')
 
@@ -1532,7 +1541,6 @@ class FolderChangeTitle(CreateFolder):
             SET title = $1
             WHERE id = $2;
         """, self.text, kwargs['folder_id'])
-
 
         message_obj = await self.generate_send_message(stage=1, res=res, **kwargs)
         await self.bot.send_text(message_obj)
@@ -1630,26 +1638,37 @@ class FolderChangeTitle(CreateFolder):
                     message_obj = TextMessage(
                         chat_id=self.chat.id,
                         text=i['text'],
-                        photo=i['file_id']
+                        photo=i['file_id'],
+                        disable_web_page_preview=i["disable_preview"]
                     )
-                    sent_message = await self.bot.send_text(message_obj)
+                    file_rows = await self.db.fetch("""
+                        SELECT * FROM note_files_table
+                        WHERE note_pid = $1;
+                    """, i["id"])
+                    if file_rows:
+                        message_obj.photo = [message_obj.photo] + [i["file_id"] for i in file_rows]
+                        sent_message = await self.bot.send_text(message_obj)
+                    else:
+                        sent_message = [await self.bot.send_text(message_obj)]
+
                     if i['add_info']:
                         await self.bot.set_emoji(
-                            chat_id=sent_message.chat.id,
-                            message_id=sent_message.message_id,
+                            chat_id=sent_message[0].chat.id,
+                            message_id=sent_message[0].message_id,
                             emoji=self.global_texts['reactions']['HiddenInfo']
                         )
-                    await self.db.execute("""
-                        INSERT INTO message_table
-                        (user_pid, message_id, text, type, is_bot_message, addition)
-                        VALUES ($1, $2, $3, $4, TRUE, $5);
-                    """,
-                                          self.db_user['id'],
-                                          sent_message.message_id,
-                                          sent_message.text,
-                                          'note',
-                                          str(i['id'])
-                                          )
+                    for ii in sent_message:
+                        await self.db.execute("""
+                            INSERT INTO message_table
+                            (user_pid, message_id, text, type, is_bot_message, addition)
+                            VALUES ($1, $2, $3, $4, TRUE, $5);
+                        """,
+                                              self.db_user['id'],
+                                              ii.message_id,
+                                              ii.text,
+                                              'note',
+                                              str(i['id'])
+                                              )
             else:
                 variable.append('expand')
 
@@ -1693,6 +1712,7 @@ class CreateNote(CreateFolder):
             return True
 
     async def process(self, *args, **kwargs) -> None:
+
         photo = None
         entities = self.message.entities
         if self.message.photo:
@@ -1704,24 +1724,37 @@ class CreateNote(CreateFolder):
             WHERE id = $1;
         """, self.pressure_info['id'])
 
+        disable_preview = False
+
+        if self.message.link_preview_options:
+            if self.message.link_preview_options.is_disabled is True:
+                disable_preview = True
+
         await self.db.execute("""
             INSERT INTO note_table 
-            (user_pid, title, text, type, parent_id, file_id)
+            (user_pid, title, text, type, parent_id, file_id, media_group_id, disable_preview)
             VALUES
-            ($1, $2, $3, 'note', $4, $5);
-        """, self.db_user['id'], self.text[:17] + '...', entities_to_html(self.text, entities), kwargs['folder_id'], photo)
+            ($1, $2, $3, 'note', $4, $5, $6, $7);
+        """, self.db_user['id'], self.text[:17] + '...', entities_to_html(self.text, entities), kwargs['folder_id'],
+                              photo, self.message.media_group_id, disable_preview)
 
-
-        message_obj = await self.generate_send_message(stage=1, **kwargs)
-        await self.bot.send_text(message_obj)
-        await self.bot.delete_message(
-            chat_id=self.chat.id,
-            message_id=self.press_message_id
-        )
-        message_obj2 = await CreateFolder.generate_send_message(self, stage=2, folder_id=kwargs['folder_id'])
-        await self.bot.send_text(message_obj2)
+        if self.message.media_group_id:
+            # noinspection PyAsyncCall
+            asyncio.create_task(unit_media(self.message.media_group_id, self, kwargs["folder_id"]))
+        else:
+            message_obj = await self.generate_send_message(stage=1, **kwargs)
+            await self.bot.send_text(message_obj)
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=self.press_message_id
+            )
+            message_obj2 = await CreateFolder.generate_send_message(self, stage=2, folder_id=kwargs['folder_id'])
+            await self.bot.send_text(message_obj2)
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        if not kwargs.get("folder_id"):
+            rres1 = re.fullmatch(r'folder/([0-9]+)/create_note/', self.cdata)
+            kwargs["folder_id"] = int(rres1.group(1))
         if kwargs['stage'] == 1:
             text = Template(self.send_texts['CreateNote']).substitute()
 
@@ -1804,26 +1837,37 @@ class CreateNote(CreateFolder):
                     message_obj = TextMessage(
                         chat_id=self.chat.id,
                         text=i['text'],
-                        photo=i['file_id']
+                        photo=i['file_id'],
+                        disable_web_page_preview=i["disable_preview"]
                     )
-                    sent_message = await self.bot.send_text(message_obj)
+                    file_rows = await self.db.fetch("""
+                        SELECT * FROM note_files_table
+                        WHERE note_pid = $1;
+                    """, i["id"])
+                    if file_rows:
+                        message_obj.photo = [message_obj.photo] + [i["file_id"] for i in file_rows]
+                        sent_message = await self.bot.send_text(message_obj)
+                    else:
+                        sent_message = [await self.bot.send_text(message_obj)]
+
                     if i['add_info']:
                         await self.bot.set_emoji(
-                            chat_id=sent_message.chat.id,
-                            message_id=sent_message.message_id,
+                            chat_id=sent_message[0].chat.id,
+                            message_id=sent_message[0].message_id,
                             emoji=self.global_texts['reactions']['HiddenInfo']
                         )
-                    await self.db.execute("""
-                        INSERT INTO message_table
-                        (user_pid, message_id, text, type, is_bot_message, addition)
-                        VALUES ($1, $2, $3, $4, TRUE, $5);
-                    """,
-                                          self.db_user['id'],
-                                          sent_message.message_id,
-                                          sent_message.text,
-                                          'note',
-                                          str(i['id'])
-                                          )
+                    for ii in sent_message:
+                        await self.db.execute("""
+                            INSERT INTO message_table
+                            (user_pid, message_id, text, type, is_bot_message, addition)
+                            VALUES ($1, $2, $3, $4, TRUE, $5);
+                        """,
+                                              self.db_user['id'],
+                                              ii.message_id,
+                                              ii.text,
+                                              'note',
+                                              str(i['id'])
+                                              )
             else:
                 variable.append('expand')
 
@@ -1858,6 +1902,37 @@ class CreateNote(CreateFolder):
         )
 
 
+async def unit_media(media_group_id: str, create_note_instance: CreateNote, folder_id: int):
+    from utils import db
+    await asyncio.sleep(1)
+    rows = await db.fetch("""
+        SELECT * FROM note_table
+        WHERE media_group_id = $1;
+    """, media_group_id)
+    if rows and len(rows) > 1:
+        note_row = rows[0]
+        for row in rows[1:]:
+            await db.execute("""
+                DELETE FROM note_table WHERE id = $1;
+            """, row["id"])
+            await db.execute("""
+                INSERT INTO note_files_table
+                (note_pid, file_id)
+            """, note_row["id"], row["file_id"])
+    try:
+        await create_note_instance.bot.delete_message(
+            chat_id=create_note_instance.chat.id,
+            message_id=create_note_instance.press_message_id
+        )
+
+        message_obj = await create_note_instance.generate_send_message(stage=1, folder_id=folder_id)
+        await create_note_instance.bot.send_text(message_obj)
+        message_obj2 = await CreateFolder.generate_send_message(create_note_instance, stage=2, folder_id=folder_id)
+        await create_note_instance.bot.send_text(message_obj2)
+    except:
+        pass
+
+
 class NoteChangeTitle(NextCallbackMessageCommand):
     async def define(self):
         rres1 = re.fullmatch(r'note/([0-9]+)/change_title/', self.cdata)
@@ -1882,7 +1957,6 @@ class NoteChangeTitle(NextCallbackMessageCommand):
             SET title = $1
             WHERE id = $2;
         """, self.text, kwargs['note_id'])
-
 
         message_obj = await self.generate_send_message(stage=1, res=res, **kwargs)
         await self.bot.send_text(message_obj)
@@ -1989,7 +2063,7 @@ class NoteChangeText(NextCallbackMessageCommand):
                 SELECT * FROM note_table
                 WHERE id = $1;
             """, kwargs['note_id'])
-            
+
             text = Template(self.global_texts['callback_command']['edit']['Note']).substitute(
                 title=res['title'],
                 text=res['text']
@@ -2103,7 +2177,8 @@ class AdminRevise(NextCallbackMessageCommand):
 
         revise_expr = self.text_low
         revise_expr = revise_expr.replace('\n', '+')
-        revise_expr = revise_expr.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*', '*').replace('+%', '%')
+        revise_expr = revise_expr.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*', '*').replace(
+            '+%', '%')
 
         await self.db.execute("""
             UPDATE user_table
@@ -2246,11 +2321,12 @@ class AdminReviseSecond(NextCallbackMessageCommand):
 
             expr_1 = self.db_user['revise_expr'].replace(' ', '').replace(',', '.')
             expr_1 = expr_1.replace('\n', '+')
-            expr_1 = expr_1.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*','*').replace('+%', '%')
+            expr_1 = expr_1.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*', '*').replace('+%',
+                                                                                                                '%')
             expr_2 = self.text_low.replace(' ', '').replace(',', '.')
             expr_2 = expr_2.replace('\n', '+')
-            expr_2 = expr_2.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*','*').replace('+%', '%')
-
+            expr_2 = expr_2.replace('+-', '-').replace('++', '+').replace('+/', '/').replace('+*', '*').replace('+%',
+                                                                                                                '%')
 
             try:
                 res1 = float_to_str(eval(expr_1))

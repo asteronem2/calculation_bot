@@ -104,6 +104,10 @@ class DeleteNote(MessageReactionCommand):
     async def process(self, *args, **kwargs) -> None:
         if kwargs['res']['type'] == 'note':
             await self.db.execute("""
+                DELETE FROM note_files_table
+                WHERE note_pid = $1;
+            """, int(kwargs['res']['addition']))
+            await self.db.execute("""
                 DELETE FROM note_table
                 WHERE id = $1;
             """, int(kwargs['res']['addition']))
@@ -114,10 +118,15 @@ class DeleteNote(MessageReactionCommand):
                 WHERE id = $1;
             """, int(kwargs['res']['addition']))
 
-        await self.bot.delete_message(
-            chat_id=self.chat.id,
-            message_id=self.message_id
-        )
+        all_message_this_note = await self.db.fetch("""
+            SELECT * FROM message_table
+            WHERE addition = $1;
+        """, kwargs['res']['addition'])
+        for i in all_message_this_note:
+            await self.bot.delete_message(
+                chat_id=self.chat.id,
+                message_id=i["message_id"]
+            )
 
 
 class ReplyReaction(MessageReactionCommand):

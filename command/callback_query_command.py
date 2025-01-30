@@ -2227,26 +2227,37 @@ class Info(CallbackQueryCommand):
                 message_obj = TextMessage(
                     chat_id=self.chat.id,
                     text=i['text'],
-                    photo=i['file_id']
+                    photo=i['file_id'],
+                    disable_web_page_preview=i["disable_preview"]
                 )
-                sent_message = await self.bot.send_text(message_obj)
+                file_rows = await self.db.fetch("""
+                    SELECT * FROM note_files_table
+                    WHERE note_pid = $1;
+                """, i["id"])
+                if file_rows:
+                    message_obj.photo = [message_obj.photo] + [i["file_id"] for i in file_rows]
+                    sent_message = await self.bot.send_text(message_obj)
+                else:
+                    sent_message = [await self.bot.send_text(message_obj)]
+
                 if i['add_info']:
                     await self.bot.set_emoji(
-                        chat_id=sent_message.chat.id,
-                        message_id=sent_message.message_id,
+                        chat_id=sent_message[0].chat.id,
+                        message_id=sent_message[0].message_id,
                         emoji=self.global_texts['reactions']['HiddenInfo']
                     )
-                await self.db.execute("""
-                    INSERT INTO message_table
-                    (user_pid, message_id, text, type, is_bot_message, addition)
-                    VALUES ($1, $2, $3, $4, TRUE, $5);
-                """,
-                                      self.db_user['id'],
-                                      sent_message.message_id,
-                                      sent_message.text,
-                                      'note',
-                                      str(i['id'])
-                                      )
+                for ii in sent_message:
+                    await self.db.execute("""
+                        INSERT INTO message_table
+                        (user_pid, message_id, text, type, is_bot_message, addition)
+                        VALUES ($1, $2, $3, $4, TRUE, $5);
+                    """,
+                                           self.db_user['id'],
+                                           ii.message_id,
+                                           ii.text,
+                                           'note',
+                                           str(i['id'])
+                                           )
         else:
             variable.append('expand')
 
@@ -3869,26 +3880,37 @@ class Folder(CallbackQueryCommand):
                 message_obj = TextMessage(
                     chat_id=self.chat.id,
                     text=i['text'],
-                    photo=i['file_id']
+                    photo=i['file_id'],
+                    disable_web_page_preview=i["disable_preview"]
                 )
-                sent_message = await self.bot.send_text(message_obj)
+                file_rows = await self.db.fetch("""
+                    SELECT * FROM note_files_table
+                    WHERE note_pid = $1;
+                """, i["id"])
+                if file_rows:
+                    message_obj.photo = [message_obj.photo] + [i["file_id"] for i in file_rows]
+                    sent_message = await self.bot.send_text(message_obj)
+                else:
+                    sent_message = [await self.bot.send_text(message_obj)]
+
                 if i['add_info']:
                     await self.bot.set_emoji(
-                        chat_id=sent_message.chat.id,
-                        message_id=sent_message.message_id,
+                        chat_id=sent_message[0].chat.id,
+                        message_id=sent_message[0].message_id,
                         emoji=self.global_texts['reactions']['HiddenInfo']
                     )
-                await self.db.execute("""
-                    INSERT INTO message_table
-                    (user_pid, message_id, text, type, is_bot_message, addition)
-                    VALUES ($1, $2, $3, $4, TRUE, $5);
-                """,
-                                       self.db_user['id'],
-                                       sent_message.message_id,
-                                       sent_message.text,
-                                       'note',
-                                       str(i['id'])
-                                       )
+                for ii in sent_message:
+                    await self.db.execute("""
+                        INSERT INTO message_table
+                        (user_pid, message_id, text, type, is_bot_message, addition)
+                        VALUES ($1, $2, $3, $4, TRUE, $5);
+                    """,
+                                           self.db_user['id'],
+                                           ii.message_id,
+                                           ii.text,
+                                           'note',
+                                           str(i['id'])
+                                           )
         else:
             variable.append('expand')
 

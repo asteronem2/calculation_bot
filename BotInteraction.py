@@ -3,9 +3,11 @@ import re
 import time
 import traceback
 from dataclasses import dataclass
+from typing import Union, List
 
 import aiogram
 from aiogram.exceptions import AiogramError
+from aiogram.types import InputMediaPhoto
 from aiogram.types.reaction_type_emoji import ReactionTypeEmoji
 
 from utils import log
@@ -26,8 +28,9 @@ class TextMessage(Message):
     destroy_timeout: int = 0
     button_destroy: int = 0
     pin: bool = False
-    photo: str = None
+    photo: Union[str, List[str]] = None
     reply_to_message_id: int = None
+    disable_web_page_preview: bool = True
 
 
 @dataclass
@@ -37,6 +40,7 @@ class EditMessage(Message):
     message_id: int
     markup: aiogram.types.InlineKeyboardMarkup = None,
     button_destroy: int = 0
+    disable_web_page_preview: bool = True
 
 
 # noinspection PyAsyncCall
@@ -72,16 +76,33 @@ class BotInter:
             if TextMessage:
                 try:
                     if message_obj.photo:
-                        sent_message = await self.bot.send_photo(
-                            chat_id=message_obj.chat_id,
-                            photo=message_obj.photo,
-                            caption=message_obj.text[:2000],
-                            message_thread_id=message_obj.message_thread_id,
-                            reply_markup=message_obj.markup,
-                            parse_mode=self._parse_mode,
-                            disable_notification=self.disable_notifications,
-                            reply_to_message_id=message_obj.reply_to_message_id
-                        )
+                        if type(message_obj.photo) == str:
+                            sent_message = await self.bot.send_photo(
+                                chat_id=message_obj.chat_id,
+                                photo=message_obj.photo,
+                                caption=message_obj.text[:2000],
+                                message_thread_id=message_obj.message_thread_id,
+                                reply_markup=message_obj.markup,
+                                parse_mode=self._parse_mode,
+                                disable_notification=self.disable_notifications,
+                                reply_to_message_id=message_obj.reply_to_message_id
+                            )
+                        elif type(message_obj.photo) == list:
+                            sent_messages = await self.bot.send_media_group(
+                                chat_id=message_obj.chat_id,
+                                media=[InputMediaPhoto(
+                                    media=i,
+                                    caption=message_obj.text[:2000],
+                                    parse_mode=self._parse_mode,
+                                ) for i in message_obj.photo],
+                                message_thread_id=message_obj.message_thread_id,
+                                disable_notification=self.disable_notifications,
+                                reply_to_message_id=message_obj.reply_to_message_id
+                            )
+                            await log('SEND BOT: MEDIA GROUP PHOTO', 'info')
+                            print(f'\033[1;36mSEND BOT: \033[1;32mMEDIA GROUP PHOTO\033[0;0m')
+                            return sent_messages
+
                     else:
                         sent_message = await self.bot.send_message(
                             chat_id=message_obj.chat_id,
@@ -90,7 +111,7 @@ class BotInter:
                             reply_markup=message_obj.markup,
                             parse_mode=self._parse_mode,
                             disable_notification=self.disable_notifications,
-                            disable_web_page_preview=self.disable_web_page_preview,
+                            disable_web_page_preview=message_obj.disable_web_page_preview,
                             reply_to_message_id=message_obj.reply_to_message_id
                         )
                     rres = re.sub(r'<.+?>|/n', '', sent_message.text or sent_message.caption or 'Without caption')
@@ -148,14 +169,23 @@ class BotInter:
         if message_obj.markup == (None,):
             message_obj.markup = None
         try:
-            await self.bot.edit_message_text(
-                chat_id=message_obj.chat_id,
-                text=message_obj.text[:4000],
-                message_id=message_obj.message_id,
-                reply_markup=message_obj.markup,
-                parse_mode=self._parse_mode,
-                disable_web_page_preview=self.disable_web_page_preview
-            )
+            try:
+                await self.bot.edit_message_text(
+                    chat_id=message_obj.chat_id,
+                    text=message_obj.text[:4000],
+                    message_id=message_obj.message_id,
+                    reply_markup=message_obj.markup,
+                    parse_mode=self._parse_mode,
+                    disable_web_page_preview=message_obj.disable_web_page_preview
+                )
+            except:
+                await self.bot.edit_message_caption(
+                    chat_id=message_obj.chat_id,
+                    caption=message_obj.text[:4000],
+                    message_id=message_obj.message_id,
+                    reply_markup=message_obj.markup,
+                    parse_mode=self._parse_mode
+                )
         except aiogram.exceptions.TelegramNetworkError as err:
             print(f"\033[1;31mERROR:\033[37m {err}\033[0m")
             asyncio.sleep(2)

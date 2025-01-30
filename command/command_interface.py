@@ -256,6 +256,18 @@ class NextCallbackMessageCommand:
         self.last_message_id = self.message.message_id - 1
 
     async def async_init(self):
+        if self.message.media_group_id:
+            res1 = await self.db.fetchrow("""
+                SELECT * FROM note_table
+                WHERE media_group_id = $1;
+            """, self.message.media_group_id)
+            if res1:
+                await self.db.execute("""
+                    INSERT INTO note_files_table
+                    (note_pid, file_id)
+                    VALUES ($1, $2)
+                """, res1["id"], self.message.photo[-1].file_id)
+                return False
         await self._get_addition_from_db()
 
     @abstractmethod

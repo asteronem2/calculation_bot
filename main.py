@@ -49,7 +49,8 @@ async def add_all_cls():
 
 async def check_define(cls_list: list, interface_class, obj):
     interface = interface_class(obj)
-    await interface.async_init()
+    if await interface.async_init() is False:
+        return None
     for cls in cls_list:
         define = await cls.define(interface)
         if define is True:
@@ -58,7 +59,14 @@ async def check_define(cls_list: list, interface_class, obj):
             return cls, define
     return None
 
+class LastMediaTime:
+    def __init__(self):
+        self.time = time.time()
 
+    def actualize(self):
+        self.time = time.time()
+
+lmt = LastMediaTime()
 @dispatcher.message()
 async def telegram_message_update(message: Message):
     try:
@@ -85,12 +93,19 @@ async def telegram_message_update(message: Message):
                                     message.from_user.id)
 
             if res:
+                if message.media_group_id:
+                    while True:
+                        await asyncio.sleep(0.1)
+                        if (time.time() - 0.5) > lmt.time:
+                            break
+                    lmt.actualize()
                 result: Type[MessageCommand] = await check_define(next_callback_message_cls, NextCallbackMessageCommand, message)
                 if result is None:
                     return None
 
                 command_obj = result(message)
-                await command_obj.async_init()
+                if await command_obj.async_init() is False:
+                    return
                 define = await command_obj.define()
 
                 if define is None:
