@@ -53,7 +53,8 @@ class Cancel(MessageReactionCommand):
             if last_res['story__expr_type'] == 'create':
                 return
             else:
-                new_value = last_res['currency__value'] - (last_res['story__after_value'] - last_res['story__before_value'])
+                new_value = last_res['currency__value'] - (
+                            last_res['story__after_value'] - last_res['story__before_value'])
                 await self.db.execute("""
                     UPDATE currency_table
                     SET value = $1
@@ -181,7 +182,8 @@ class ReplyReaction(MessageReactionCommand):
             """, int(res['chat_pid']))
 
             from utils import DED
-            sent = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id, disable_notification=True)
+            sent = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id,
+                                                      disable_notification=True)
 
             await self.bot.delete_message(sent.chat.id, sent.message_id)
 
@@ -347,23 +349,40 @@ class AdminHiddenInfo(MessageReactionCommand):
             WHERE id = $1;
         """, int(kwargs['res1']['addition']))
 
-        message_obj = await self.generate_send_message(res2=res2, **kwargs)
-        sent_message = await self.bot.send_text(message_obj)
+        if res2.get("add_info"):
+            message_obj = await self.generate_send_message(res2=res2, **kwargs)
+            sent_message = await self.bot.send_text(message_obj)
 
-        await self.db.execute("""
-            INSERT INTO message_table
-            (user_pid, message_id, text, type, is_bot_message, addition)
-            VALUES ($1, $2, $3, $4, TRUE, $5)
-        """, self.db_user['id'], sent_message.message_id, sent_message.text, 'hidden_note', str(res2['id']))
+            await self.db.execute("""
+                INSERT INTO message_table
+                (user_pid, message_id, text, type, is_bot_message, addition)
+                VALUES ($1, $2, $3, $4, TRUE, $5)
+            """, self.db_user['id'], sent_message.message_id, sent_message.text, 'hidden_note', str(res2['id']))
+        else:
+            message_obj = TextMessage(
+                chat_id=self.chat.id,
+                text="<b>Отсутствует дополнительная информация</b>",
+                destroy_timeout=5
+            )
+            await self.bot.send_text(message_obj)
 
     async def generate_send_message(self, *args, **kwargs) -> TextMessage:
         text = kwargs['res2']['add_info']
-
-        return TextMessage(
-            chat_id=self.chat.id,
-            text=text,
-            reply_to_message_id=self.message_id
-        )
+        rres = re.fullmatch(r"photo=([^&]+)&text=(.+)", text)
+        print(rres)
+        if rres:
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=rres.group(2) if rres.group(2) != "..." else None,
+                photo=rres.group(1),
+                reply_to_message_id=self.message_id
+            )
+        else:
+            return TextMessage(
+                chat_id=self.chat.id,
+                text=text,
+                reply_to_message_id=self.message_id
+            )
 
 
 class AdminHideHiddenInfo(MessageReactionCommand):
@@ -417,7 +436,8 @@ class ChangeCalculation(MessageReactionCommand):
                             curr_id = res['currency_pid']
                             from utils import DED
                             try:
-                                forwarded = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id, self.message_id)
+                                forwarded = await self.bot.bot.forward_message(DED.DEBUG_CHAT_ID, self.chat.id,
+                                                                               self.message_id)
                             except:
                                 return
                             f_text = forwarded.text

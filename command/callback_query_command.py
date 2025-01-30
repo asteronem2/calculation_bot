@@ -3,9 +3,11 @@ import re
 import traceback
 from inspect import trace
 from string import Template
+from typing import List
 
 from aiogram.methods import SendMessage
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton as IButton
 
 import BotInteraction
 from BotInteraction import EditMessage, TextMessage
@@ -39,6 +41,7 @@ class Close(CallbackQueryCommand):
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
 
 # Команды админов в группе
 class EditCurrencyEdit(CallbackQueryCommand):
@@ -187,7 +190,8 @@ class CurrChangeTitleCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -237,7 +241,8 @@ class CurrChangeValueCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -287,7 +292,8 @@ class CurrChangePostfixCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Отмена', callback_data=f'curr/edit/edit/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -690,7 +696,8 @@ class ChatTopicsCommand(CallbackQueryCommand):
             if i['topic'] == i['main_topic']:
                 topic_list.append(('Главная тема', f'https://t.me/c/{str(self.chat.id)[4:]}/{i["topic"]}', i['id']))
             else:
-                topic_list.append((f'Тема {theme_num}', f'https://t.me/c/{str(self.chat.id)[4:]}/{i["topic"]}', i['id']))
+                topic_list.append(
+                    (f'Тема {theme_num}', f'https://t.me/c/{str(self.chat.id)[4:]}/{i["topic"]}', i['id']))
                 theme_num += 1
 
         str_topic_list = '\n'.join([f'<a href="{i[1]}">{i[0]}</a>' for i in topic_list]) if topic_list else ''
@@ -1011,18 +1018,19 @@ class CurrencyRounding(EditCurrency):
 
     async def process(self, *args, **kwargs) -> None:
         new_rounding = kwargs['rounding'] + 1
-        
+
         if new_rounding == 6:
             new_rounding = 0
-        
+
         await self.db.execute("""
             UPDATE currency_table 
             SET rounding = $1
             WHERE id = $2;
         """, new_rounding, kwargs['curr_pk'])
-        
+
         message_obj = await EditCurrency.generate_edit_message(self, curr_id=kwargs['curr_pk'])
         await self.bot.edit_text(message_obj)
+
 
 # Команды сотрудников в группе
 class CurrCalculationCommand(CallbackQueryCommand):
@@ -1068,7 +1076,8 @@ class CurrCalculationCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'curr/balance/{kwargs["curr_id"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Отмена', callback_data=f'curr/balance/{kwargs["curr_id"]}/')]])
         )
 
 
@@ -1086,7 +1095,6 @@ class CurrSetNullCommand(CallbackQueryCommand):
             SELECT * FROM currency_table
             WHERE id = $1;
         """, kwargs['curr_id'])
-
 
         await self.db.execute("""
             UPDATE currency_table
@@ -1109,9 +1117,8 @@ class CurrSetNullCommand(CallbackQueryCommand):
             after_value=0.0,
             message_id=self.got_message_id,
             expression='обнуление',
-            sent_message_id = sent_message.message_id
+            sent_message_id=sent_message.message_id
         )
-
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         text = Template(self.send_texts['CurrSetNullCommand']).substitute(
@@ -1444,7 +1451,7 @@ class CurrStoryMenu(CallbackQueryCommand):
 
             cycle.append({
                 'text': i_text,
-                'callback' : f'curr/story_menu/{kwargs["curr_id"]}/set/{type_}/{i["date"]}/' if i['use'] is True else
+                'callback': f'curr/story_menu/{kwargs["curr_id"]}/set/{type_}/{i["date"]}/' if i['use'] is True else
                 'None'
             })
 
@@ -1456,7 +1463,6 @@ class CurrStoryMenu(CallbackQueryCommand):
             variable=variable,
             **butt_args
         )
-
 
         return EditMessage(
             chat_id=self.chat.id,
@@ -1550,7 +1556,8 @@ class CurrGetStory(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
-        story = story_generate(story_list=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'], rounding=res2['rounding'])
+        story = story_generate(story_list=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'],
+                               end_date=kwargs['end_date'], rounding=res2['rounding'])
 
         before_first_story = await self.db.fetchrow("""
             SELECT * FROM story_table
@@ -1752,7 +1759,7 @@ class CurrDetailMenu(CallbackQueryCommand):
 
             cycle.append({
                 'text': i_text,
-                'callback' : f'curr/detail_menu/{kwargs["curr_id"]}/set/{type_}/{i["date"]}/' if i['use'] is True else
+                'callback': f'curr/detail_menu/{kwargs["curr_id"]}/set/{type_}/{i["date"]}/' if i['use'] is True else
                 'None'
             })
 
@@ -1764,7 +1771,6 @@ class CurrDetailMenu(CallbackQueryCommand):
             variable=variable,
             **butt_args
         )
-
 
         return EditMessage(
             chat_id=self.chat.id,
@@ -1859,7 +1865,8 @@ class CurrGetDetail(CallbackQueryCommand):
             WHERE id = $1;
         """, res2['chat_pid'])
 
-        detail = detail_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'], end_date=kwargs['end_date'], rounding=res2["rounding"])
+        detail = detail_generate(story_items=res, chat_id=res3['chat_id'], start_date=kwargs['start_date'],
+                                 end_date=kwargs['end_date'], rounding=res2["rounding"])
 
         if detail is False:
             return await self.generate_error_message(**kwargs)
@@ -2049,7 +2056,8 @@ class AddressChangeMinValueCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'address/{res["id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'address/{res["id"]}/')]])
         )
 
 
@@ -2252,12 +2260,12 @@ class Info(CallbackQueryCommand):
                         (user_pid, message_id, text, type, is_bot_message, addition)
                         VALUES ($1, $2, $3, $4, TRUE, $5);
                     """,
-                                           self.db_user['id'],
-                                           ii.message_id,
-                                           ii.text,
-                                           'note',
-                                           str(i['id'])
-                                           )
+                                          self.db_user['id'],
+                                          ii.message_id,
+                                          ii.text,
+                                          'note',
+                                          str(i['id'])
+                                          )
         else:
             variable.append('expand')
 
@@ -2624,11 +2632,11 @@ class Menu(CallbackQueryCommand):
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         if self.access_level == 'admin':
             text = Template(self.global_texts['message_command']['MenuCommand']).substitute()
-    
+
             markup = markup_generate(
                 buttons=self.buttons['MenuCommand']
             )
-    
+
             return EditMessage(
                 chat_id=self.chat.id,
                 text=text,
@@ -2675,6 +2683,7 @@ class Menu(CallbackQueryCommand):
                 message_id=self.sent_message_id,
                 markup=markup
             )
+
 
 # Балансы
 class AdminBalance(CallbackQueryCommand):
@@ -2770,7 +2779,8 @@ class AdminBalanceStory(CallbackQueryCommand):
 
             story = story_generate(res3, res['chat_id'], rounding=item['rounding']) or ''
 
-            curr_story_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
+            curr_story_list += '<blockquote expandable>' + Template(
+                self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
                 title=item['title'],
                 postfix=((item['postfix'] or '') if story else ''),
                 story=story
@@ -2846,7 +2856,8 @@ class AdminBalanceVolume(CallbackQueryCommand):
                     traceback.print_exc()
                     volume = ''
 
-            curr_volume_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
+            curr_volume_list += '<blockquote expandable>' + Template(
+                self.global_texts['message_command']['CurrencyVolumeCommand']).substitute(
                 title=item['title'],
                 volume=volume
             ) + '</blockquote>' + '\n'
@@ -2909,7 +2920,8 @@ class AdminBalanceDetail(CallbackQueryCommand):
                 ORDER BY id ASC;
             """, item['id'])
 
-            curr_detail_list += '<blockquote expandable>' + Template(self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
+            curr_detail_list += '<blockquote expandable>' + Template(
+                self.global_texts['message_command']['CurrencyDetailCommand']).substitute(
                 title=item['title'],
                 detail=detail_generate(res3, res['chat_id'], rounding=item["rounding"]) or ''
             ) + '</blockquote>' + '\n'
@@ -3282,7 +3294,7 @@ class AdminChatLockUnlock(AdminChat):
             UPDATE chat_table
             SET locked = $1
             WHERE id = $2;
-        """, True if kwargs['type_'] == 'lock' else False,kwargs['chat_pk'])
+        """, True if kwargs['type_'] == 'lock' else False, kwargs['chat_pk'])
 
         message_obj = await AdminChat.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
@@ -3318,7 +3330,8 @@ class AdminChatChangeCodeName(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/chat/{kwargs["chat_pk"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Отмена', callback_data=f'admin/chat/{kwargs["chat_pk"]}/')]])
         )
 
 
@@ -3359,7 +3372,8 @@ class AdminChatSetTag(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/chat/{res["id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/chat/{res["id"]}/')]])
         )
 
 
@@ -3766,7 +3780,8 @@ class AdminDistributionPinUnpin(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
+            markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Отмена', callback_data=f'admin/distribution/choice/{kwargs["tag"]}/')]])
         )
 
 
@@ -3827,7 +3842,7 @@ class Folder(CallbackQueryCommand):
         """, kwargs['folder_id'])
 
         notes = ''
-        
+
         if not res['expand']:
             for i in child_notes:
                 text = i['text']
@@ -3905,12 +3920,12 @@ class Folder(CallbackQueryCommand):
                         (user_pid, message_id, text, type, is_bot_message, addition)
                         VALUES ($1, $2, $3, $4, TRUE, $5);
                     """,
-                                           self.db_user['id'],
-                                           ii.message_id,
-                                           ii.text,
-                                           'note',
-                                           str(i['id'])
-                                           )
+                                          self.db_user['id'],
+                                          ii.message_id,
+                                          ii.text,
+                                          'note',
+                                          str(i['id'])
+                                          )
         else:
             variable.append('expand')
 
@@ -4018,13 +4033,13 @@ class FolderSettings(CallbackQueryCommand):
 
         if not res2:
             variable.append('delete')
-        
+
         hidden_var = None
         for i in res2:
             if i['type'] == 'note' and i['add_info']:
                 hidden_var = 'show_hidden'
                 break
-        
+
         hidden_res = await self.db.fetch("""
             SELECT * FROM message_table
             WHERE user_pid = $1
@@ -4033,9 +4048,9 @@ class FolderSettings(CallbackQueryCommand):
 
         if hidden_res:
             hidden_var = 'hide_hidden'
-        
+
         variable.append(hidden_var)
-                    
+
         markup = markup_generate(
             buttons=self.buttons['FolderSettings'],
             folder_id=res['id'],
@@ -4200,7 +4215,6 @@ class FolderChangeParentMenu(CallbackQueryCommand):
             title=res['title']
         )
 
-
         cycle = []
 
         for i in folder_list:
@@ -4289,7 +4303,8 @@ class FolderChangeTitle(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
         )
 
 
@@ -4344,7 +4359,6 @@ class FolderDelete(Folder):
             """, kwargs['folder_id'])
 
         if kwargs['stage'] == 2:
-
             await self.db.execute("""
                 DELETE FROM note_table
                 WHERE id = $1;
@@ -4401,7 +4415,6 @@ class CreateFolder(CallbackQueryCommand):
             ON CONFLICT (user_pid, message_id, callback_data) DO NOTHING;
         """, None, self.db_user['id'], self.sent_message_id, self.cdata)
 
-
         message_obj = await self.generate_edit_message(**kwargs)
         await self.bot.edit_text(message_obj)
 
@@ -4419,7 +4432,8 @@ class CreateFolder(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
         )
 
 
@@ -4462,7 +4476,8 @@ class CreateNote(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'folder/{kwargs["folder_id"]}/')]])
         )
 
 
@@ -4482,7 +4497,6 @@ class NoteDelete(CallbackQueryCommand):
             """, kwargs['note_id'])
 
         if kwargs['stage'] == 2:
-
             await self.db.execute("""
                 DELETE FROM note_table
                 WHERE id = $1;
@@ -4539,7 +4553,6 @@ class NoteDelete(CallbackQueryCommand):
                 else:
                     notes += f'<blockquote expandable><b>{title}:/b>\n{text}</blockquote>'
                 notes += '\n'
-
 
         text = Template(self.edit_texts['Folder']).substitute(
             folder_title=res1['title'],
@@ -4621,7 +4634,8 @@ class NoteChangeTitle(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'note/{kwargs["note_id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'note/{kwargs["note_id"]}/')]])
         )
 
 
@@ -4664,7 +4678,8 @@ class NoteChangeText(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'note/{kwargs["note_id"]}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'note/{kwargs["note_id"]}/')]])
         )
 
 
@@ -5027,7 +5042,8 @@ class AdminTagChangeTag(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/tag/{tag}/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data=f'admin/tag/{tag}/')]])
         )
 
 
@@ -5384,7 +5400,8 @@ class AdminEmployeesAdd(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/employees/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/employees/')]])
         )
 
 
@@ -5423,7 +5440,8 @@ class AdminEmployeesRemove(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/employees/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/employees/')]])
         )
 
 
@@ -5550,6 +5568,132 @@ class ClientBind(AdminClientBind):
 
         message_obj = await AdminClientBind.generate_edit_message(self, **kwargs)
         await self.bot.edit_text(message_obj)
+
+
+class ClientStoryMenu(CallbackQueryCommand):
+    async def define(self):
+        if self.cdata.startswith("client_story_menu"):
+            rres = re.findall(r"[^&?/]+=[^&?/]+", self.cdata)
+            params = {}
+            for item in rres:
+                equal_split = item.split("=")
+                params[equal_split[0]] = equal_split[1]
+            curr = params.get("curr")
+            start = params.get("start")
+            end = params.get("end")
+            if not curr:
+                raise
+            await self.process(curr=curr, start=start, end=end)
+            return True
+
+    async def process(self, curr, start, end, *args, **kwargs) -> None:
+        if end:
+            if datetime.datetime.fromisoformat(start) > datetime.datetime.fromisoformat(end):
+                print("return")
+                return
+        curr_row = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, int(curr))
+
+        text = Template(self.global_texts["callback_command"]["edit"]['CurrStoryMenu']).substitute(
+            title=curr_row['title'].upper()
+        )
+
+        buttons: List[List[IButton]] = []
+        buttons.append([])
+        for i in ("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"):
+            buttons[-1].append(IButton(text=i, callback_data="None"))
+        buttons.append([])
+        row_count = 0
+        underlining = False
+        for i in calendar():
+            if i["date"] == start:
+                underlining = True
+
+            if row_count == 7:
+                buttons.append([])
+                row_count = 0
+            row_count += 1
+            if end:
+                callback_data = f'client_story_menu?curr={curr}&start={i["date"]}' if i["use"] is True else 'None'
+            else:
+                callback_data = f'client_story_menu?curr={curr}&start={start}&end={i["date"]}' if i["use"] is True else 'None'
+
+
+            button_text = i["text"]
+            if underlining:
+                button_text = "".join([i + "\u0331" for i in button_text])
+
+            buttons[-1].append(IButton(text=button_text, callback_data=callback_data))
+            if i["date"] == end or end is None:
+                underlining = False
+        if end:
+            buttons.append([IButton(text="Получить историю",callback_data=f"get_story_menu?curr={curr}&start={start}&end={end}")])
+        else:
+            buttons.append([IButton(text="Получить историю",callback_data=f"get_story_menu?curr={curr}&start={start}&end={start}")])
+        markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+        msg_to_edit = EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+        await self.bot.edit_text(msg_to_edit)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+
+class GetStoryMenu(CallbackQueryCommand):
+    async def define(self):
+        if self.cdata.startswith("get_story_menu"):
+            rres = re.findall(r"[^&?/]+=[^&?/]+", self.cdata)
+            params = {}
+            for item in rres:
+                equal_split = item.split("=")
+                params[equal_split[0]] = equal_split[1]
+            curr = params.get("curr")
+            start = params.get("start")
+            end = params.get("end")
+            if not curr or not start or not end:
+                raise
+            await self.process(curr=curr, start=start, end=end)
+            return True
+
+    async def process(self, curr, start, end, *args, **kwargs) -> None:
+        curr_row = await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, int(curr))
+
+        story_list = await self.db.fetch("""
+            SELECT * FROM story_table
+            WHERE currency_pid = $1
+            ORDER BY id ASC;
+        """, int(curr))
+
+        story = story_generate(story_list, curr_row["chat_pid"], start, end, curr_row["rounding"])
+
+        if story:
+            text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(
+                title=curr_row['title'].upper(),
+                story=story,
+                postfix=((curr_row['postfix'] or '') if story else '')
+            )
+        else:
+            text = "За данный период отсутствует история"
+        msg_to_edit = EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id
+        )
+        await self.bot.edit_text(msg_to_edit)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
 
 
 # Команды
@@ -5708,7 +5852,8 @@ class AdminChangeCommand(CallbackQueryCommand):
             chat_id=self.chat.id,
             text=text,
             message_id=self.sent_message_id,
-            markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/commands/')]])
+            markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text='Отмена', callback_data='admin/commands/')]])
         )
 
 

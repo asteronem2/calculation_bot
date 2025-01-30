@@ -4,6 +4,7 @@ import os
 import re
 import sys
 from string import Template
+from typing import List
 
 from aiogram.types import InlineKeyboardMarkup as IMarkup, InlineKeyboardButton as IButton, FSInputFile
 
@@ -11,10 +12,8 @@ import BotInteraction
 from command.command_interface import MessageCommand
 
 from BotInteraction import TextMessage, EditMessage
-from command.inline_query_command import mega_eval
-from main import message_command_cls
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
-    story_generate, entities_to_html, volume_generate
+    story_generate, entities_to_html, volume_generate, calendar
 
 
 class StartCommand(MessageCommand):
@@ -1457,7 +1456,14 @@ class AdminAddInfoNote(MessageCommand):
             WHERE id = $1;
         """, int(kwargs['res']['addition']))
 
-        hidden_text = entities_to_html(self.text, self.message.entities)
+        text = self.text or self.message.caption
+        if not text:
+            text = "..."
+
+        hidden_text = entities_to_html(text, self.message.entities)
+
+        if self.message.photo:
+            hidden_text = "photo=" + self.message.photo[-1].file_id + "&" + "text=" + hidden_text
 
         await self.db.execute("""
             UPDATE note_table
@@ -1898,9 +1904,6 @@ class QuoteReplied(MessageCommand):
 
 
 class ClientStory(MessageCommand):
-    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
-        pass
-
     async def define(self):
         if self.access_level == 'client':
             rres = re.fullmatch(rf'{self.keywords["StoryCommand"]}', self.text_low)
@@ -1922,6 +1925,9 @@ class ClientStory(MessageCommand):
 
         message_obj = await self.generate_send_message(res1=res1, res2=res2)
         await self.bot.send_text(message_obj)
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         curr_story_list = ''
@@ -1949,3 +1955,76 @@ class ClientStory(MessageCommand):
             chat_id=self.chat.id,
             text=text,
         )
+
+
+class ClientStoryMenu(MessageCommand):
+    async def define(self):
+        if self.access_level in ["client"]:
+            rres = re.fullmatch(rf'(.+) +{self.keywords["StoryCommand"]}', self.text_low)
+            if rres:
+                chat_id = self.db_user['bind_chat']
+                if chat_id:
+                    curr = rres.group(1)
+                    res = await self.db.fetch("""
+                        SELECT * FROM currency_table
+                        WHERE chat_pid = $1
+                        ORDER BY title ASC; 
+                    """, chat_id)
+                    for i in res:
+                        if curr == i['title']:
+                            await self.process(curr=i, chat_id=chat_id)
+                            return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_send_message(**kwargs)
+        await self.bot.send_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        curr = kwargs["curr"]
+
+        text = Template(self.global_texts["callback_command"]["edit"]['CurrStoryMenu']).substitute(
+            title=curr['title'].upper()
+        )
+
+        buttons: List[List[IButton]] = []
+
+        start_date = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).strftime("%Y-%m-%d")
+        end_date = start_date
+
+        buttons.append([])
+        for i in ("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"):
+            buttons[-1].append(IButton(text=i, callback_data="None"))
+        buttons.append([])
+        row_count = 0
+        underlining = False
+        for i in calendar():
+            if i["date"] == start_date:
+                underlining = True
+
+            if row_count == 7:
+                buttons.append([])
+                row_count = 0
+            row_count += 1
+            callback_data = f'client_story_menu?curr={kwargs["curr"]["id"]}&start={i["date"]}' if i["use"] is True else 'None'
+
+            button_text = i["text"]
+            if underlining:
+                button_text = "".join([i + "\u0331" for i in button_text])
+
+            buttons[-1].append(IButton(text=button_text, callback_data=callback_data))
+
+            if i["date"] == start_date:
+                underlining = False
+
+        buttons.append([IButton(text="Получить историю", callback_data=f"get_story_menu?curr={kwargs['curr']['id']}&start={start_date}&end={end_date}")])
+
+        markup = IMarkup(inline_keyboard=buttons)
+
+        return TextMessage(
+            chat_id=self.chat.id,
+            text=text,
+            markup=markup
+        )
+
+    async def generate_error_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass

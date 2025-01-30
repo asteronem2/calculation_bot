@@ -1,6 +1,5 @@
 import asyncio
 import re
-import time
 import traceback
 from dataclasses import dataclass
 from typing import Union, List
@@ -80,7 +79,7 @@ class BotInter:
                             sent_message = await self.bot.send_photo(
                                 chat_id=message_obj.chat_id,
                                 photo=message_obj.photo,
-                                caption=message_obj.text[:2000],
+                                caption=message_obj.text[:2000] if message_obj.text else None,
                                 message_thread_id=message_obj.message_thread_id,
                                 reply_markup=message_obj.markup,
                                 parse_mode=self._parse_mode,
@@ -92,7 +91,7 @@ class BotInter:
                                 chat_id=message_obj.chat_id,
                                 media=[InputMediaPhoto(
                                     media=i,
-                                    caption=message_obj.text[:2000],
+                                    caption=message_obj.text[:2000] if message_obj.text else None,
                                     parse_mode=self._parse_mode,
                                 ) for i in message_obj.photo],
                                 message_thread_id=message_obj.message_thread_id,
