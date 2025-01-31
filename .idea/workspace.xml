@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.23 final unstable version&#10;1. Bug fixing">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BotInteraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/BotInteraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/command/message_reaction_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_reaction_command.py" afterDir="false" />
-    </list>
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.24 final unstable version&#10;1. Bug fixing" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,7 +52,7 @@
     "Python.test.executor": "Run",
     "Python.utils.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "<unknown>",
     "last_opened_file_path": "/Users/ded/Programming/calculation_bot",
     "settings.editor.selected.configurable": "preferences.keymap"
   }
@@ -109,14 +104,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00072" summary="0.9.78 final unstable version&#10;1. Выгрузка таблицы inline запросов пользователей">
-      <option name="closed" value="true" />
-      <created>1729609528048</created>
-      <option name="number" value="00072" />
-      <option name="presentableId" value="LOCAL-00072" />
-      <option name="project" value="LOCAL" />
-      <updated>1729609528048</updated>
     </task>
     <task id="LOCAL-00073" summary="0.9.79 final unstable version&#10;1. Корректная работа inline калькуляции">
       <option name="closed" value="true" />
@@ -502,7 +489,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738234369296</updated>
     </task>
-    <option name="localTasksCounter" value="121" />
+    <task id="LOCAL-00121" summary="0.10.24 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1738270606001</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1738270606001</updated>
+    </task>
+    <option name="localTasksCounter" value="122" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -537,7 +532,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.9.99 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.0 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.1 final unstable version&#10;1. Update inline calculation" />
     <MESSAGE value="0.10.2 final unstable version&#10;1. Bug fixing" />
@@ -562,17 +556,7 @@
     <MESSAGE value="0.10.21 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.22 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.23 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.23 final unstable version&#10;1. Bug fixing" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/command/inline_query_command.py</url>
-          <line>234</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="0.10.24 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.24 final unstable version&#10;1. Bug fixing" />
   </component>
 </project>

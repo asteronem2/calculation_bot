@@ -1298,7 +1298,10 @@
           }
         ],
         [
-          {"text": "Чаты контрагентов", "callback_data": "admin/client_bind_chat/"}
+          {
+            "text": "Чаты контрагентов",
+            "callback_data": "admin/client_bind_chat/"
+          }
         ],
         [
           {
@@ -1312,18 +1315,44 @@
         ]
       ],
       "AdminClientBindChat": [
-        [{"text": "@$username ($first_name)", "callback_data": "admin/client_bind_chat/$client_id/", "cycle": "cycle", "row_width":  1}],
-        [{"text": "Назад \uD83D\uDD19", "callback_data": "admin/employees/"}]
+        [
+          {
+            "text": "@$username ($first_name)",
+            "callback_data": "admin/client_bind_chat/$client_id/",
+            "cycle": "cycle",
+            "row_width": 1
+          }
+        ],
+        [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "menu/"
+          },
+          {
+            "text": "Назад \uD83D\uDD19",
+            "callback_data": "admin/employees/"
+          }
+        ]
       ],
       "AdminClientBind": [
         [
-          {"text": "$status $code_name ($title)",
-          "callback_data": "admin/client_bind_chat/$client_id/$chat_pk/",
-          "cycle": "cycle",
-          "row_width": 1
+          {
+            "text": "$status $code_name ($title)",
+            "callback_data": "admin/client_bind_chat/$client_id/$chat_pk/",
+            "cycle": "cycle",
+            "row_width": 1
           }
         ],
-        [{"text": "Назад \uD83D\uDD19", "callback_data": "admin/client_bind_chat/"}]
+        [
+          {
+            "text": "В меню ❇️",
+            "callback_data": "menu/"
+          },
+          {
+            "text": "Назад \uD83D\uDD19",
+            "callback_data": "admin/client_bind_chat/"
+          }
+        ]
       ],
       "AdminBotSettings": [
         [
