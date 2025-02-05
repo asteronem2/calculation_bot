@@ -177,7 +177,8 @@
         "EmployeeMenuInfoNull": "<b>У вас нет доступа к информации</b>",
         "EmployeeMenuCommands": "<b>Список команд в личном чате:</b>\n<blockquote expandable><b>$AddressListCommand</b> - показывает список валют\n<b>$TrackingCommand</b> - включает отслеживание\n<b>$OffTrackingCommand</b> - отключает отслеживание\n<b>адрес «криптоадрес» «минимальное значение»</b> - создаёт валюту (указывать минимальное значение не обязательно). Если валюта существует открывает меню управления валютой</blockquote>\n\n<b>Список команд в группе:</b>\n<blockquote expandable><b>$BalanceListCommand</b> - показывает валюты чата\n<b>$StoryCommand</b> - история валюты\n<b>$DetailCommand</b> - детализация валюты\n<b>$CancelCommand</b> - отмена последней операции\n<b>$NullCommand</b> - обнуление валюты\n<b>«валюта»</b> - открывает меню взаимодействия с валютой\n<b>«число/формула»</b> - производит калькуляцию\n</blockquote>",
         "AdminClientBindChat": "<b>Выберите контрагента, к которому желаете привязать чат</b>",
-        "AdminClientBind": "<b>Выберите чат, который желаете привязать к контрагенту @$username ($first_name)</b>"
+        "AdminClientBind": "<b>Выберите чат, который желаете привязать к контрагенту @$username ($first_name)</b>",
+        "ChatReplySettings": "<b>Настройки калькуляции чата</b>"
       },
       "send": {
         "CurrSetNullCommand": "Валюта <b>$title</b> обнулена",
@@ -353,6 +354,20 @@
         ],
         [
           {
+            "text": "Настройка калькуляции",
+            "callback_data": "chat/reply_settings/"
+          }
+        ],
+        [
+          {
+            "text": "❎ Закрыть",
+            "callback_data": "close"
+          }
+        ]
+      ],
+      "ChatReplySettings": [
+        [
+          {
             "text": "Только пересылаемые",
             "callback_data": "chat/mode/forward/set/non_forward/",
             "variable": "forward"
@@ -404,10 +419,32 @@
         ],
         [
           {
+            "text": "Только ответы из другого чата",
+            "callback_data": "chat/mode/external/set/non_external/",
+            "variable": "external"
+          },
+          {
+            "text": "Только не ответы из другого чата",
+            "callback_data": "chat/mode/external/set/external|non_external/",
+            "variable": "non_external"
+          },
+          {
+            "text": "Ответы из другого чата + остальное",
+            "callback_data": "chat/mode/external/set/external/",
+            "variable": "external|non_external"
+          }
+        ],
+        [
+          {
+            "text": "Назад \uD83D\uDD19",
+            "callback_data": "chat/edit_chat_theme/"
+          },
+          {
             "text": "❎ Закрыть",
             "callback_data": "close"
           }
         ]
+
       ],
       "CurrencyBalanceCommand": [
         [

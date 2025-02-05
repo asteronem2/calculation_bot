@@ -955,21 +955,110 @@ class ChatGeneralTopicCommand(CallbackQueryCommand):
         )
 
 
-class ChatMode(EditChatTheme):
+class ChatReplySettings(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'chat/mode/([^/]+)/set/([^/]+)/', self.cdata)
-        if rres:
-            answer_type = rres.group(1)
-            set_mode = rres.group(2)
-            await self.process(answer_type=answer_type, set_mode=set_mode)
-            return True
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'chat/reply_settings/', self.cdata)
+            if rres:
+                await self.process()
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        text = Template(self.edit_texts['ChatReplySettings']).substitute()
+
+        res = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, self.db_chat['id'])
+
+        variable = []
+
+        chat_id = res["chat_id"]
+
+        rres = re.findall(r'([^|]+?)\|', res['answer_mode'])
+
+        if 'forward' in rres:
+            if 'non_forward' in rres:
+                variable.append('forward|non_forward')
+            else:
+                variable.append('forward')
+        else:
+            if 'non_forward' in rres:
+                variable.append('non_forward')
+
+        if 'reply' in rres:
+            if 'non_reply' in rres:
+                variable.append('reply|non_reply')
+            else:
+                variable.append('reply')
+        else:
+            if 'non_reply' in rres:
+                variable.append('non_reply')
+
+        if 'quote' in rres:
+            if 'non_quote' in rres:
+                variable.append('quote|non_quote')
+            else:
+                variable.append('quote')
+        else:
+            if 'non_quote' in rres:
+                variable.append('non_quote')
+                
+        if 'external' in rres:
+            if 'non_external' in rres:
+                variable.append('external|non_external')
+            else:
+                variable.append('external')
+        else:
+            if 'non_external' in rres:
+                variable.append('non_external')
+            else:
+                variable.append('external|non_external')
+                await self.db.execute("""
+                    UPDATE chat_table
+                    SET answer_mode = $1
+                    WHERE chat_id = $2;
+                """, res["answer_mode"] + "|external|non_external", chat_id)
+
+        markup = markup_generate(
+            self.buttons['ChatReplySettings'],
+            chat_id=chat_id,
+            topic=self.topic,
+            variable=variable
+        )
+
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup,
+        )
+
+
+
+class ChatMode(ChatReplySettings):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'chat/mode/([^/]+)/set/([^/]+)/', self.cdata)
+            if rres:
+                answer_type = rres.group(1)
+                set_mode = rres.group(2)
+                await self.process(answer_type=answer_type, set_mode=set_mode)
+                return True
 
     async def process(self, *args, **kwargs) -> None:
         set_mode = kwargs['set_mode']
 
         new_mode = self.db_chat['answer_mode']
 
-        x = re.search(r'forward|reply|quote', set_mode).group(0)
+        x = re.search(r'forward|reply|quote|external', set_mode).group(0)
 
         if set_mode == f'non_{x}':
             new_mode = new_mode.replace(f'{x}', set_mode)
@@ -984,17 +1073,18 @@ class ChatMode(EditChatTheme):
             WHERE chat_id = $2;
         """, new_mode, self.chat.id)
 
-        message_obj = await EditChatTheme.generate_edit_message(self)
+        message_obj = await ChatReplySettings.generate_edit_message(self)
         await self.bot.edit_text(message_obj)
 
 
 class ChatPinBalanceOption(EditChatTheme):
     async def define(self):
-        rres = re.fullmatch(r'chat/(pin|unpin)_balances/', self.cdata)
-        if rres:
-            type_ = rres.group(1)
-            await self.process(type_=type_)
-            return True
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'chat/(pin|unpin)_balances/', self.cdata)
+            if rres:
+                type_ = rres.group(1)
+                await self.process(type_=type_)
+                return True
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
@@ -1009,12 +1099,13 @@ class ChatPinBalanceOption(EditChatTheme):
 
 class CurrencyRounding(EditCurrency):
     async def define(self):
-        rres = re.fullmatch(r'curr/rounding/([0-9]+)/([0-5])/', self.cdata)
-        if rres:
-            curr_pk = int(rres.group(1))
-            rounding = int(rres.group(2))
-            await self.process(curr_pk=curr_pk, rounding=rounding)
-            return True
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'curr/rounding/([0-9]+)/([0-5])/', self.cdata)
+            if rres:
+                curr_pk = int(rres.group(1))
+                rounding = int(rres.group(2))
+                await self.process(curr_pk=curr_pk, rounding=rounding)
+                return True
 
     async def process(self, *args, **kwargs) -> None:
         new_rounding = kwargs['rounding'] + 1
@@ -1474,13 +1565,14 @@ class CurrStoryMenu(CallbackQueryCommand):
 
 class CurrStoryPeriod(CurrStoryMenu):
     async def define(self):
-        rres = re.fullmatch(r'curr/story_menu/([0-9]+)/set/(start|end)/([^/]+)/', self.cdata)
-        if rres:
-            curr_id = int(rres.group(1))
-            type_ = rres.group(2)
-            date = rres.group(3)
-            await self.process(curr_id=curr_id, type_=type_, date=date)
-            return True
+        if self.access_level in ['admin', 'employee']:
+            rres = re.fullmatch(r'curr/story_menu/([0-9]+)/set/(start|end)/([^/]+)/', self.cdata)
+            if rres:
+                curr_id = int(rres.group(1))
+                type_ = rres.group(2)
+                date = rres.group(3)
+                await self.process(curr_id=curr_id, type_=type_, date=date)
+                return True
 
     async def process(self, *args, **kwargs) -> None:
         res = await self.db.fetch("""
@@ -1513,13 +1605,14 @@ class CurrStoryPeriod(CurrStoryMenu):
 
 class CurrGetStory(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'curr/get_story/([0-9]+)/([0-9-]+)/([0-9-]+)/', self.cdata)
-        if rres:
-            curr_id = int(rres.group(1))
-            start_date = rres.group(2)
-            end_date = rres.group(3)
-            await self.process(start_date=start_date, end_date=end_date, curr_id=curr_id)
-            return True
+        if self.access_level in ['admin', 'employee']:
+            rres = re.fullmatch(r'curr/get_story/([0-9]+)/([0-9-]+)/([0-9-]+)/', self.cdata)
+            if rres:
+                curr_id = int(rres.group(1))
+                start_date = rres.group(2)
+                end_date = rres.group(3)
+                await self.process(start_date=start_date, end_date=end_date, curr_id=curr_id)
+                return True
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""
@@ -1782,13 +1875,14 @@ class CurrDetailMenu(CallbackQueryCommand):
 
 class CurrDetailPeriod(CurrDetailMenu):
     async def define(self):
-        rres = re.fullmatch(r'curr/detail_menu/([0-9]+)/set/(start|end)/([^/]+)/', self.cdata)
-        if rres:
-            curr_id = int(rres.group(1))
-            type_ = rres.group(2)
-            date = rres.group(3)
-            await self.process(curr_id=curr_id, type_=type_, date=date)
-            return True
+        if self.access_level in ['admin', 'employee']:
+                rres = re.fullmatch(r'curr/detail_menu/([0-9]+)/set/(start|end)/([^/]+)/', self.cdata)
+                if rres:
+                    curr_id = int(rres.group(1))
+                    type_ = rres.group(2)
+                    date = rres.group(3)
+                    await self.process(curr_id=curr_id, type_=type_, date=date)
+                    return True
 
     async def process(self, *args, **kwargs) -> None:
         res = await self.db.fetch("""
@@ -1821,13 +1915,14 @@ class CurrDetailPeriod(CurrDetailMenu):
 
 class CurrGetDetail(CallbackQueryCommand):
     async def define(self):
-        rres = re.fullmatch(r'curr/get_detail/([0-9]+)/([0-9-]+)/([0-9-]+)/', self.cdata)
-        if rres:
-            curr_id = int(rres.group(1))
-            start_date = rres.group(2)
-            end_date = rres.group(3)
-            await self.process(start_date=start_date, end_date=end_date, curr_id=curr_id)
-            return True
+        if self.access_level in ['admin', 'employee']:
+            rres = re.fullmatch(r'curr/get_detail/([0-9]+)/([0-9-]+)/([0-9-]+)/', self.cdata)
+            if rres:
+                curr_id = int(rres.group(1))
+                start_date = rres.group(2)
+                end_date = rres.group(3)
+                await self.process(start_date=start_date, end_date=end_date, curr_id=curr_id)
+                return True
 
     async def process(self, *args, **kwargs) -> None:
         await self.db.execute("""

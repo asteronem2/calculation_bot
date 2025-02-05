@@ -562,11 +562,19 @@ class CalculationCommand(CurrencyCalculationCommand):
                                     return
 
                             if self.message.quote:
-                                if 'quote' not in answer_mode_list:
-                                    return
+                                if self.message.external_reply:
+                                    if 'external' not in answer_mode_list:
+                                        return
+                                else:
+                                    if 'quote' not in answer_mode_list:
+                                        return
                             else:
-                                if 'non_quote' not in answer_mode_list:
-                                    return
+                                if self.message.external_reply:
+                                    if 'non_external' not in answer_mode_list:
+                                        return
+                                else:
+                                    if 'non_quote' not in answer_mode_list:
+                                        return
 
                             if not self.message.quote:
                                 if self.message.reply_to_message:
@@ -1875,7 +1883,7 @@ class OffTrackingCommand(MessageCommand):
 
 class QuoteReplied(MessageCommand):
     async def define(self):
-        if self.message.quote or self.message.reply_to_message:
+        if (self.message.quote or self.message.reply_to_message) and not self.message.external_reply:
             res = await self.db.fetchrow("""
                 SELECT * FROM message_table
                 WHERE message_id = $1
