@@ -554,44 +554,32 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 ORDER BY currency_table.title ASC; 
                             """, self.chat.id)
                         if res:
-                            answer_mode_list = re.findall(r'[^/|]+', self.db_chat['answer_mode'])
+                            answer_mode = self.db_chat['answer_mode']
 
-                            if not "external" in answer_mode_list and not "non_external" in answer_mode_list:
-                                new_answer_mode = self.db_chat["answer_mode"] + "external|non_external"
+
+                            if not "default" in answer_mode:
+                                answer_mode = "default|quote|reply|forward|external"
                                 await self.db.execute("""
                                     UPDATE chat_table
                                     SET answer_mode = $1
                                     WHERE chat_id = $2;
-                                """, new_answer_mode, self.chat.id)
-                                answer_mode_list = re.findall(r'[^/|]+', new_answer_mode)
+                                """, answer_mode, self.chat.id)
 
                             if self.message.forward_origin:
-                                if 'forward' not in answer_mode_list:
+                                if "!forward" in answer_mode:
+                                    return
+                            elif self.message.external_reply:
+                                if "!external" in answer_mode:
+                                    return
+                            elif self.message.quote:
+                                if "!quote" in answer_mode:
+                                    return
+                            elif self.message.reply_to_message:
+                                if "!reply" in answer_mode:
                                     return
                             else:
-                                if 'non_forward' not in answer_mode_list:
+                                if "!default" in answer_mode:
                                     return
-
-                            if self.message.external_reply:
-                                if 'external' not in answer_mode_list:
-                                    return
-                            else:
-                                if self.message.quote:
-                                    if 'quote' not in answer_mode_list:
-                                        return
-                                else:
-                                    if 'non_quote' not in answer_mode_list:
-                                        return
-                                if 'non_external' not in answer_mode_list:
-                                    return
-
-                            if not self.message.quote:
-                                if self.message.reply_to_message:
-                                    if 'reply' not in answer_mode_list:
-                                        return
-                                else:
-                                    if 'non_reply' not in answer_mode_list:
-                                        return
 
                             await self.process(res=res, calc_res=calc_res, expr=expr)
                             return True

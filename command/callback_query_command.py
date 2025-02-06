@@ -520,11 +520,6 @@ class EditChatTheme(CallbackQueryCommand):
             variable.append('1')
         chat_id = res['id']
 
-        if res['sign'] is False:
-            variable.append('photo-')
-        else:
-            variable.append('photo+')
-
         if res['pin_balance'] is True:
             variable.append('pin_balance')
         else:
@@ -756,27 +751,6 @@ class ChatEditTopicCommand(CallbackQueryCommand):
         )
 
 
-class ChatPhotoCalcCommand(EditChatTheme):
-    async def define(self):
-        if self.access_level == 'admin':
-            rres = re.fullmatch(r'chat/photo_calc/([0-9]+)/([+-])/', self.cdata)
-            if rres:
-                chat_id = int(rres.group(1))
-                sign = rres.group(2)
-                await self.process(chat_id=chat_id, sign=sign)
-                return True
-
-    async def process(self, *args, **kwargs) -> None:
-        await self.db.execute("""
-            UPDATE chat_table
-            set sign = $1
-            WHERE id = $2;
-        """, True if kwargs['sign'] == '-' else False, kwargs['chat_id'])
-
-        message_obj = await EditChatTheme.generate_edit_message(self)
-        await self.bot.edit_text(message_obj)
-
-
 class ChatLockCommand(CallbackQueryCommand):
     async def define(self):
         if self.access_level == 'admin':
@@ -979,59 +953,40 @@ class ChatReplySettings(CallbackQueryCommand):
         """, self.db_chat['id'])
 
         variable = []
+        btn_kwargs = {}
 
-        chat_id = res["chat_id"]
 
-        rres = re.findall(r'([^|]+?)\|', res['answer_mode'])
-
-        if 'forward' in rres:
-            if 'non_forward' in rres:
-                variable.append('forward|non_forward')
-            else:
-                variable.append('forward')
+        if res['sign'] is False:
+            variable.append('photo-')
         else:
-            if 'non_forward' in rres:
-                variable.append('non_forward')
+            variable.append('photo+')
 
-        if 'reply' in rres:
-            if 'non_reply' in rres:
-                variable.append('reply|non_reply')
-            else:
-                variable.append('reply')
-        else:
-            if 'non_reply' in rres:
-                variable.append('non_reply')
+        rres = re.findall(r'[^|]+', res['answer_mode'])
 
-        if 'quote' in rres:
-            if 'non_quote' in rres:
-                variable.append('quote|non_quote')
+        if not "default" in self.db_chat["answer_mode"]:
+            new_answer_mode = "default|quote|reply|forward|external"
+            await self.db.execute("""
+                UPDATE chat_table
+                SET answer_mode = $1
+                WHERE chat_id = $2;
+            """, new_answer_mode, self.chat.id)
+
+            rres = re.findall(r'[^|]+', new_answer_mode)
+
+
+        for i in rres:
+            i = i.replace("!!", "!")
+            if i[0] == "!":
+                btn_kwargs["status_" + i[1:]] = "⏺"
             else:
-                variable.append('quote')
-        else:
-            if 'non_quote' in rres:
-                variable.append('non_quote')
-                
-        if 'external' in rres:
-            if 'non_external' in rres:
-                variable.append('external|non_external')
-            else:
-                variable.append('external')
-        else:
-            if 'non_external' in rres:
-                variable.append('non_external')
-            else:
-                variable.append('external|non_external')
-                await self.db.execute("""
-                    UPDATE chat_table
-                    SET answer_mode = $1
-                    WHERE chat_id = $2;
-                """, res["answer_mode"] + "external|non_external", chat_id)
+                btn_kwargs["status_" + i] = "✅"
 
         markup = markup_generate(
             self.buttons['ChatReplySettings'],
-            chat_id=chat_id,
+            chat_id=self.db_chat["id"],
             topic=self.topic,
-            variable=variable
+            variable=variable,
+            **btn_kwargs
         )
 
         return EditMessage(
@@ -1046,33 +1001,49 @@ class ChatReplySettings(CallbackQueryCommand):
 class ChatMode(ChatReplySettings):
     async def define(self):
         if self.access_level == 'admin':
-            rres = re.fullmatch(r'chat/mode/([^/]+)/set/([^/]+)/', self.cdata)
+            rres = re.fullmatch(r'chat/mode/([^/]+)/', self.cdata)
             if rres:
                 answer_type = rres.group(1)
-                set_mode = rres.group(2)
-                await self.process(answer_type=answer_type, set_mode=set_mode)
+                await self.process(answer_type=answer_type)
                 return True
 
     async def process(self, *args, **kwargs) -> None:
-        set_mode = kwargs['set_mode']
-
         new_mode = self.db_chat['answer_mode']
-        new_mode = new_mode.replace("||", "|")
+        answer_type = kwargs["answer_type"]
 
-        x = re.search(r'forward|reply|quote|external', set_mode).group(0)
+        type_ = re.search(rf"!?{answer_type}", new_mode).group()
 
-        if set_mode == f'non_{x}':
-            new_mode = new_mode.replace(f'{x}', set_mode)
-        elif set_mode == f'{x}|non_{x}':
-            new_mode = new_mode.replace(f'non_{x}', set_mode)
-        elif set_mode == f'{x}':
-            new_mode = new_mode.replace(f'{x}|non_{x}', set_mode)
+        if type_[0] == "!":
+            new_mode = new_mode.replace(type_, answer_type)
+        else:
+            new_mode = new_mode.replace(type_, "!" + answer_type)
 
         await self.db.execute("""
             UPDATE chat_table
             SET answer_mode = $1
             WHERE chat_id = $2;
         """, new_mode, self.chat.id)
+
+        message_obj = await ChatReplySettings.generate_edit_message(self)
+        await self.bot.edit_text(message_obj)
+
+
+class ChatPhotoCalcCommand(ChatReplySettings):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'chat/photo_calc/([0-9]+)/([+-])/', self.cdata)
+            if rres:
+                chat_id = int(rres.group(1))
+                sign = rres.group(2)
+                await self.process(chat_id=chat_id, sign=sign)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        await self.db.execute("""
+            UPDATE chat_table
+            set sign = $1
+            WHERE id = $2;
+        """, True if kwargs['sign'] == '-' else False, kwargs['chat_id'])
 
         message_obj = await ChatReplySettings.generate_edit_message(self)
         await self.bot.edit_text(message_obj)
@@ -5765,13 +5736,18 @@ class GetStoryMenu(CallbackQueryCommand):
             WHERE id = $1;
         """, int(curr))
 
+        chat_row = await self.db.fetchrow("""
+            SELECT * FROM chat_table
+            WHERE id = $1;
+        """, curr_row["chat_pid"])
+
         story_list = await self.db.fetch("""
             SELECT * FROM story_table
             WHERE currency_pid = $1
             ORDER BY id ASC;
         """, int(curr))
 
-        story = story_generate(story_list, curr_row["chat_pid"], start, end, curr_row["rounding"])
+        story = story_generate(story_list, chat_row["chat_id"], start, end, curr_row["rounding"])
 
         if story:
             text = Template(self.global_texts['message_command']['CurrencyStoryCommand']).substitute(

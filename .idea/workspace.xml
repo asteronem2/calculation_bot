@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.27 final unstable version&#10;1. Bug fixing">
+    <list default="true" id="207f13d6-3c80-4892-89f5-dcdb582157c3" name="Changes" comment="0.10.28 final unstable version&#10;1. Bug fixing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command/callback_query_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/callback_query_command.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/command/message_command.py" beforeDir="false" afterPath="$PROJECT_DIR$/command/message_command.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/locales.json" beforeDir="false" afterPath="$PROJECT_DIR$/locales.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/schema.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,19 +50,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.message_command.executor&quot;: &quot;Run&quot;,
-    &quot;Python.next_callback_message.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.utils.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/ded/Programming/calculation_bot&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "Python.message_command.executor": "Run",
+    "Python.next_callback_message.executor": "Run",
+    "Python.test.executor": "Run",
+    "Python.utils.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/ded/Programming/calculation_bot",
+    "settings.editor.selected.configurable": "preferences.keymap"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -108,14 +110,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1721981674067</updated>
-    </task>
-    <task id="LOCAL-00077" summary="0.9.81 final unstable version&#10;1. Отправка логов по превышении 20 мб файла logs.log">
-      <option name="closed" value="true" />
-      <created>1730119697295</created>
-      <option name="number" value="00077" />
-      <option name="presentableId" value="LOCAL-00077" />
-      <option name="project" value="LOCAL" />
-      <updated>1730119697295</updated>
     </task>
     <task id="LOCAL-00078" summary="0.9.82 final unstable version&#10;1. Корректная inline калькуляция&#10;2. Правильно удаление сообщений от заметок">
       <option name="closed" value="true" />
@@ -501,7 +495,15 @@
       <option name="project" value="LOCAL" />
       <updated>1738829924491</updated>
     </task>
-    <option name="localTasksCounter" value="126" />
+    <task id="LOCAL-00126" summary="0.10.28 final unstable version&#10;1. Bug fixing">
+      <option name="closed" value="true" />
+      <created>1738831493584</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1738831493584</updated>
+    </task>
+    <option name="localTasksCounter" value="127" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -536,7 +538,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="0.10.3 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.4 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.5 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.6 final unstable version&#10;1. Bug fixing" />
@@ -561,6 +562,7 @@
     <MESSAGE value="0.10.25 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.26 final unstable version&#10;1. Bug fixing" />
     <MESSAGE value="0.10.27 final unstable version&#10;1. Bug fixing" />
-    <option name="LAST_COMMIT_MESSAGE" value="0.10.27 final unstable version&#10;1. Bug fixing" />
+    <MESSAGE value="0.10.28 final unstable version&#10;1. Bug fixing" />
+    <option name="LAST_COMMIT_MESSAGE" value="0.10.28 final unstable version&#10;1. Bug fixing" />
   </component>
 </project>

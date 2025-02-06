@@ -311,26 +311,6 @@
           {
             "text": "📍 Темы",
             "callback_data": "chat/topics/$chat_id/"
-          },
-          {
-            "text": "Фото +",
-            "callback_data": "chat/photo_calc/$chat_id/+/",
-            "variable": "photo+"
-          },
-          {
-            "text": "Фото -",
-            "callback_data": "chat/photo_calc/$chat_id/-/",
-            "variable": "photo-"
-          }
-        ],
-        [
-          {
-            "text": "🚫 Заблокировать чат 🔒",
-            "callback_data": "chat/lock/$chat_id/"
-          },
-          {
-            "text": "❌ Удалить историю чата 🔒",
-            "callback_data": "chat/drop_story/$chat_id/"
           }
         ],
         [
@@ -360,6 +340,18 @@
         ],
         [
           {
+            "text": "🚫 Заблокировать чат 🔒",
+            "callback_data": "chat/lock/$chat_id/"
+          }
+        ],
+        [
+          {
+            "text": "❌ Удалить историю чата 🔒",
+            "callback_data": "chat/drop_story/$chat_id/"
+          }
+        ],
+        [
+          {
             "text": "❎ Закрыть",
             "callback_data": "close"
           }
@@ -368,70 +360,44 @@
       "ChatReplySettings": [
         [
           {
-            "text": "Только пересылаемые",
-            "callback_data": "chat/mode/forward/set/non_forward/",
-            "variable": "forward"
+            "text": "Фото +",
+            "callback_data": "chat/photo_calc/$chat_id/+/",
+            "variable": "photo+"
           },
           {
-            "text": "Только не пересылаемые",
-            "callback_data": "chat/mode/forward/set/forward|non_forward/",
-            "variable": "non_forward"
-          },
-          {
-            "text": "Пересылаемые + не пересылаемые",
-            "callback_data": "chat/mode/forward/set/forward/",
-            "variable": "forward|non_forward"
+            "text": "Фото -",
+            "callback_data": "chat/photo_calc/$chat_id/-/",
+            "variable": "photo-"
           }
         ],
         [
           {
-            "text": "Только ответы",
-            "callback_data": "chat/mode/reply/set/non_reply/",
-            "variable": "reply"
-          },
-          {
-            "text": "Только не ответы",
-            "callback_data": "chat/mode/reply/set/reply|non_reply/",
-            "variable": "non_reply"
-          },
-          {
-            "text": "Ответы + не ответы",
-            "callback_data": "chat/mode/reply/set/reply/",
-            "variable": "reply|non_reply"
+            "text": "${status_default} Стандартные",
+            "callback_data": "chat/mode/default/"
           }
         ],
         [
           {
-            "text": "Только цитирование",
-            "callback_data": "chat/mode/quote/set/non_quote/",
-            "variable": "quote"
-          },
-          {
-            "text": "Только не цитирование",
-            "callback_data": "chat/mode/quote/set/quote|non_quote/",
-            "variable": "non_quote"
-          },
-          {
-            "text": "Цитирование + не цитирование",
-            "callback_data": "chat/mode/quote/set/quote/",
-            "variable": "quote|non_quote"
+            "text": "${status_forward} Пересылаемые",
+            "callback_data": "chat/mode/forward/"
           }
         ],
         [
           {
-            "text": "Только ответы из другого чата",
-            "callback_data": "chat/mode/external/set/non_external/",
-            "variable": "external"
-          },
+            "text": "${status_reply} Ответы",
+            "callback_data": "chat/mode/reply/"
+          }
+        ],
+        [
           {
-            "text": "Только не ответы из другого чата",
-            "callback_data": "chat/mode/external/set/external|non_external/",
-            "variable": "non_external"
-          },
+            "text": "${status_quote} Цитирование",
+            "callback_data": "chat/mode/quote/"
+          }
+        ],
+        [
           {
-            "text": "Ответы из другого чата + остальное",
-            "callback_data": "chat/mode/external/set/external/",
-            "variable": "external|non_external"
+            "text": "${status_external} Ответы с другого чата",
+            "callback_data": "chat/mode/external/"
           }
         ],
         [
@@ -444,7 +410,6 @@
             "callback_data": "close"
           }
         ]
-
       ],
       "CurrencyBalanceCommand": [
         [
