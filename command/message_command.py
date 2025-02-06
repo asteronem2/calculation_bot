@@ -555,6 +555,16 @@ class CalculationCommand(CurrencyCalculationCommand):
                             """, self.chat.id)
                         if res:
                             answer_mode_list = re.findall(r'[^/|]+', self.db_chat['answer_mode'])
+
+                            if not "external" in answer_mode_list and not "non_external" in answer_mode_list:
+                                new_answer_mode = self.db_chat["answer_mode"] + "external|non_external"
+                                await self.db.execute("""
+                                    UPDATE chat_table
+                                    SET answer_mode = $1
+                                    WHERE chat_id = $2;
+                                """, new_answer_mode, self.chat.id)
+                                answer_mode_list = re.findall(r'[^/|]+', new_answer_mode)
+
                             if self.message.forward_origin:
                                 if 'forward' not in answer_mode_list:
                                     return

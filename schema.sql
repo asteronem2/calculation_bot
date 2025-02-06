@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS chat_table (
     locked BOOLEAN NOT NULL DEFAULT TRUE,
     super BOOLEAN NOT NULL DEFAULT TRUE,
     sign BOOLEAN DEFAULT FALSE,
-    answer_mode TEXT DEFAULT 'quote|non_quote|reply|non_reply|forward|non_forward|',
+    answer_mode TEXT DEFAULT 'quote|non_quote|reply|non_reply|forward|non_forward|external|non_external',
     pin_balance BOOLEAN,
     bind_chat INTEGER REFERENCES chat_table(id) DEFAULT NULL,
     UNIQUE (chat_id, topic)
