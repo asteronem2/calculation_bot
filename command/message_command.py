@@ -12,6 +12,7 @@ import BotInteraction
 from command.command_interface import MessageCommand
 
 from BotInteraction import TextMessage, EditMessage
+from main import message_command_cls
 from utils import str_to_float, float_to_str, markup_generate, calculate, detail_generate, detail_generate, Tracking, \
     story_generate, entities_to_html, volume_generate, calendar
 
@@ -562,19 +563,18 @@ class CalculationCommand(CurrencyCalculationCommand):
                                     return
 
                             if self.message.quote:
-                                if self.message.external_reply:
-                                    if 'external' not in answer_mode_list:
-                                        return
-                                else:
-                                    if 'quote' not in answer_mode_list:
-                                        return
+                                if 'quote' not in answer_mode_list:
+                                    return
                             else:
-                                if self.message.external_reply:
-                                    if 'non_external' not in answer_mode_list:
-                                        return
-                                else:
-                                    if 'non_quote' not in answer_mode_list:
-                                        return
+                                if 'non_quote' not in answer_mode_list:
+                                    return
+
+                            if self.message.external_reply:
+                                if 'external' not in answer_mode_list:
+                                    return
+                            else:
+                                if 'non_external' not in answer_mode_list:
+                                    return
 
                             if not self.message.quote:
                                 if self.message.reply_to_message:
