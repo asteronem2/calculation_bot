@@ -554,7 +554,7 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 ORDER BY currency_table.title ASC; 
                             """, self.chat.id)
                         if res:
-                            answer_mode_list = re.findall(r'([^/]+?)\|', self.db_chat['answer_mode'])
+                            answer_mode_list = re.findall(r'[^/|]+', self.db_chat['answer_mode'])
                             if self.message.forward_origin:
                                 if 'forward' not in answer_mode_list:
                                     return
@@ -562,17 +562,16 @@ class CalculationCommand(CurrencyCalculationCommand):
                                 if 'non_forward' not in answer_mode_list:
                                     return
 
-                            if self.message.quote:
-                                if 'quote' not in answer_mode_list:
-                                    return
-                            else:
-                                if 'non_quote' not in answer_mode_list:
-                                    return
-
                             if self.message.external_reply:
                                 if 'external' not in answer_mode_list:
                                     return
                             else:
+                                if self.message.quote:
+                                    if 'quote' not in answer_mode_list:
+                                        return
+                                else:
+                                    if 'non_quote' not in answer_mode_list:
+                                        return
                                 if 'non_external' not in answer_mode_list:
                                     return
 

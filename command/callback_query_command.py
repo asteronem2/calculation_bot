@@ -1025,7 +1025,7 @@ class ChatReplySettings(CallbackQueryCommand):
                     UPDATE chat_table
                     SET answer_mode = $1
                     WHERE chat_id = $2;
-                """, res["answer_mode"] + "|external|non_external", chat_id)
+                """, res["answer_mode"] + "external|non_external", chat_id)
 
         markup = markup_generate(
             self.buttons['ChatReplySettings'],
@@ -1057,6 +1057,7 @@ class ChatMode(ChatReplySettings):
         set_mode = kwargs['set_mode']
 
         new_mode = self.db_chat['answer_mode']
+        new_mode = new_mode.replace("||", "|")
 
         x = re.search(r'forward|reply|quote|external', set_mode).group(0)
 
