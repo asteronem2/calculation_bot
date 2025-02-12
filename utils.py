@@ -280,7 +280,7 @@ def float_to_str(value: float, rounding: int = 2) -> Union[str, bool]:
 
 def format_expr(value: str):
     value = value.replace(',', '.').replace(' ', '')
-    value = re.sub(r"\d+", lambda x: float_to_str(float(x.group()), 20), value)
+    value = re.sub(r"[\d.]+", lambda x: float_to_str(float(x.group()), 20), value)
     value = re.sub(r"[*+%/-]", lambda x: f" {x.group()} ", value)
     return value
 
