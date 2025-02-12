@@ -251,8 +251,6 @@ def float_to_str(value: float, rounding: int = 2) -> Union[str, bool]:
         split_value = value.split('.')
         before_dot = split_value[0][::-1]
 
-
-
         update_before_dot = []
         while before_dot:
             update_before_dot.append(before_dot[:3])
@@ -263,19 +261,6 @@ def float_to_str(value: float, rounding: int = 2) -> Union[str, bool]:
 
         after_dot = split_value[1] if len(split_value) == 2 else '0'
 
-        # for i in range(len(after_dot) - rounding, 1):
-        #     if after_dot[-i] in '01234':
-        #         after_dot = after_dot[:-(i+1)]
-        #     elif after_dot[-i] == '9':
-        #         cond = True
-        #         num = 0
-        #         while cond is True:
-        #             if after_dot[-(i+num)] == '9':
-        #                 after_dot = after_dot[:-(i+num-1)]
-        #             else:
-        #                 cond = False
-        #     else:
-        #         after_dot = after_dot[:-(i + 1)] + str(int(after_dot[-(i + 1)]) + 1)
         zero_max = '0'*(rounding+1)
         zero_list = []
         for i in range(len(zero_max)):
@@ -293,35 +278,11 @@ def float_to_str(value: float, rounding: int = 2) -> Union[str, bool]:
     except:
         return False
 
-def format_number(value: str):
-    rounding = 20
+def format_expr(value: str):
     value = value.replace(',', '.').replace(' ', '')
-    split_value = value.split('.')
-    before_dot = split_value[0][::-1]
-
-    update_before_dot = []
-    while before_dot:
-        update_before_dot.append(before_dot[:3])
-        before_dot = before_dot[3:]
-
-    update_before_dot = [i[::-1] for i in update_before_dot[::-1]]
-    final_before_dot_str = ' '.join(update_before_dot)
-
-    after_dot = split_value[1] if len(split_value) == 2 else '0'
-    zero_max = '0' * (rounding + 1)
-    zero_list = []
-    for i in range(len(zero_max)):
-        zero_list.append(zero_max[:i])
-
-    if after_dot[:rounding] in zero_list:
-        final_after_dot_str = None
-    else:
-        final_after_dot_str = after_dot[:rounding]
-
-    if final_after_dot_str:
-        return final_before_dot_str + ',' + final_after_dot_str
-    else:
-        return final_before_dot_str
+    value = re.sub(r"\d+", lambda x: float_to_str(float(x.group()), 20), value)
+    value = re.sub(r"[*+%/-]", lambda x: f" {x.group()} ", value)
+    return value
 
 def markup_generate(buttons: list, variable: list = None, *args, **kwargs) -> aiogram.types.InlineKeyboardMarkup:
     """
@@ -591,7 +552,7 @@ def story_generate(story_list: List[Record], chat_id: int, start_date: str = Non
 
     base_string = re.sub(r'(a href="[^<]+"|/a)|([>0-9)])([*+%/=-]|-->)([<0-9(])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', base_string)
     base_string += ' '
-    base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{format_number(x.group(1))}{x.group()[-1]}", base_string)
+    base_string = re.sub(r'[ (>]([0-9]+|[0-9]+\.[0-9]+)[<) ]', lambda x: f"{x.group()[0]}{format_expr(x.group(1))}{x.group()[-1]}", base_string)
     base_string = base_string.replace(' * 0', '*0')
     base_string = f'<b>{float_to_str(first_before, rounding)}</b> --> ' + base_string + f' = <b>{float_to_str(last_after, rounding)}</b>'
     base_string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=-])([^ a-zA-Z])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', base_string)
@@ -674,20 +635,25 @@ def detail_generate(story_items: List[Record], chat_id: int, start_date: str = N
                 value=''
             )
 
+    print(string)
     string = re.sub(r'(<a href=.+?>)|( +)', lambda x: x.group(1) or '', string)
     string = re.sub(r'\(([+-]?[0-9.,]+)\)', lambda x: x.group(1), string)
     string = re.sub(r'([+-])[+-]+[^>]', lambda x: x.group(1), string)
-    # string = re.sub(r'(<a href=[^>]+>)|([0-9>\n])([*+/%-])([0-9<])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)} {x.group(4)}', string)
+    print(string)
+
     string = re.sub(r"(= ?[+-?] ?)([0-9.]{2,})(\n)",
                     lambda x: f'{x.group(1)}{float_to_str(float(x.group(2)), rounding)}{x.group(3)}', string)
     string = re.sub(r"([+*/%-] ?<.+?> ?)([^<]{2,})(</.+?>)",
-                    lambda x: f'{x.group(1)}{format_number(x.group(2))}{x.group(3)}', string)
+                    lambda x: f'{x.group(1)}{format_expr(x.group(2))}{x.group(3)}', string)
+    print(string)
+
     string = re.sub(r'(href=)|(=|-->)', lambda x: x.group(1) or f' {x.group(2)} ', string)
     string = re.sub(r' +', ' ', string)
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([*+%/=>-])([^ a-zA-Z()])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'(a href="[^<]+"|/a|-->|->)|([^ a-zA-Z<()])([*+%/=-])', lambda x: x.group(1) or f'{x.group(2)} {x.group(3)}', string)
     string = re.sub(r'[( ](<[^>]+>)[ )]', lambda x: f" {x.group(1)}", string)
     string = re.sub(r"<b>([+\d., -]+?)</b>", lambda x: "<b>" + float_to_str(float(x.group(1).replace(' ', '').replace(',', '.')), rounding) +"</b>", string)
+    print(string)
 
     return string
 
@@ -796,13 +762,13 @@ def volume_generate(story_expression: str, rounding: int = 2):
         if i == 0:
             steps[i] = re.sub(
                 r'[0-9.,]+',
-                lambda x: str(format_number(x.group())),
+                lambda x: str(format_expr(x.group())),
                 steps[i]
             )
         elif i != 0:
             steps[i] = re.sub(
                 r'[0-9.]+',
-                lambda x: str(format_number(x.group())) if x.group() in list_unformatted_numbers else float_to_str(float(x.group()), rounding),
+                lambda x: str(format_expr(x.group())) if x.group() in list_unformatted_numbers else float_to_str(float(x.group()), rounding),
                 steps[i]
             )
 
