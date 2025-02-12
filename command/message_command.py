@@ -1997,11 +1997,16 @@ class ClientStoryMenu(MessageCommand):
         end_date = start_date
 
         buttons.append([])
+        buttons[-1].append(
+            IButton(text="Назад", callback_data=f'client_story_menu?c={kwargs["curr"]["id"]}&s={start_date}&e={end_date}&p=-1')
+        )
+        buttons.append([])
         for i in ("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"):
             buttons[-1].append(IButton(text=i, callback_data="None"))
         buttons.append([])
         row_count = 0
         underlining = False
+
         for i in calendar():
             if i["date"] == start_date:
                 underlining = True
@@ -2010,7 +2015,7 @@ class ClientStoryMenu(MessageCommand):
                 buttons.append([])
                 row_count = 0
             row_count += 1
-            callback_data = f'client_story_menu?curr={kwargs["curr"]["id"]}&start={i["date"]}' if i["use"] is True else 'None'
+            callback_data = f'client_change_page?c={kwargs["curr"]["id"]}&s={i["date"]}&p=0' if i["use"] is True else 'None'
 
             button_text = i["text"]
             if underlining:
@@ -2021,7 +2026,7 @@ class ClientStoryMenu(MessageCommand):
             if i["date"] == start_date:
                 underlining = False
 
-        buttons.append([IButton(text="Получить историю", callback_data=f"get_story_menu?curr={kwargs['curr']['id']}&start={start_date}&end={end_date}")])
+        buttons.append([IButton(text="Получить историю", callback_data=f"get_story_menu?c={kwargs['curr']['id']}&s={start_date}&e={end_date}")])
 
         markup = IMarkup(inline_keyboard=buttons)
 

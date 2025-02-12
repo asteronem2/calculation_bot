@@ -4,6 +4,7 @@ import os
 import datetime
 import time
 import traceback
+from http.cookiejar import month
 from string import Template
 from typing import List, Any, Union, Dict
 import re
@@ -960,8 +961,8 @@ def entities_to_html(text: str, entities: List[aiogram.types.MessageEntity]) -> 
     return text
 
 
-def calendar(weeks: int = 4):
-    today = datetime.datetime.today()
+def calendar(month_delta: int = 0, month_in_text: bool = False, weeks: int = 4):
+    today = datetime.datetime.today() + datetime.timedelta(weeks=month_delta*4)
     today_weekday = today.weekday()
 
     def day_delta(delta: int, date: datetime.datetime = today):
@@ -976,9 +977,9 @@ def calendar(weeks: int = 4):
 
     cycle_date = start_date
     while True:
-        text = str(cycle_date.day)
+        text = str(cycle_date.strftime("%m.%d" if month_in_text else "%d"))
         use = True
-        if cycle_date > today:
+        if cycle_date > datetime.datetime.today():
             use = False
             text = ''.join([i + '\u0336' for i in text]) + '\u0336'
 

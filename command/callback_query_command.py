@@ -1552,6 +1552,11 @@ class CurrStoryPeriod(CurrStoryMenu):
             WHERE sent_message_id = $1;
         """, self.sent_message_id)
 
+        db_chat_id = (await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs["curr_id"]))["chat_pid"]
+
         if len(res) < 2:
             type_ = kwargs['type_'] + '_story_period'
 
@@ -1559,7 +1564,7 @@ class CurrStoryPeriod(CurrStoryMenu):
                 INSERT INTO callback_addition_table
                 (chat_pid, user_pid, got_message_id, sent_message_id, type, addition_info)
                 VALUES ($1, $2, $3, $3, $4, $5);
-            """, self.db_chat['id'], self.db_user['id'], self.sent_message_id, type_, kwargs['date'])
+            """, db_chat_id, self.db_user['id'], self.sent_message_id, type_, kwargs['date'])
         else:
             await self.db.execute("""
                 DELETE FROM callback_addition_table
@@ -1569,7 +1574,7 @@ class CurrStoryPeriod(CurrStoryMenu):
                 INSERT INTO callback_addition_table
                 (chat_pid, user_pid, got_message_id, sent_message_id, type, addition_info)
                 VALUES ($1, $2, $3, $3, 'start_story_period', $4);
-            """, self.db_chat['id'], self.db_user['id'], self.sent_message_id, kwargs['date'])
+            """, db_chat_id, self.db_user['id'], self.sent_message_id, kwargs['date'])
 
         message_obj = await CurrStoryMenu.generate_edit_message(self, start_buttons=False, curr_id=kwargs['curr_id'])
         await self.bot.edit_text(message_obj)
@@ -1592,6 +1597,10 @@ class CurrGetStory(CallbackQueryCommand):
             WHERE sent_message_id = $1;
         """, self.sent_message_id)
 
+        db_chat_id = (await self.db.fetchrow("""
+            SELECT * FROM currency_table
+            WHERE id = $1;
+        """, kwargs["curr_id"]))["chat_pid"]
         await self.bot.delete_message(chat_id=self.chat.id, message_id=self.sent_message_id)
         message_obj = await self.generate_send_message(**kwargs)
         sent = await self.bot.send_text(message_obj)
@@ -1600,7 +1609,7 @@ class CurrGetStory(CallbackQueryCommand):
             INSERT INTO message_table
             (user_pid, chat_pid, message_id, type, addition)
             VALUES ($1, $2, $3, 'story', $4);
-        """, self.db_user['id'], self.db_chat['id'], sent.message_id, str(kwargs['curr_id']))
+        """, self.db_user['id'], db_chat_id, sent.message_id, str(kwargs['curr_id']))
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
@@ -3582,6 +3591,43 @@ class AdminChatBalance(CallbackQueryCommand):
 
     async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
+
+class AdminChoicePeriod(CallbackQueryCommand):
+    async def define(self):
+        if self.access_level == 'admin':
+            rres = re.fullmatch(r'admin/balance/([0-9]+)/choice_period/', self.cdata)
+            if rres:
+                chat_pk = int(rres.group(1))
+                await self.process(chat_pk=chat_pk)
+                return True
+
+    async def process(self, *args, **kwargs) -> None:
+        message_obj = await self.generate_edit_message(**kwargs)
+        await self.bot.edit_text(message_obj)
+
+    async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
+        res = await self.db.fetch("""
+            SELECT * FROM currency_table
+            WHERE chat_pid = $1
+            ORDER BY title ASC;
+        """, kwargs['chat_pk'])
+
+        text = Template(self.edit_texts["AdminBalanceChoiceCurrency"]).substitute()
+        today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3))).strftime("%Y-%m-%d")
+        markup = markup_generate([
+            [{"text": i["title"], "callback_data": f"client_story_menu?c={i['id']}&s={today}&e={today}&p=0"}] for i in res
+        ] + [[{"text": "Назад", "callback_data": f"admin/chat/{kwargs['chat_pk']}/story"}]])
+        return EditMessage(
+            chat_id=self.chat.id,
+            text=text,
+            message_id=self.sent_message_id,
+            markup=markup
+        )
+
+    async def generate_send_message(self, *args, **kwargs) -> BotInteraction.Message:
+        pass
+
 
 
 class AdminChatBindList(CallbackQueryCommand):
@@ -5645,18 +5691,18 @@ class ClientStoryMenu(CallbackQueryCommand):
             for item in rres:
                 equal_split = item.split("=")
                 params[equal_split[0]] = equal_split[1]
-            curr = params.get("curr")
-            start = params.get("start")
-            end = params.get("end")
+            curr = params.get("c")
+            start = params.get("s")
+            end = params.get("e")
+            page = int(params.get("p"))
             if not curr:
                 raise
-            await self.process(curr=curr, start=start, end=end)
+            await self.process(curr=curr, start=start, end=end, page=page)
             return True
 
-    async def process(self, curr, start, end, *args, **kwargs) -> None:
+    async def process(self, curr, start, end, page, *args, **kwargs) -> None:
         if end:
             if datetime.datetime.fromisoformat(start) > datetime.datetime.fromisoformat(end):
-                print("return")
                 return
         curr_row = await self.db.fetchrow("""
             SELECT * FROM currency_table
@@ -5669,13 +5715,30 @@ class ClientStoryMenu(CallbackQueryCommand):
 
         buttons: List[List[IButton]] = []
         buttons.append([])
+
+        if page != -7:
+            buttons[-1].append(
+                IButton(text="Назад", callback_data=f'client_change_page?c={curr}&s={start}{("&e=" + end) if end else ""}&p={int(page)-1}')
+            )
+
+        if page != 0:
+            buttons[-1].append(
+                IButton(text="Вперёд", callback_data=f'client_change_page?c={curr}&s={start}{("&e=" + end) if end else ""}&p={int(page)+1}')
+            )
+
+        buttons.append([])
         for i in ("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"):
             buttons[-1].append(IButton(text=i, callback_data="None"))
         buttons.append([])
         row_count = 0
         underlining = False
-        for i in calendar():
-            if i["date"] == start:
+        calendar_list = calendar(page, True if page != 0 else False)
+        for i in calendar_list:
+            if i["date"] == start or (
+                    calendar_list.index(i) == 0 and
+                    (datetime.datetime.fromisoformat(start) < datetime.datetime.fromisoformat(
+                i["date"]) < datetime.datetime.fromisoformat(end)) if end else False
+            ):
                 underlining = True
 
             if row_count == 7:
@@ -5683,10 +5746,9 @@ class ClientStoryMenu(CallbackQueryCommand):
                 row_count = 0
             row_count += 1
             if end:
-                callback_data = f'client_story_menu?curr={curr}&start={i["date"]}' if i["use"] is True else 'None'
+                callback_data = f'client_story_menu?c={curr}&s={i["date"]}&p={page}' if i["use"] is True else 'None'
             else:
-                callback_data = f'client_story_menu?curr={curr}&start={start}&end={i["date"]}' if i["use"] is True else 'None'
-
+                callback_data = f'client_story_menu?c={curr}&s={start}&e={i["date"]}&p={page}' if i["use"] is True else 'None'
 
             button_text = i["text"]
             if underlining:
@@ -5696,9 +5758,9 @@ class ClientStoryMenu(CallbackQueryCommand):
             if i["date"] == end or end is None:
                 underlining = False
         if end:
-            buttons.append([IButton(text="Получить историю",callback_data=f"get_story_menu?curr={curr}&start={start}&end={end}")])
+            buttons.append([IButton(text="Получить историю",callback_data=f"get_story_menu?c={curr}&s={start}&e={end}")])
         else:
-            buttons.append([IButton(text="Получить историю",callback_data=f"get_story_menu?curr={curr}&start={start}&end={start}")])
+            buttons.append([IButton(text="Получить историю",callback_data=f"get_story_menu?c={curr}&s={start}&e={start}")])
         markup = InlineKeyboardMarkup(inline_keyboard=buttons)
 
         msg_to_edit = EditMessage(
@@ -5714,6 +5776,38 @@ class ClientStoryMenu(CallbackQueryCommand):
         pass
 
 
+class ClientChangePage(ClientStoryMenu):
+    async def define(self):
+        if self.cdata.startswith("client_change_page"):
+            rres = re.findall(r"[^&?/]+=[^&?/]+", self.cdata)
+            params = {}
+            for item in rres:
+                equal_split = item.split("=")
+                params[equal_split[0]] = equal_split[1]
+            curr = params.get("c")
+            start = params.get("s")
+            end = params.get("e")
+            page = int(params.get("p"))
+            if not curr:
+                raise
+
+            params = {}
+            for key, value in {
+                "c": curr,
+                "s": start,
+                "e": end,
+                "p": page
+            }.items():
+                if value:
+                    params[key] = value
+            params_string = "&".join(f"{key}={value}" for key, value in params.items())
+            self.cdata = f"client_story_menu?" + params_string
+            await self.process(curr=curr, start=start, end=end, page=page)
+            return True
+
+    async def process(self, curr, start, end, page, *args, **kwargs) -> None:
+        await ClientStoryMenu.process(self, curr=curr, start=start, end=end, page=page)
+
 class GetStoryMenu(CallbackQueryCommand):
     async def define(self):
         if self.cdata.startswith("get_story_menu"):
@@ -5722,9 +5816,9 @@ class GetStoryMenu(CallbackQueryCommand):
             for item in rres:
                 equal_split = item.split("=")
                 params[equal_split[0]] = equal_split[1]
-            curr = params.get("curr")
-            start = params.get("start")
-            end = params.get("end")
+            curr = params.get("c")
+            start = params.get("s")
+            end = params.get("e")
             if not curr or not start or not end:
                 raise
             await self.process(curr=curr, start=start, end=end)
@@ -5971,3 +6065,4 @@ class Null1(CallbackQueryCommand):
 
     async def generate_edit_message(self, *args, **kwargs) -> BotInteraction.Message:
         pass
+
