@@ -279,10 +279,41 @@ def float_to_str(value: float, rounding: int = 2) -> Union[str, bool]:
         return False
 
 def format_expr(value: str):
+    def formatting(value2):
+        rounding = 20
+        value2 = value2.replace(',', '.').replace(' ', '')
+        split_value2 = value2.split('.')
+        before_dot = split_value2[0][::-1]
+    
+        update_before_dot = []
+        while before_dot:
+            update_before_dot.append(before_dot[:3])
+            before_dot = before_dot[3:]
+    
+        update_before_dot = [i[::-1] for i in update_before_dot[::-1]]
+        final_before_dot_str = ' '.join(update_before_dot)
+    
+        after_dot = split_value2[1] if len(split_value2) == 2 else '0'
+        zero_max = '0' * (rounding + 1)
+        zero_list = []
+        for i in range(len(zero_max)):
+            zero_list.append(zero_max[:i])
+    
+        if after_dot[:rounding] in zero_list:
+            final_after_dot_str = None
+        else:
+            final_after_dot_str = after_dot[:rounding]
+    
+        if final_after_dot_str:
+            return final_before_dot_str + ',' + final_after_dot_str
+        else:
+            return final_before_dot_str
+
     value = value.replace(',', '.').replace(' ', '')
-    value = re.sub(r"[\d.]+", lambda x: float_to_str(float(x.group()), 20), value)
+    value = re.sub(r"[\d.]+", lambda x: formatting(x.group()), value)
     value = re.sub(r"[*+%/-]", lambda x: f" {x.group()} ", value)
     return value
+
 
 def markup_generate(buttons: list, variable: list = None, *args, **kwargs) -> aiogram.types.InlineKeyboardMarkup:
     """
